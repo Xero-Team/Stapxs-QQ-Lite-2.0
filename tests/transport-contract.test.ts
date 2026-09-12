@@ -64,6 +64,35 @@ describe('transport contracts', () => {
         await expect(transport.connect({ timeoutMs: 1 })).rejects.toMatchObject({ code: 'timeout' })
     })
 
+    it('sends configured heartbeats and stops them on close', async () => {
+        vi.useFakeTimers()
+        class HeartbeatSocket {
+            binaryType = ''
+            readyState = 0
+            onopen: (() => void) | null = null
+            onmessage: ((event: { data: unknown }) => void) | null = null
+            onclose: (() => void) | null = null
+            onerror: (() => void) | null = null
+            sent: string[] = []
+            constructor() { queueMicrotask(() => { this.readyState = 1; this.onopen?.() }) }
+            send(data: string) { this.sent.push(data) }
+            close() { this.readyState = 3; this.onclose?.() }
+        }
+        vi.stubGlobal('WebSocket', HeartbeatSocket)
+        const transport = new WebSocketTransport('ws://heartbeat', undefined, {
+            heartbeatIntervalMs: 10,
+            heartbeatPayload: { action: 'get_status', echo: 'test-heartbeat' },
+        })
+        await transport.connect({ timeoutMs: 100 })
+        const socket = (transport as unknown as { socket: HeartbeatSocket }).socket
+        await vi.advanceTimersByTimeAsync(25)
+        expect(socket.sent).toEqual(['{"action":"get_status","echo":"test-heartbeat"}', '{"action":"get_status","echo":"test-heartbeat"}'])
+        await transport.close()
+        await vi.advanceTimersByTimeAsync(25)
+        expect(socket.sent).toHaveLength(2)
+        vi.useRealTimers()
+    })
+
     it('parses SSE events and exposes receive-only semantics', async () => {
         class FakeSource {
             onopen: (() => void) | null = null

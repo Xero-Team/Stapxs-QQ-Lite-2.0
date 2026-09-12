@@ -6,7 +6,7 @@
 
 - [x] 建立 `refactor` 分支、变更日志和 ADR 目录；记录当前 Web/Electron/Tauri/Capacitor 构建基线。
 - [ ] 安装 Node 22+、Corepack/Yarn，锁定包管理器和 CI 版本；生成依赖清单与许可证清单。
-- [ ] 为 OneBot 11 消息、事件、API 建立兼容性样例集；覆盖常见 Bot（NapCat、Lagrange 等）。
+- [x] 为 OneBot 11 消息、事件、API 建立兼容性样例集；覆盖常见 Bot（NapCat、Lagrange 等）。
 - [ ] 增加 CI 门禁：格式、ESLint、TypeScript、依赖审计、Web 构建、Rust check、Playwright smoke。
 
 ## 1. 去上游化与品牌
@@ -45,7 +45,7 @@
 - [x] 建立 OneBot schema 包：事件/API 请求响应使用 Zod；必要时评估 protobuf 仅用于明确的高吞吐内部通道，不改变 OneBot 公共 JSON 协议。
 - [ ] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。
 - [x] 用 Dexie/idb 迁移聊天历史、缓存和设置；设计版本化 schema、迁移、导出/清除和容量策略。
-- [ ] 消息解析、CQ 码、媒体 URL、转发消息全部使用纯函数和兼容性测试。
+- [x] 消息解析、CQ 码、媒体 URL、转发消息全部使用纯函数和兼容性测试。
 
 ## 6. 验证与发布
 

@@ -71,15 +71,26 @@ export interface WebSocketLike {
     close(code?: number, reason?: string): void
 }
 
+export interface WebSocketTransportOptions {
+    /** Send a protocol-specific heartbeat while the socket is authenticated. */
+    heartbeatIntervalMs?: number
+    heartbeatPayload?: unknown | (() => unknown)
+}
+
 /** Small browser WebSocket adapter used by all renderer transports. */
 export class WebSocketTransport implements Transport {
     private socket: WebSocketLike | undefined
+    private heartbeatTimer: ReturnType<typeof setInterval> | undefined
     private currentState: TransportState = 'idle'
     private readonly handlers = new Set<(payload: unknown) => void>()
     private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
     private readonly errorHandlers = new Set<() => void>()
 
-    constructor(private readonly url: string, private readonly protocols?: string | string[]) {}
+    constructor(
+        private readonly url: string,
+        private readonly protocols?: string | string[],
+        private readonly options: WebSocketTransportOptions = {},
+    ) {}
 
     get state(): TransportState { return this.currentState }
 
@@ -91,7 +102,12 @@ export class WebSocketTransport implements Transport {
             const Socket = globalThis.WebSocket as unknown as new (url: string, protocols?: string | string[]) => WebSocketLike
             const socket = new Socket(this.url, this.protocols)
             this.socket = socket
-            socket.onopen = () => { settled = true; this.currentState = 'authenticated'; resolve() }
+            socket.onopen = () => {
+                settled = true
+                this.currentState = 'authenticated'
+                this.startHeartbeat()
+                resolve()
+            }
             socket.onmessage = (event) => this.handlers.forEach((handler) => handler(event.data))
             socket.onerror = () => {
                 this.currentState = 'error'
@@ -118,9 +134,35 @@ export class WebSocketTransport implements Transport {
     }
 
     async close(code?: number, reason?: string): Promise<void> {
+        this.stopHeartbeat()
         this.socket?.close(code, reason)
         this.socket = undefined
         this.currentState = 'closed'
+    }
+
+    private startHeartbeat(): void {
+        this.stopHeartbeat()
+        const interval = this.options.heartbeatIntervalMs
+        if (interval === undefined || interval <= 0) return
+        this.heartbeatTimer = setInterval(() => {
+            if (!this.socket || this.currentState !== 'authenticated') return
+            try {
+                const payload = typeof this.options.heartbeatPayload === 'function'
+                    ? this.options.heartbeatPayload()
+                    : this.options.heartbeatPayload ?? { action: 'get_status', params: {}, echo: 'xero-heartbeat' }
+                this.socket.send(typeof payload === 'string' ? payload : JSON.stringify(payload))
+            } catch {
+                this.currentState = 'error'
+                this.errorHandlers.forEach((handler) => handler())
+            }
+        }, interval)
+    }
+
+    private stopHeartbeat(): void {
+        if (this.heartbeatTimer !== undefined) {
+            clearInterval(this.heartbeatTimer)
+            this.heartbeatTimer = undefined
+        }
     }
 
     onMessage(handler: (payload: unknown) => void): () => void {
