@@ -89,7 +89,8 @@ async (page) => {
                     await smokePage.waitForTimeout(100)
                 }
                 if (!initializationActions.every((action) => requests.includes(action))) {
-                    throw new Error(`${scenario}: post-login initialization timed out (${requests.join(',')})`)
+                    const missing = initializationActions.filter((action) => !requests.includes(action))
+                    throw new Error(`${scenario}: post-login initialization timed out (requests=${requests.join(',')}; missing=${missing.join(',')})`)
                 }
 
                 // Exercise the browser transport with one real UI send and one
