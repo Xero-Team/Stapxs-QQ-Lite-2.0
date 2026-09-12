@@ -122,11 +122,19 @@ jobs:
                   merge-multiple: true
             - name: Artifacts List
               run: ls -R
+            - name: Generate artifact checksums
+              run: |
+                  find . -type f -path './${{ needs.init.outputs.version }}-*/*' -print0 \
+                    | sort -z \
+                    | xargs -0 sha256sum > SHA256SUMS
+                  cat SHA256SUMS
             # 发布构建结果
             - name: Publish Release
               uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
               with:
-                  files: ./${{ needs.init.outputs.version }}-*/*
+                  files: |
+                      ./${{ needs.init.outputs.version }}-*/*
+                      SHA256SUMS
                   tag_name: v${{ needs.init.outputs.version }}
                   body: |
                       # Release 自动构建
