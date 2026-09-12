@@ -116,11 +116,11 @@ impl WebSocketClient {
                         }
                         break;
                     }
-                    Err(e) => {
-                        eprintln!("WebSocket error: {:?}", e);
+                    Err(_e) => {
+                        eprintln!("WebSocket error");
                         if is_active_recv.swap(false, Ordering::SeqCst) {
                             let mut cb = on_close_recv.lock().unwrap();
-                            cb(CloseCode::Abnormal, Utf8Bytes::from(format!("read error: {e}")));
+                            cb(CloseCode::Abnormal, Utf8Bytes::from("read error"));
                         }
                         break;
                     }

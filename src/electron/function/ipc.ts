@@ -221,7 +221,7 @@ export function regIpcListener() {
 
     ipcMain.on('sys:download', (_, args) => {
         logger.level = logLevel
-        logger.info('下载文件：' + args.downloadPath)
+        logger.info('开始下载文件')
 
         const downloadPath = args.downloadPath
         const fileName = args.fileName
@@ -234,7 +234,7 @@ export function regIpcListener() {
     // 发送通知
     ipcMain.on('sys:sendNotice', async (_, data) => {
         logger.level = logLevel
-        logger.info('创建通知：' + data.tag + ' - ' + data.body)
+        logger.info('创建系统通知')
         // MacOS: 刷新 TouchBar
         if(touchBarInstance && data.base_type === 'msg') {
             touchBarInstance.newMessage(data)
@@ -664,7 +664,7 @@ export function regIpcListener() {
             logger.info(`成功加载 ${emojis.length} 个本地表情`)
             return emojis
         } catch (error) {
-            logger.error('读取文件夹失败:', error)
+            logger.error('读取文件夹失败')
             throw error
         }
     })
@@ -680,7 +680,7 @@ export function regIpcListener() {
             // 转换为 base64
             return fileData.toString('base64')
         } catch (error) {
-            logger.error('读取文件失败:', error)
+            logger.error('读取文件失败')
             throw error
         }
     })

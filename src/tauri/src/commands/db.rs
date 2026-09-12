@@ -87,21 +87,21 @@ fn get_db_key(db_path: &std::path::Path) -> Result<String, String> {
     {
         match crate::commands::keychain::get_or_create_db_key() {
             Ok(key) => return Ok(key),
-            Err(e) => log::warn!("钥匙串读取失败，尝试本地回退密钥：{}", e),
+            Err(_e) => log::warn!("钥匙串读取失败，尝试本地回退密钥"),
         }
     }
     #[cfg(target_os = "windows")]
     {
         match crate::commands::keychain::get_or_create_db_key() {
             Ok(key) => return Ok(key),
-            Err(e) => log::warn!("Windows 凭据管理器读取失败，尝试本地回退密钥：{}", e),
+            Err(_e) => log::warn!("Windows 凭据管理器读取失败，尝试本地回退密钥"),
         }
     }
     #[cfg(target_os = "linux")]
     {
         match crate::commands::keychain::get_or_create_db_key() {
             Ok(key) => return Ok(key),
-            Err(e) => log::warn!("Linux Secret Service 读取失败，尝试本地回退密钥：{}", e),
+            Err(_e) => log::warn!("Linux Secret Service 读取失败，尝试本地回退密钥"),
         }
     }
 
@@ -134,10 +134,7 @@ fn get_or_create_fallback_db_key(path: &std::path::Path) -> Result<String, Strin
         let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
     }
 
-    log::warn!(
-        "系统密码管理器不可用，已写入本地设备专属回退密钥：{:?}",
-        path
-    );
+    log::warn!("系统密码管理器不可用，已写入本地设备专属回退密钥");
 
     Ok(key)
 }
@@ -156,11 +153,8 @@ pub fn open_db(data_dir: PathBuf) -> rusqlite::Result<Connection> {
 fn open_or_recreate(db_path: std::path::PathBuf) -> rusqlite::Result<Connection> {
     match try_open_encrypted(&db_path) {
         Ok(conn) => Ok(conn),
-        Err(e) => {
-            log::warn!(
-                "无法以加密模式打开 {:?}（{}）",
-                db_path, e
-            );
+        Err(_e) => {
+            log::warn!("无法以加密模式打开加密数据库");
             // 直接退出应用
             std::process::exit(1);
         }
