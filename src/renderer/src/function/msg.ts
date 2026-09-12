@@ -92,6 +92,12 @@ if (msgPathAt != undefined) {
 let listLoadTimes = 0
 const logger = new Logger()
 type MessagePayload = Record<string, unknown>
+type MessageSegmentPayload = MessagePayload & {
+    type?: string
+    data?: unknown
+    id?: string | number
+    content?: MessagePayload[]
+}
 
 function asMessagePayload(value: unknown): MessagePayload | undefined {
     return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
@@ -1910,10 +1916,10 @@ function normalizeNewIncomingMessage(data: any): any[] {
 }
 
 function insertHistorySegmentAtAnchor(
-    current: any[],
+    current: MessagePayload[],
     anchorMsgId: string,
-    segment: any[],
-): any[] {
+    segment: MessagePayload[],
+): MessagePayload[] {
     const insertIdx = current.findIndex((m) => m.message_id === anchorMsgId)
     if (insertIdx === -1) return current
 
@@ -1934,19 +1940,20 @@ function normalizeMessageId(id: unknown): string {
     return String(id)
 }
 
-function getMessageTimestamp(msg: any): number {
+function getMessageTimestamp(msg: MessagePayload): number {
     const t = Number(msg?.time)
     return Number.isFinite(t) ? t : 0
 }
 
-function buildFallbackMessageKey(msg: any): string {
+function buildFallbackMessageKey(msg: MessagePayload): string {
     const seq = msg?.message_seq ?? msg?.seq_id ?? msg?.seq ?? ''
-    const sender = msg?.sender?.user_id ?? msg?.user_id ?? msg?.sender_id ?? ''
+    const senderInfo = asMessagePayload(msg?.sender)
+    const sender = senderInfo?.user_id ?? msg?.user_id ?? msg?.sender_id ?? ''
     const ts = getMessageTimestamp(msg)
     return `${ts}|${sender}|${seq}`
 }
 
-function compareMessageOrder(a: any, b: any): number {
+function compareMessageOrder(a: MessagePayload, b: MessagePayload): number {
     const ta = getMessageTimestamp(a)
     const tb = getMessageTimestamp(b)
     if (ta !== tb) return ta - tb
@@ -1963,28 +1970,30 @@ function compareMessageOrder(a: any, b: any): number {
     return ia.localeCompare(ib)
 }
 
-function getImageSegments(msg: any): any[] {
+function getImageSegments(msg: MessagePayload): MessagePayload[] {
     if (!Array.isArray(msg?.message)) return []
-    return msg.message.filter((seg: any) => seg?.type === 'image')
+    return msg.message
+        .map(asMessagePayload)
+        .filter((seg): seg is MessagePayload => seg?.type === 'image')
 }
 
-function hasImageMessage(msg: any): boolean {
+function hasImageMessage(msg: MessagePayload): boolean {
     return getImageSegments(msg).length > 0
 }
 
-function hasResolvableImageSource(msg: any): boolean {
+function hasResolvableImageSource(msg: MessagePayload): boolean {
     const imgs = getImageSegments(msg)
     if (imgs.length === 0) return false
-    return imgs.every((seg: any) => {
-        const url = typeof seg?.url === 'string' ? seg.url : ''
-        const file = typeof seg?.file === 'string' ? seg.file : ''
+    return imgs.every((seg) => {
+        const url = typeof seg.url === 'string' ? seg.url : ''
+        const file = typeof seg.file === 'string' ? seg.file : ''
         if (url.length > 0) return true
         if (file.length > 0) return true
         return false
     })
 }
 
-function shouldReplaceDuplicateMessage(existing: any, incoming: any): boolean {
+function shouldReplaceDuplicateMessage(existing: MessagePayload, incoming: MessagePayload): boolean {
     const settingsStore = useSettingsStore()
     if (!hasImageMessage(incoming)) return false
     if (existing?._from_local_db !== true) return false
@@ -1998,7 +2007,7 @@ function shouldReplaceDuplicateMessage(existing: any, incoming: any): boolean {
     return !hasResolvableImageSource(existing) && hasResolvableImageSource(incoming)
 }
 
-function mergeMessagesByIdAndTime(current: any[], incoming: any[]): any[] {
+function mergeMessagesByIdAndTime(current: MessagePayload[], incoming: MessagePayload[]): MessagePayload[] {
     if (incoming.length === 0) return [...current]
     if (current.length === 0) {
         const firstPass = [...incoming]
@@ -2009,7 +2018,7 @@ function mergeMessagesByIdAndTime(current: any[], incoming: any[]): any[] {
     const idSet = new Set<string>()
     const idIndexMap = new Map<string, number>()
     const fallbackSet = new Set<string>()
-    const merged = [] as any[]
+    const merged: MessagePayload[] = []
 
     for (const msg of current) {
         merged.push(msg)
@@ -2048,12 +2057,12 @@ function mergeMessagesByIdAndTime(current: any[], incoming: any[]): any[] {
     return merged
 }
 
-function replaceMessageListInPlace(next: any[]) {
+function replaceMessageListInPlace(next: MessagePayload[]) {
     const chatStore = useChatStore()
-    chatStore.messageList.splice(0, chatStore.messageList.length, ...next)
+    chatStore.messageList.splice(0, chatStore.messageList.length, ...(next as unknown as MsgItemElem[]))
 }
 
-export async function getMessageList(list: any[] | undefined) {
+export async function getMessageList(list: MessagePayload[] | undefined) {
     if (!list) return undefined
 
     list = parseMsgList(
@@ -2066,7 +2075,7 @@ export async function getMessageList(list: any[] | undefined) {
         list.reverse()
     }
     // 检查必要字段
-    list.forEach((item: any) => {
+    list.forEach((item: MessagePayload) => {
         if (!item.post_type) {
             item.post_type = 'message'
         }
@@ -2078,15 +2087,20 @@ export async function getMessageList(list: any[] | undefined) {
  * 消息预处理
  * @param msg 要处理的消息
  */
-async function msgPreprocess(msg: any): Promise<any> {
+async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
+    let segments: MessageSegmentPayload[] = Array.isArray(msg.message)
+        ? msg.message.map(asMessagePayload).filter((item): item is MessageSegmentPayload => item !== undefined)
+        : []
+    msg.message = segments
     //#region == json 合并转发 ============================
-    if (msg.message.at(0)?.type === 'json') {
+    if (segments.at(0)?.type === 'json') {
         try {
-            const data = JSON.parse(msg.message.at(0).data)
-            if (data['app'] === 'com.tencent.multimsg') {
-                msg.message = [{
+            const rawData = segments.at(0)?.data
+            const data = typeof rawData === 'string' ? asMessagePayload(JSON.parse(rawData)) : undefined
+            if (data?.app === 'com.tencent.multimsg') {
+                msg.message = segments = [{
                     type: 'forward',
-                    id: data['meta']['detail']['resid'],
+                    id: String(asMessagePayload(asMessagePayload(data.meta)?.detail)?.resid ?? ''),
                 }]
             }
         } catch (e) {/**/ }
@@ -2094,36 +2108,37 @@ async function msgPreprocess(msg: any): Promise<any> {
     //#endregion
 
     //#region == 合并转发解析 ==============================
-    if (msg.message.at(0)?.type === 'forward') {
-        const forwardId = msg.message.at(0).id
+    const forwardSegment = segments.at(0)
+    if (forwardSegment?.type === 'forward') {
+        const forwardId = forwardSegment.id
         if (forwardId) {
             try {
-                if (msg.message.at(0).content && msg.message.at(0).content.length > 0) {
+                if (forwardSegment.content && forwardSegment.content.length > 0) {
                     // 如果 content 里已经有内容了就直接用 content 里的内容
-                    const data = await getMessageList(msg.message.at(0).content)
-                    if (data) msg.message.at(0).content = data
+                    const data = await getMessageList(forwardSegment.content)
+                    if (data) forwardSegment.content = data
                 } else {
                     // 否则调用接口获取
                     const originData = await Connector.callApi('forward_msg', { id: forwardId })
                     const data = Array.isArray(originData)
                         ? await getMessageList(originData)
                         : undefined
-                    if (data) msg.message.at(0).content = data
+                    if (data) forwardSegment.content = data
                 }
             } catch (e) {
                 logger.error(e as unknown as Error, '合并转发解析失败')
             }
         } else {
-            msg.message.at(0).content = []
+            forwardSegment.content = []
         }
     }
     //#endregion
 
     //#region == lgr 商场表情 =============================
     // 过滤掉mface后面尾随的字符串
-    const filter: any[] = []
-    for (let id = 0; id < msg.message.length; id++) {
-        const seg = msg.message[id]
+    const filter: MessagePayload[] = []
+    for (let id = 0; id < segments.length; id++) {
+        const seg = segments[id]
         filter.push(seg)
         if (seg.type === 'mface') id++
     }
