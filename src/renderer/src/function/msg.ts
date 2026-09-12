@@ -2117,7 +2117,7 @@ async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
                     id: String(asMessagePayload(asMessagePayload(data.meta)?.detail)?.resid ?? ''),
                 }]
             }
-        } catch (e) {/**/ }
+            } catch {/**/ }
     }
     //#endregion
 

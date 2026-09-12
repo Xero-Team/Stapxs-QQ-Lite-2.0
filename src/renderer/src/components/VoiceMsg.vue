@@ -243,12 +243,12 @@ async function buildSpectrumBars() {
 
         try {
             spectrumBars.value = await analyzeBufferSpectrum(decodedBuffer, count)
-        } catch (error) {
+        } catch {
             spectrumBars.value = buildWaveFallback(decodedBuffer, count)
         }
 
         hasSpectrumData.value = true
-    } catch (error) {
+    } catch {
         if (currentToken === spectrumBuildToken) {
             spectrumBars.value = createPlaceholderSpectrumBars(count)
             hasSpectrumData.value = false

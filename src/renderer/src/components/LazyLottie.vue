@@ -32,7 +32,7 @@ const playAnimation = () => {
     if (!lottieRef.value) return
     try {
         lottieRef.value.play?.()
-    } catch (e) {
+    } catch {
         // do nothing
     }
 }

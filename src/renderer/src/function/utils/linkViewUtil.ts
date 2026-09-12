@@ -18,7 +18,7 @@ export const linkView = {
                 } else {
                     return num.toString()
                 }
-            } catch (_) {
+            } catch {
                 return String(numObj)
             }
         }

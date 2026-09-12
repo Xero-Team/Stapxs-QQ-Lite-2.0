@@ -792,7 +792,7 @@ async function parseText(index: number) {
             try {
                 protocol = new URL(fistLink).protocol + '//'
                 domain = new URL(fistLink).hostname
-            } catch (ignore) {
+            } catch {
                 // ignore
             }
 

@@ -331,7 +331,7 @@ async function selectLocalEmojiFolder() {
             // 重新加载本地表情
             reloadLocalEmojis()
         }
-    } catch (error) {
+    } catch {
         popInfo.add(PopType.ERR, $t('选择文件夹失败'))
     }
 }
@@ -369,7 +369,7 @@ async function reloadLocalEmojis() {
         } else {
             localEmojis.value = []
         }
-    } catch (error) {
+    } catch {
         localEmojis.value = []
     }
 }
@@ -398,7 +398,7 @@ async function addLocalEmoji(emoji: LocalEmoji) {
         if(settingsStore.sysConfig.send_face == true) {
             emit('sendMsg')
         }
-    } catch (error) {
+    } catch {
         const { $t } = app.config.globalProperties
         popInfo.add(PopType.ERR, $t('添加本地表情失败'))
     }

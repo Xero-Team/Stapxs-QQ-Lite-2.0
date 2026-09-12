@@ -504,7 +504,7 @@
                 await fetch(item[1], { method: 'GET' })
                 const end = new Date().getTime()
                 info += `    ${item[0]}  -> ${end - start} ms\n`
-            } catch (e) {
+            } catch {
                 info += `    ${item[0]}  -> failed\n`
             }
         }

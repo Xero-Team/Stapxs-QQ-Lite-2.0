@@ -161,7 +161,7 @@ export const backend = {
                 try {
                     const highEntropy = await userAgentData.getHighEntropyValues?.(['platformVersion'])
                     version = typeof highEntropy?.platformVersion === 'string' ? highEntropy.platformVersion : version
-                } catch (e) {
+                } catch {
                     // 如果获取失败，保持 Unknown
                 }
             } else {
