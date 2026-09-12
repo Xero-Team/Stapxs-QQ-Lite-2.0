@@ -23,3 +23,4 @@
 - Native download listener callbacks now use typed progress events and explicit cleanup return values; broader platform utility and message payload boundaries still need migration.
 - DOM directive lifecycle state in `appUtil.ts` now uses `WeakMap` registries instead of custom `any` properties; legacy utility payloads remain for the broader type migration.
 - Release and release-history responses are now checked at the external boundary before rendering update dialogs, removing several untyped response callbacks.
+- Optional notice responses now require a validated array/object boundary before rendering; notice template data uses `Record<string, unknown>`.
