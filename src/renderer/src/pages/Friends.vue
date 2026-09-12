@@ -227,7 +227,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         }
         isSearch.value = false
         searchInfo.value = ''
-        contactStore.showList = [] as any[]
+        contactStore.showList = []
 
         const back = {
             type: data.user_id ? 'user' : 'group',
@@ -268,7 +268,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             )
         } else {
             isSearch.value = false
-            contactStore.showList = [] as any[]
+            contactStore.showList = []
         }
         // macOS: 刷新 TouchBar
         if(backend.isDesktop()) {
