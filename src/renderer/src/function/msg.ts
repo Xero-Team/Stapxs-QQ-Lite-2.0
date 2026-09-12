@@ -1048,7 +1048,7 @@ const msgFunctions = {
             completeUploadTask(taskId)
         }
         const newEchoList = ['sendMsgBack', ...echoList.slice(4)]
-        msgFunctions.sendMsgBack(_, msg, newEchoList)
+        msgFunctions.sendMsgBack?.(_, msg, newEchoList)
     },
     /**
      * 获取收藏表情
@@ -1195,7 +1195,7 @@ const msgFunctions = {
         const data = getMsgData('file_download', msg, msgPath.file_download)[0] ?? {}
         const url = typeof data.file_url === 'string' ? data.file_url : ''
 
-        const fileName = decodeURIComponent(atob(echoList[2]))
+        const fileName = decodeURIComponent(atob(echoList[2] ?? ''))
         const fileSize = data.file_size || 0
 
         // 使用文件传输管理器下载
@@ -1214,7 +1214,7 @@ const msgFunctions = {
         const data = getMsgData('file_download', msg, msgPath.file_download)[0] ?? {}
         const url = typeof data.file_url === 'string' ? data.file_url : ''
 
-        const fileName = decodeURIComponent(atob(echoList[2]))
+        const fileName = decodeURIComponent(atob(echoList[2] ?? ''))
         const fileSize = data.file_size || 0
 
         // 使用文件传输管理器下载
@@ -1501,6 +1501,7 @@ const msgFunctions = {
         }
         // 保存 cookie 和 bkn
         const domain = echoList[1]
+        if (!domain) return
         if (!authStore.loginInfo.webapi) authStore.loginInfo.webapi = {}
         if (!authStore.loginInfo.webapi[domain])
             authStore.loginInfo.webapi[domain] = {}
@@ -2052,7 +2053,8 @@ function mergeMessagesByIdAndTime(current: MessagePayload[], incoming: MessagePa
         if (id) {
             if (idSet.has(id)) {
                 const idx = idIndexMap.get(id)
-                if (idx !== undefined && shouldReplaceDuplicateMessage(merged[idx], msg)) {
+                const existing = idx === undefined ? undefined : merged[idx]
+                if (idx !== undefined && existing && shouldReplaceDuplicateMessage(existing, msg)) {
                     merged[idx] = msg
                 }
                 continue
@@ -2435,7 +2437,6 @@ function newMsg(_: string, rawData: MessagePayload) {
                     tag: `${sessionId}/${data.message_id}`,
                     icon:
                         data.message_type === 'group' ? avatarUrl(id, 'group') : avatarUrl(id),
-                    image: undefined,
                     type: data.group_id ? 'group' : 'user',
                     is_important: isImportant,
                 } as NotifyInfo
