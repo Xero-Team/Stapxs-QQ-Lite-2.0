@@ -32,15 +32,19 @@ async (page) => {
                 const responses = {
                     get_version_info: { app_name: backend, app_version: '1.0.0' },
                     get_login_info: { user_id: accountId, nickname: 'Mock Login' },
-                    [friendAction]: [],
+                    [friendAction]: [{ user_id: 20002, nickname: 'Mock Friend', remark: 'Mock Friend' }],
                     get_group_list: [],
                     get_cookies: { cookies: '' },
+                    send_msg: { message_id: 'mock-send-1' },
                     ...(backend === 'NapCat.Onebot' ? { get_recent_contact: [] } : {}),
                 }
+                const initializationActions = Object.keys(responses).filter((action) => action !== 'send_msg')
                 let initialized
+                let activeSocket
                 const initialization = new Promise((resolve) => { initialized = resolve })
                 // Intercept every socket, so the smoke can never contact a real bot.
                 await smokePage.routeWebSocket('**/*', (socket) => {
+                    activeSocket = socket
                     if (!socket.url().startsWith('ws://127.0.0.1:30991/')) {
                         unexpectedRequests++
                         socket.close()
@@ -57,7 +61,7 @@ async (page) => {
                             data: known ? responses[request.action] : null,
                             echo: request.echo,
                         }))
-                        if (Object.keys(responses).every((action) => requests.includes(action))) {
+                        if (initializationActions.every((action) => requests.includes(action))) {
                             initialized()
                         }
                     })
@@ -85,6 +89,38 @@ async (page) => {
                     }),
                 ])
 
+                // Exercise the browser transport with one real UI send and one
+                // server-pushed OneBot message. Keep the login matrix fast by
+                // running this extended flow only once.
+                let messageFlow = { sent: false, received: false }
+                if (backend === 'Lagrange.OneBot' && accountId === 10001) {
+                    await smokePage.locator('#bar-friends').click()
+                    const friend = smokePage.locator('#user-20002:visible')
+                    await smokePage.locator('#friendTab').waitFor({ state: 'visible' })
+                    await friend.waitFor({ state: 'attached' })
+                    await friend.click({ force: true })
+                    const input = smokePage.locator('#main-input')
+                    await input.waitFor()
+                    await input.fill('hello from Playwright')
+                    await input.press('Enter')
+                    await smokePage.waitForFunction(() =>
+                        document.body.textContent?.includes('hello from Playwright') === true)
+                    messageFlow.sent = requests.includes('send_msg')
+                    activeSocket?.send(JSON.stringify({
+                        post_type: 'message',
+                        message_type: 'private',
+                        sub_type: 'friend',
+                        time: Math.floor(Date.now() / 1000),
+                        self_id: 10001,
+                        user_id: 30003,
+                        message_id: 'mock-incoming-1',
+                        message: [{ type: 'text', data: { text: 'hello from OneBot' } }],
+                        raw_message: 'hello from OneBot',
+                    }))
+                    await smokePage.getByText('hello from OneBot', { exact: true }).waitFor()
+                    messageFlow.received = true
+                }
+
                 // Validate the persisted account type through the public settings format.
                 const historyIsNormalized = await smokePage.evaluate(() => {
                     const options = localStorage.getItem('options') ?? ''
@@ -102,9 +138,12 @@ async (page) => {
                     externalRequests,
                     unexpectedRequests,
                     pageErrors,
+                    messageFlow,
                 }
                 if (!checks.historyIsNormalized || !checks.externalServicesDisabled
-                    || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0) {
+                    || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0
+                    || (backend === 'Lagrange.OneBot' && accountId === 10001
+                        && (!messageFlow.sent || !messageFlow.received))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })
