@@ -70,11 +70,15 @@
         cover: string,                                  // 封面链接
         free?: boolean                                  // 试听标识
         time?: number                                   // 音频时长
-        data?: any                                      // 额外数据（如歌曲ID等）
+        data?: unknown                                   // 额外数据（如歌曲ID等）
         lyric?: LyricLine[]                              // 歌词（可选）
     }
 
-    const emitRef = ref(undefined as any)
+    type PlayerEmit = {
+        (event: 'open-panel', value: boolean): void
+        (event: 'update-lyric', value: string): void
+    }
+    const emitRef = ref<PlayerEmit>(() => undefined)
     const resetController = ref(() => {})
 
     const musicListState = ref<MusicInfo[]>([])
@@ -270,9 +274,10 @@
         addMusic(music, 'current')
     }
 
-    const audioLoaded = (event: any) => {
+    const audioLoaded = (event: Event) => {
+        if (!(event.target instanceof HTMLAudioElement)) return
         isLoaded.value = true
-        audio.value = event.target as HTMLAudioElement
+        audio.value = event.target
         sizeMax.value = currentMusic.value?.time ?? audio.value.duration
         sizeReal.value = audio.value.duration
         minutes.value = Math.floor(sizeMax.value / 60)
@@ -373,8 +378,9 @@
         }
     }
 
-    const audioChange = (event: any) => {
-        const bar = event.target as HTMLInputElement
+    const audioChange = (event: Event) => {
+        if (!(event.target instanceof HTMLInputElement)) return
+        const bar = event.target
         if (audio.value) {
             const value = parseFloat(bar.value)
             if(value <= audio.value.duration) {

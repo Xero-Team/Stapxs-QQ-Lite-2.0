@@ -31,7 +31,7 @@
                     :key="session.user_id"
                     class="qzone-permission-item"
                     @click="toggleSession(session)">
-                    <TinySessionBody :session="session" :selected="isSelected(session)" />
+                    <TinySessionBody :session="toTinySession(session)" :selected="isSelected(session)" />
                 </div>
             </div>
         </template>
@@ -89,6 +89,14 @@
 
     function getSessionId(session: UserGroupElem) {
         return Number(session.user_id)
+    }
+
+    function toTinySession(session: UserGroupElem) {
+        return {
+            user_id: session.user_id,
+            nickname: session.nickname,
+            remark: session.remark,
+        }
     }
 
     function isSelected(session: UserGroupElem) {
