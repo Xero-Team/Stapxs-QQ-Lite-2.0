@@ -49,3 +49,4 @@
 - Heartbeat and request notification handlers now accept the shared `MessagePayload` record type; heartbeat timestamps are numerically validated before updating the watchdog state.
 - Emoji-like, group-ban, kick, and input-status notice handlers now share the typed payload boundary; group IDs, durations, and localized status text are normalized before use.
 - Poke notice rendering now validates each raw-info segment before reading its type, source, or text, removing another untyped segment callback.
+- Group-approval notices now consume the shared message payload record while retaining the existing member refresh and join notification behavior.

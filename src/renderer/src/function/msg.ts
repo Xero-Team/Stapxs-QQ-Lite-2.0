@@ -566,7 +566,7 @@ const noticeFunctions = {
         }
     },
 
-    approve: (_: string, msg: { [key: string]: any }) => {
+    approve: (_: string, msg: MessagePayload) => {
         const { $t } = app.config.globalProperties
         const chatStore = useChatStore()
 
