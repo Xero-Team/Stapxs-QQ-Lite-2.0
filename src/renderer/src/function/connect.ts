@@ -220,6 +220,7 @@ export class Connector {
 
     static onopen(address: string, token: string | undefined) {
         const settingsStore = useSettingsStore()
+        retry = 0
         logger.add(LogType.WS, '连接成功')
         // 保存登录信息
         Option.save('address', address)
