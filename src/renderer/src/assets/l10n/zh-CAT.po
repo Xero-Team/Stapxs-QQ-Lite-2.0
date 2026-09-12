@@ -6,11 +6,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: zh_CN\n"
 "PO-Revision-Date: 2024-09-20\n"
-"Language-Team: Stapx Steve (stapxs)\n"
+"Language-Team: Xero-Team (stapxs)\n"
 
 # 这是当前语言的介绍，请自行发挥
-msgid "你好世界！这是 Stapxs QQ Lite 的默认简体中文。"
-msgstr "喵喵喵！这是喵星文化与宣传部提供的 Stapxs QQ Lite 默认喵体中文。"
+msgid "你好世界！这是 Xero QQ Lite 的默认简体中文。"
+msgstr "喵喵喵！这是喵星文化与宣传部提供的 Xero QQ Lite 默认喵体中文。"
 
 # 这是当前语言的名字，请自行修改
 msgid "简体中文"

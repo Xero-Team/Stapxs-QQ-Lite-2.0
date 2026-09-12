@@ -328,7 +328,7 @@
             </div>
             <div v-if="settingsStore.sysConfig.enable_local_history" class="tip">
                 {{
-                    $t('Stapxs QQ Lite 支持将消息缓存至本地，消息将以加密数据库的方式安全的保存。')
+                    $t('Xero QQ Lite 支持将消息缓存至本地，消息将以加密数据库的方式安全的保存。')
                 }}
             </div>
             <div v-if="settingsStore.sysConfig.enable_local_history" class="opt-item">

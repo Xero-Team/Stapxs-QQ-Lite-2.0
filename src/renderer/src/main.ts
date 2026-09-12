@@ -74,7 +74,7 @@ const colorList = [
 const color = colorList[Math.floor(Math.random() * colorList.length)]
 const str = strList[Math.floor(Math.random() * strList.length)]
 console.log(
-    `%c${str}%c Stapxs QQ Lite - ${packageInfo.version} ( ${import.meta.env.DEV ? 'development' : 'production'} ) `,
+    `%c${str}%c Xero QQ Lite - ${packageInfo.version} ( ${import.meta.env.DEV ? 'development' : 'production'} ) `,
     `font-weight:bold;background:#${color};color:#fff;border-radius:7px 0 0 7px;padding:7px 14px;margin:7px 0 7px 7px;`,
     'background:#e3e8ec;color:#000;border-radius:0 7px 7px 0;display:inline-block;padding:7px 14px;margin:7px 7px 7px 0;',
 )

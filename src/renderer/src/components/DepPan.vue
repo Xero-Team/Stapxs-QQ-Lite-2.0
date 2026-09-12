@@ -106,7 +106,7 @@
                 <div class="ss-card info">
                     <font-awesome-icon :icon="['fas', 'circle-info']" />
                     <span>{{
-                        $t('Stapxs QQ Lite 依赖的部分服务允许自行部署，此处只提供服务的来源；不保证所使用的服务来自官方。')
+                        $t('Xero QQ Lite 依赖的部分服务允许自行部署，此处只提供服务的来源；不保证所使用的服务来自官方。')
                     }}</span>
                 </div>
                 <div class="dept">

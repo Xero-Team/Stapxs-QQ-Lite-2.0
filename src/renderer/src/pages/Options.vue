@@ -33,10 +33,10 @@
             <div class="ss-card end-card">
                 <div>
                     <div>
-                        <span>Stapxs QQ Lite</span>
+                        <span>Xero QQ Lite</span>
                         <a>{{ packageInfo.version }}</a>
                     </div>
-                    <span>Copyright © 2022 - 2026 Stapx Steve [ 林槐 ]</span>
+                    <span>Copyright © 2022 - 2026 Xero-Team [ 林槐 ]</span>
                 </div>
                 <svg style="width: 50px"
                     xmlns="http://www.w3.org/2000/svg"

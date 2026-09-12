@@ -19,7 +19,7 @@
         <img src="/img/icons/icon.svg">
         <span>WELCOME</span>
         <div>
-            <span>{{ $t('Stapxs QQ Lite') }}</span>
+            <span>{{ $t('Xero QQ Lite') }}</span>
             <a>2.0</a>
         </div>
         <hr>
@@ -40,7 +40,7 @@
                         </option>
                     </select>
                 </div>
-                <span class="author">{{ $t('作者：') }}{{ $t('Stapx Steve') }}</span>
+                <span class="author">{{ $t('作者：') }}{{ $t('Xero-Team') }}</span>
             </div>
         </div>
         <button class="ss-button wel-next" @click="setPage('license')">
@@ -49,12 +49,12 @@
     </div>
     <div v-if="show == 'license'" class="base-box">
         <div class="lead">
-            <span>{{ $t('欢迎使用 Stapxs QQ Lite') }}</span>
+            <span>{{ $t('欢迎使用 Xero QQ Lite') }}</span>
             <div />
             <div>
                 <span>{{ $t('在开始之前，请阅读以下条款：') }}</span>
-                <a @click="openLink(`https://github.com/${repoName}/blob/next/DISCLAIMER.md`)">Stapxs QQ Lite 免责条款（简体中文）</a>
-                <a @click="openLink(`https://github.com/${repoName}/blob/next/LICENSE`)">Stapxs QQ Lite 开源许可（英文）</a>
+                <a @click="openLink(`https://github.com/${repoName}/blob/next/DISCLAIMER.md`)">Xero QQ Lite 免责条款（简体中文）</a>
+                <a @click="openLink(`https://github.com/${repoName}/blob/next/LICENSE`)">Xero QQ Lite 开源许可（英文）</a>
                 <br>
                 <span>{{ $t('并酌情阅读以下文档：') }}</span>
                 <a @click="openLink('https://www.chiark.greenend.org.uk/~sgtatham/bugs-cn.html')">《如何有效地报告 BUG》</a>
@@ -79,7 +79,7 @@
             </div>
             <div>
                 <span>{{ $t('外观') }}</span>
-                <a>{{ $t('Stapxs QQ Lite 拥有一个主题色，你可以选择一个主题色作为主要风格！如果你喜欢保持深色主题，也可以关闭自动深色模式自行选择。') }}</a>
+                <a>{{ $t('Xero QQ Lite 拥有一个主题色，你可以选择一个主题色作为主要风格！如果你喜欢保持深色主题，也可以关闭自动深色模式自行选择。') }}</a>
                 <div v-if="!napcat" class="opt-item wel-opt-item">
                     <div>
                         <span>{{ $t('主题色') }}</span>
@@ -218,7 +218,7 @@
             </div>
             <div>
                 <span>{{ $t('更多菜单') }}</span>
-                <a>{{ $t('Stapxs QQ Lite 的部分功能包含在元素的菜单中。你可以右击（或长按）消息列表、头像、消息等元素展开菜单来使用更多功能！') }}</a>
+                <a>{{ $t('Xero QQ Lite 的部分功能包含在元素的菜单中。你可以右击（或长按）消息列表、头像、消息等元素展开菜单来使用更多功能！') }}</a>
             </div>
         </div>
         <button class="ss-button wel-next" @click="setPage('tip_input')">
@@ -283,10 +283,10 @@
             <span>{{ $t('开源提醒') }}</span>
             <div />
             <div style="align-items: flex-end;">
-                <span>{{ $t('Stapxs QQ Lite 是一个开源免费的软件，这意味着没有任何激活、使用限制等付费功能；') }}</span>
-                <span style="margin-bottom: 20px;">{{ $t('如果你通过任何付费方式获取了 Stapxs QQ Lite，请及时追回损失并酌情反馈。') }}</span>
+                <span>{{ $t('Xero QQ Lite 是一个开源免费的软件，这意味着没有任何激活、使用限制等付费功能；') }}</span>
+                <span style="margin-bottom: 20px;">{{ $t('如果你通过任何付费方式获取了 Xero QQ Lite，请及时追回损失并酌情反馈。') }}</span>
 
-                <span>{{ $t('Stapxs QQ Lite 仅在 GitHub 上发布。由于提供了自行部署的方式，非官方版本请谨慎使用。') }}</span>
+                <span>{{ $t('Xero QQ Lite 仅在 GitHub 上发布。由于提供了自行部署的方式，非官方版本请谨慎使用。') }}</span>
                 <font-awesome-icon style="width:15vh;height:15vh;margin-top:-15vh;opacity:0.1;color:var(--color-font);"
                     :icon="['fas', 'triangle-exclamation']" />
             </div>

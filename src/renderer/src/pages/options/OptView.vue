@@ -13,9 +13,9 @@
                 <font-awesome-icon :icon="['fas', 'language']" />
                 <div>
                     <span>{{ $t('简体中文') }}</span>
-                    <span class="author">{{ $t('作者：') }}{{ $t('Stapx Steve') }}</span>
+                    <span class="author">{{ $t('作者：') }}{{ $t('Xero-Team') }}</span>
                     <span>{{
-                        $t('你好世界！这是 Stapxs QQ Lite 的默认简体中文。')
+                        $t('你好世界！这是 Xero QQ Lite 的默认简体中文。')
                     }}</span>
                 </div>
             </div>

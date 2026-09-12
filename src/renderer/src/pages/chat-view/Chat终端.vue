@@ -286,7 +286,7 @@
             )
             addCommandLineF('[screen is terminating]')
             addCommandOutF(
-                '* Stapxs QQ Lite Shell requires "FiraCode Nerd Font" to display complete command line symbols, please ensure the device has installed this font.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n* 使用 "help" 命令查看所有可用命令。\n\n\n',
+                '* Xero QQ Lite Shell requires "FiraCode Nerd Font" to display complete command line symbols, please ensure the device has installed this font.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n* 使用 "help" 命令查看所有可用命令。\n\n\n',
                 'var(--color-font)',
             )
             addCommandOutF(
@@ -294,7 +294,7 @@
                 'var(--color-font)',
             )
             addCommandOutF(
-                `Welcome to Stapxs QQ Lite ${packageInfo.version} (Vue ${packageInfo.devDependencies.vue}-${import.meta.env.DEV ? 'development' : 'production'})\n\n`,
+                `Welcome to Xero QQ Lite ${packageInfo.version} (Vue ${packageInfo.devDependencies.vue}-${import.meta.env.DEV ? 'development' : 'production'})\n\n`,
                 'var(--color-font)',
             )
         }
@@ -567,7 +567,7 @@
                 },
             },
             ssqq: {
-                info: 'Stapxs QQ Lite Base Command.',
+                info: 'Xero QQ Lite Base Command.',
                 fun: (raw: string, item: string[]) => {
                     switch (item[1]) {
                         // 发送消息
@@ -752,7 +752,7 @@
                 info: 'print system info.',
                 fun: () => {
                     const infoList = {
-                        Application: 'Stapxs QQ Lite',
+                        Application: 'Xero QQ Lite',
                         Kernel: packageInfo.version + '-' + backend.type,
                         Shell: 'stsh Basic Shell 1.0',
                         Theme: 'ChatSHell',

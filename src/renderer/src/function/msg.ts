@@ -695,7 +695,7 @@ const msgFunctions = {
             })
             const title = `${data.nickname} `
             if (backend.platform == 'web') {
-                document.title = title + '- Stapxs QQ Lite'
+                document.title = title + '- Xero QQ Lite'
             } else {
                 document.title = title
                 backend.call(undefined, 'win:setTitle', false, title)

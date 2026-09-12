@@ -2,7 +2,7 @@
     <div v-if="dev" id="dev-bar" :class="['dev-bar', 'onloading', {
         'win': backend.platform == 'win32'
     }]">
-        Stapxs QQ Lite Development Mode
+        Xero QQ Lite Development Mode
         {{ backend.platform ? ' / platform: ' + backend.platform : '' }}
         {{ ' / client: ' + appClient.type }}
         {{ ' / backend: ' + (authStore.jsonMap?.name ?? 'Not Connected') }}
@@ -878,7 +878,7 @@ onMounted(() => {
         App.createIpc() // Electron：创建 IPC 通信
         // 加载开发者相关功能
         if (dev) {
-            document.title = 'Stapxs QQ Lite (Dev)'
+            document.title = 'Xero QQ Lite (Dev)'
             // 布局检查工具
             Spacing.start()
             // FPS 检查
@@ -918,7 +918,7 @@ onMounted(() => {
             if (app) app.classList.add('withBar')
         }
         // 基础初始化完成
-        logger.system('欢迎回来，开发者。Stapxs QQ Lite 正处于 ' + (dev ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
+        logger.system('欢迎回来，开发者。Xero QQ Lite 正处于 ' + (dev ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
         const loadView = document.getElementById('load-view')
         loadView?.remove()
         setTimeout(() => {
@@ -973,7 +973,7 @@ onMounted(() => {
             connect()
         }
         if(napcat) {
-            logger.info('Stapxs QQ Lite 处于 Napcat 模式 ……')
+            logger.info('Xero QQ Lite 处于 Napcat 模式 ……')
             const token = localStorage.getItem('token')
             if(token) {
                 // api/Debug/create 获取连接配置信息
@@ -1017,7 +1017,7 @@ onMounted(() => {
                     // 离开提醒
                     const popInfo = {
                         title: $t('提醒'),
-                        html: `<span>${$t('离开 Stapxs QQ Lite？')}</span>`,
+                        html: `<span>${$t('离开 Xero QQ Lite？')}</span>`,
                         button: [
                             {
                                 text: $t('取消'),
@@ -1084,7 +1084,7 @@ onMounted(() => {
         ]
         const title = titleList[Math.floor(Math.random() * titleList.length)]
         if(backend.platform == 'web') {
-            document.title = title + '- Stapxs QQ Lite'
+            document.title = title + '- Xero QQ Lite'
         } else {
             document.title = title
             backend.call(undefined, 'win:setTitle', false, title)

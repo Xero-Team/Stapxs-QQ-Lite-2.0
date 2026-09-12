@@ -55,7 +55,7 @@ linux:
         - { target: deb, arch: x64 }
         - { target: deb, arch: arm64 }
         - { target: tar.gz, arch: x64 }
-    maintainer: Stapx Steve [林槐]
+    maintainer: Xero-Team [林槐]
     vendor: Xero Steve Team
     synopsis: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
     category: Network

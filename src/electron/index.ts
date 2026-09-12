@@ -40,11 +40,11 @@ async function createWindow() {
     console.log(' _____ _____ _____ _____ __ __  \n' +
         '|   __|_   _|  _  |  _  |  |  | \n' +
         '|__   | | | |     |   __|-   -| \n' +
-        '|_____| |_| |__|__|__|  |__|__| CopyRight © Stapx Steve')
+        '|_____| |_| |__|__|__|  |__|__| CopyRight © Xero-Team')
     console.log('=======================================================')
     console.log('日志等级:', logLevel)
     /* eslint-enable no-console */
-    logger.info('欢迎使用 Stapxs QQ Lite, 当前版本: ' + packageInfo.version)
+    logger.info('欢迎使用 Xero QQ Lite, 当前版本: ' + packageInfo.version)
 
     logger.info('启动平台架构：' + process.platform)
     logger.info('正在创建窗体 ……')

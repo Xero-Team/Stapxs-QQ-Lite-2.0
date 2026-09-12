@@ -7,7 +7,7 @@
 
 <template>
     <div class="meal-hungry-pan">
-        <span v-if="times">{{ $t('好耶！Stapxs QQ Lite 已经被打开 {times} 次了！', { times }) }}</span>
+        <span v-if="times">{{ $t('好耶！Xero QQ Lite 已经被打开 {times} 次了！', { times }) }}</span>
         <div>
             <div class="hun-text">
                 <span>饿饿！饭饭！</span>

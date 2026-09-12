@@ -8,16 +8,16 @@ msgstr ""
 "PO-Revision-Date: 2023-05-24\n"
 "Language-Team: Doodle Huang (doodlehuang), kuohuanhuan\n"
 
-msgid "Stapxs QQ Lite"
-msgstr "Stapxs QQ Lite"
+msgid "Xero QQ Lite"
+msgstr "Xero QQ Lite"
 
 # 这是当前语言的作者，请自行修改
-msgid "Stapx Steve"
+msgid "Xero-Team"
 msgstr "Doodle Huang, kuohuanhuan"
 
 # 这是当前语言的介绍，请自行发挥
-msgid "你好世界！这是 Stapxs QQ Lite 的默认简体中文。"
-msgstr "你好！這是 Stapxs QQ Lite 內建的繁體中文（台灣）語系。"
+msgid "你好世界！这是 Xero QQ Lite 的默认简体中文。"
+msgstr "你好！這是 Xero QQ Lite 內建的繁體中文（台灣）語系。"
 
 # 这是当前语言的名字，请自行修改
 msgid "简体中文"
@@ -450,8 +450,8 @@ msgstr "（點選以檢視合併訊息）"
 msgid "好耶"
 msgstr "好耶"
 
-msgid "好耶！Stapxs QQ Lite 已经被打开 {times} 次了！"
-msgstr "好耶！Stapxs QQ Lite 已經被使用 {times} 次了！"
+msgid "好耶！Xero QQ Lite 已经被打开 {times} 次了！"
+msgstr "好耶！Xero QQ Lite 已經被使用 {times} 次了！"
 
 msgid "真的不去点个 star 吗 ……"
 msgstr "真的不想給我的專案一個 Star 嗎……"
