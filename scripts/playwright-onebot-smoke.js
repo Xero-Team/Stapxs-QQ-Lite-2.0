@@ -15,6 +15,7 @@ async (page) => {
                 const smokePage = await context.newPage()
                 smokePage.setDefaultTimeout(10000)
                 const requests = []
+                const requestPayloads = []
                 let externalRequests = 0
                 let unexpectedRequests = 0
                 let pageErrors = 0
@@ -58,6 +59,7 @@ async (page) => {
                     socket.onMessage((message) => {
                         const request = JSON.parse(String(message))
                         requests.push(request.action)
+                        requestPayloads.push(request)
                         const known = Object.hasOwn(responses, request.action)
                         if (!known && request.action) unexpectedRequests++
                         socket.send(JSON.stringify({
@@ -141,6 +143,38 @@ async (page) => {
                     }))
                     await smokePage.getByText('hello from OneBot', { exact: true }).waitFor()
                     messageFlow.received = true
+
+                    // Exercise the actual file input and ensure the outgoing
+                    // OneBot payload contains an image segment. A tiny PNG
+                    // keeps this smoke deterministic and avoids network I/O.
+                    await smokePage.locator('#choice-pic').evaluate((input) => {
+                        const file = new File([new Uint8Array([
+                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13,
+                            73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4,
+                            0, 0, 0, 181, 28, 12, 2, 0, 0, 0, 11, 73, 68,
+                            65, 84, 120, 218, 99, 100, 248, 15, 0, 1, 5, 1,
+                            1, 39, 24, 227, 102, 0, 0, 0, 0, 73, 69, 78, 68,
+                            174, 66, 96, 130,
+                        ])], 'pixel.png', { type: 'image/png' })
+                        const transfer = new DataTransfer()
+                        transfer.items.add(file)
+                        input.files = transfer.files
+                        input.dispatchEvent(new Event('change', { bubbles: true }))
+                    })
+                    await smokePage.locator('.img-pan img').waitFor({ state: 'visible' })
+                    await input.press('Enter')
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        const imageSent = requestPayloads.some((request) =>
+                            request.action === 'send_private_msg'
+                            && Array.isArray(request.params?.message)
+                            && request.params.message.some((segment) => segment?.type === 'image'))
+                        if (imageSent) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.imageSent = requestPayloads.some((request) =>
+                        request.action === 'send_private_msg'
+                        && Array.isArray(request.params?.message)
+                        && request.params.message.some((segment) => segment?.type === 'image'))
                 }
 
                 // Validate the persisted account type through the public settings format.
@@ -166,7 +200,7 @@ async (page) => {
                 if (!checks.historyIsNormalized || !checks.externalServicesDisabled
                     || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0
                     || (backend === 'Lagrange.OneBot' && accountId === 10001
-                        && (!messageFlow.sent || !messageFlow.received))) {
+                        && (!messageFlow.sent || !messageFlow.received || !messageFlow.imageSent))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })
