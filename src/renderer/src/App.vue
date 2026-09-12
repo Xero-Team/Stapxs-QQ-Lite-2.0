@@ -271,7 +271,7 @@
                         <font-awesome-icon v-if="uiStore.popBoxList[0].allowClose != false"
                             :icon="['fas', 'xmark']" @click="removePopBox" />
                     </header>
-                    <div v-if="uiStore.popBoxList[0].html" v-html="uiStore.popBoxList[0].html" />
+                    <div v-if="uiStore.popBoxList[0].html" v-html="sanitizePopupHtml(uiStore.popBoxList[0].html)" />
                     <component :is="uiStore.popBoxList[0].template" v-else :data="uiStore.popBoxList[0].data"
                         v-bind="uiStore.popBoxList[0].templateValue" />
                     <div v-show="uiStore.popBoxList[0].button" class="button">
@@ -328,6 +328,7 @@ import { updateBaseOnMsgList } from './function/utils/msgUtil'
 import { getDeviceType, getForegroundToneFromImageUrl } from './function/utils/systemUtil'
 import { uptime, i18n } from '@renderer/main'
 import { backend } from './runtime/backend'
+import xss from 'xss'
 import {
     hydrateBackgroundImage,
     migrateInlineBackgroundImage,
@@ -369,6 +370,14 @@ const isNarrowLayout = shallowRef(window.innerWidth <= 500)
 // 响应式状态
 const connectionStore = useConnectionStore()
 const uiStore = useUIStore()
+
+function sanitizePopupHtml(value: unknown): string {
+    return typeof value === 'string' ? xss(value, {
+        whiteList: { br: [], strong: [], em: [], code: [], a: ['href', 'target', 'rel'] },
+        stripIgnoreTag: true,
+        stripIgnoreTagBody: ['script', 'style'],
+    }) : ''
+}
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
 const contactStore = useContactStore()
