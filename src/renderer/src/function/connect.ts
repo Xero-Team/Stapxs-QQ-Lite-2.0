@@ -190,7 +190,12 @@ export class Connector {
             }
 
             if (webSocketTransport?.state === 'authenticated' || webSocketTransport?.state === 'connecting') return
-            webSocketTransport = new WebSocketTransport(url)
+            webSocketTransport = new WebSocketTransport(url, undefined, {
+                // OneBot WebSocket servers commonly close idle clients; use a
+                // harmless status request as a protocol-level keepalive.
+                heartbeatIntervalMs: 30_000,
+                heartbeatPayload: { action: 'get_status', params: {}, echo: 'xero-heartbeat' },
+            })
             const transport = webSocketTransport
             transport.onMessage((payload) => this.onmessage(typeof payload === 'string' ? payload : JSON.stringify(payload)))
             transport.onClose((event) => {

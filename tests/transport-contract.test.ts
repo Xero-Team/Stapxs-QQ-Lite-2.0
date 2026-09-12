@@ -93,6 +93,33 @@ describe('transport contracts', () => {
         vi.useRealTimers()
     })
 
+    it('enters authenticated state only after the optional handshake succeeds', async () => {
+        class AuthSocket {
+            binaryType = ''
+            readyState = 0
+            onopen: (() => void) | null = null
+            onmessage: ((event: { data: unknown }) => void) | null = null
+            onclose: (() => void) | null = null
+            onerror: (() => void) | null = null
+            send = vi.fn()
+            close = vi.fn()
+            constructor() { queueMicrotask(() => { this.readyState = 1; this.onopen?.() }) }
+        }
+        vi.stubGlobal('WebSocket', AuthSocket)
+        let authenticated = false
+        const transport = new WebSocketTransport('ws://auth', undefined, {
+            authenticate: async (socket) => {
+                socket.send('{"action":"get_login_info"}')
+                await Promise.resolve()
+                authenticated = true
+            },
+        })
+        await transport.connect({ timeoutMs: 100 })
+        expect(authenticated).toBe(true)
+        expect(transport.state).toBe('authenticated')
+        await transport.close()
+    })
+
     it('parses SSE events and exposes receive-only semantics', async () => {
         class FakeSource {
             onopen: (() => void) | null = null

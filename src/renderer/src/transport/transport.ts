@@ -75,6 +75,8 @@ export interface WebSocketTransportOptions {
     /** Send a protocol-specific heartbeat while the socket is authenticated. */
     heartbeatIntervalMs?: number
     heartbeatPayload?: unknown | (() => unknown)
+    /** Optional handshake invoked after the socket opens and before it is usable. */
+    authenticate?: (socket: WebSocketLike, signal: AbortSignal) => Promise<void>
 }
 
 /** Small browser WebSocket adapter used by all renderer transports. */
@@ -103,10 +105,25 @@ export class WebSocketTransport implements Transport {
             const socket = new Socket(this.url, this.protocols)
             this.socket = socket
             socket.onopen = () => {
-                settled = true
-                this.currentState = 'authenticated'
-                this.startHeartbeat()
-                resolve()
+                void (async () => {
+                    try {
+                        if (this.options.authenticate) await this.options.authenticate(socket, signal)
+                        if (signal.aborted) return
+                        settled = true
+                        this.currentState = 'authenticated'
+                        this.startHeartbeat()
+                        resolve()
+                    } catch (error: unknown) {
+                        this.currentState = 'error'
+                        socket.close()
+                        if (!settled) {
+                            settled = true
+                            reject(error instanceof TransportError
+                                ? error
+                                : new TransportError('WebSocket authentication failed', 'protocol'))
+                        }
+                    }
+                })()
             }
             socket.onmessage = (event) => this.handlers.forEach((handler) => handler(event.data))
             socket.onerror = () => {
