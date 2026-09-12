@@ -967,7 +967,7 @@ function getMsg(message_id: string, filter: boolean = false) {
     return null
 }
 
-function downloadFile(fileData: any, message_id: string) {
+function downloadFile(fileData: MsgItemElem, message_id: string) {
     let name = authStore.jsonMap.file_download?.private_name
     if(chatStore.chatInfo.show.type == 'group') {
         name = authStore.jsonMap.file_download?.name
@@ -996,7 +996,7 @@ function textClick(event: Event) {
 }
 
 function loadFileBase(
-    fileData: any,
+    fileData: MsgItemElem,
     name: string,
     message_id: StringifyOptions,
 ) {
@@ -1029,7 +1029,7 @@ function loadFileBase(
     return name
 }
 
-function getTxtUrl(view: any) {
+function getTxtUrl(view: { url: string; txt?: string }) {
     const url = view.url
     fetch(url)
         .then((r) => r.blob())
