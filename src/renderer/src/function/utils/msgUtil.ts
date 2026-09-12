@@ -382,7 +382,6 @@ export function parseCQ(data: unknown): JsonRecord {
     const parsed = parseCqText(typeof record.message === 'string' ? record.message : '')
     if (parsed.reply) record.source = parsed.reply
     record.message = parsed.segments
-    logger.debug('解析 CQ 消息结果: ' + JSON.stringify(parsed.segments))
     return record
 }
 

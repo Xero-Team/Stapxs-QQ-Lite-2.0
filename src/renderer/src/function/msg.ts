@@ -313,9 +313,7 @@ export function dispatch(raw: string | { [k: string]: any }, echo?: string) {
         try {
             msg = JSON.parse(raw);
         } catch {
-            if (!raw.includes('"meta_event_type":"heartbeat"')) {
-                logger.add(LogType.WS, 'GET：' + raw);
-            }
+            logger.add(LogType.WS, 'GET：收到无效 JSON', undefined, true)
             return;
         }
     } else {
@@ -332,7 +330,7 @@ export function dispatch(raw: string | { [k: string]: any }, echo?: string) {
         const metaArgs = echo ? echo.split('_') : undefined;
         fn(msg, metaArgs);
     } catch (e) {
-        logger.error(e as Error, `跳转事件处理错误 - ${name}:\n${JSON.stringify(msg)}`);
+        logger.error(e as Error, `跳转事件处理错误 - ${name}`);
     }
 }
 
@@ -2336,7 +2334,7 @@ function newMsg(_: string, data: any) {
                 // 准备消息内容
                 let raw = getMsgRawTxt(data)
                 raw = raw === '' ? data.raw_message : raw
-                logger.add(LogType.INFO, '新消息通知：' + raw, undefined, true)
+                logger.add(LogType.INFO, '收到新消息通知', undefined, true)
                 if (data.group_name === undefined) {
                     // 检查消息内是否有群名，去列表里寻找
                     contactStore.userList.forEach((item) => {
