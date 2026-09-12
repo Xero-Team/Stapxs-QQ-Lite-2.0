@@ -478,7 +478,7 @@ const noticeFunctions = {
 
         // 只有在当前群才会显示
         if (groupId == chatStore.chatInfo.show.id)
-            chatStore.messageList.push(msg)
+            chatStore.messageList.push(msg as MsgItemElem)
     },
 
     /**
@@ -564,7 +564,7 @@ const noticeFunctions = {
             // 插入系统消息
             msg.str = str
             msg.pokeMe = userInfo[1].isMe
-            chatStore.messageList.push(msg)
+            chatStore.messageList.push(msg as MsgItemElem)
         }
     },
 
@@ -595,7 +595,7 @@ const noticeFunctions = {
                     name: user.nickname,
                 })
                 msg.str = str
-                chatStore.messageList.push(msg)
+                chatStore.messageList.push(msg as MsgItemElem)
             }
         }
     },

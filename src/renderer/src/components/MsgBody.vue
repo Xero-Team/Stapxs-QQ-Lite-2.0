@@ -991,7 +991,7 @@ function loadFileBase(
             'mp4', 'avi', 'mkv', 'flv',
             'txt', 'md',
         ]
-        if (list.includes(ext)) {
+        if (list.includes(ext) && msg) {
             msg.fileView = {}
             let dlName = authStore.jsonMap.file_download?.private_name
             if(chatStore.chatInfo.show.type == 'group') {

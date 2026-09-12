@@ -322,7 +322,7 @@
             color: color,
             str: raw,
             html: html,
-        })
+        } as unknown as MsgItemElem)
     }
 
     function addCommandOutF(
@@ -335,13 +335,13 @@
             color: color,
             str: raw,
             html: html,
-        })
+        } as unknown as MsgItemElem)
     }
 
     function addCommandLine(
         str: string,
         dir = chatStore.chatInfo.show.name,
-        appendData: { [key: string]: any } = {},
+        appendData: Record<string, unknown> = {},
     ) {
         chatStore.messageList.push({
             dir: dir,
@@ -355,7 +355,7 @@
                 }).format(new Date()),
             }),
             data: appendData,
-        })
+        } as unknown as MsgItemElem)
     }
 
     function addCommandLineF(str: string, dir = chatStore.chatInfo.show.name) {
@@ -371,7 +371,7 @@
                 }).format(new Date()),
             }),
             data: {},
-        })
+        } as unknown as MsgItemElem)
     }
 
     function sendMsg(event: KeyboardEvent) {

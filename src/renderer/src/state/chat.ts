@@ -1,4 +1,4 @@
-import { ChatInfoElem, MergeStackData } from '@renderer/function/elements/information'
+import { ChatInfoElem, MergeStackData, MsgItemElem } from '@renderer/function/elements/information'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -19,10 +19,10 @@ export const useChatStore = defineStore('chat', () => {
         },
     })
 
-    const messageList = ref<any[]>([])
+    const messageList = ref<MsgItemElem[]>([])
     const mergeMsgStack = ref<MergeStackData[]>([])
-    const mergeMessageList = ref<any[] | undefined>(undefined)
-    const mergeMessageImgList = ref<any[] | undefined>(undefined)
+    const mergeMessageList = ref<MsgItemElem[] | undefined>(undefined)
+    const mergeMessageImgList = ref<MsgItemElem[] | undefined>(undefined)
 
     return {
         chatInfo,
