@@ -66,7 +66,7 @@ interface BulletinImage {
     src: string
 }
 
-interface BulletinData {
+export interface BulletinData {
     time: number
     content: string[]
     img?: BulletinImage
