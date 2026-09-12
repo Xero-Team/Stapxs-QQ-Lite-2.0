@@ -108,7 +108,7 @@
     "electron": "44.3.0",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-vue": "^9.26.0",
     "js-file-downloader": "^1.1.25",
     "markdown-it": "^14.1.1",
