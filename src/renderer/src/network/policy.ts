@@ -22,7 +22,8 @@ export function isExternalRequestAllowed(url: string, enabled: unknown): boolean
 export function isSafeExternalUrl(url: string): boolean {
     try {
         const parsed = new URL(url)
-        return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+        return (parsed.protocol === 'http:' || parsed.protocol === 'https:')
+            && parsed.username === '' && parsed.password === ''
     } catch {
         return false
     }

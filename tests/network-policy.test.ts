@@ -17,6 +17,7 @@ describe('network policy', () => {
     it('rejects unsafe navigation schemes', () => {
         expect(isSafeExternalUrl('javascript:alert(1)')).toBe(false)
         expect(isSafeExternalUrl('file:///etc/passwd')).toBe(false)
+        expect(isSafeExternalUrl('https://user:password@example.test/path')).toBe(false)
         expect(isSafeExternalUrl('https://example.test/path')).toBe(true)
         expect(isSafeExternalUrl('http://example.test/path')).toBe(true)
     })

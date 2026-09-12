@@ -150,7 +150,7 @@ export function openLink(url: string) {
             backend.call('', 'sys:openInBrowser', false, backend.unProxyUrl(url))
         }
     } else {
-        window.open(url)
+        window.open(url, '_blank', 'noopener,noreferrer')
     }
 }
 
