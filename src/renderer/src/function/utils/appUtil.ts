@@ -250,8 +250,8 @@ export function jumpToChat(userId: string, msgId: string) {
 export function downloadFile(
     url: string,
     name: string,
-    onprocess: (event: ProgressEvent & { [key: string]: any }) => undefined,
-    oncancel: (event: ProgressEvent & { [key: string]: any }) => undefined,
+    onprocess: (event: ProgressEvent & { payload?: ProgressEvent }) => undefined,
+    oncancel: (event: ProgressEvent & { payload?: ProgressEvent }) => undefined,
 ): () => void {
     if (document.location.protocol == 'https:') {
         // 判断下载文件 URL 的协议
@@ -276,11 +276,13 @@ export function downloadFile(
         return () => {} // Web 平台不需要清理
     } else {
         // 创建命名回调函数以便后续移除
-        const processCallback = (event: any, data: any) => {
-            onprocess(data || event.payload)
+        const processCallback = (event: ProgressEvent & { payload?: ProgressEvent }, data?: ProgressEvent) => {
+            onprocess(data ?? event.payload ?? event)
+            return undefined
         }
-        const cancelCallback = (event: any, data: any) => {
-            oncancel(data || event.payload)
+        const cancelCallback = (event: ProgressEvent & { payload?: ProgressEvent }, data?: ProgressEvent) => {
+            oncancel(data ?? event.payload ?? event)
+            return undefined
         }
         backend.addListener(undefined, 'sys:downloadBack', processCallback)
         backend.addListener(undefined, 'sys:downloadCancel', cancelCallback)
