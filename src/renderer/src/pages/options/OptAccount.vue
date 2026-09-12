@@ -98,14 +98,14 @@
                             key !== 'app_version' &&
                             key !== 'version'">
                         <span>{{ key + ': ' }}</span>
-                        <span v-if="typeof authStore.botInfo[key] !== 'object'">
+                        <span v-if="!isBotRecord(authStore.botInfo[key])">
                             {{ paseBotInfo(key, authStore.botInfo[key]) }}
                         </span>
-                        <span v-for="item in Object.keys(authStore.botInfo[key])"
-                            v-else v-show="typeof authStore.botInfo[key][item] !== 'object'"
+                        <span v-for="item in Object.keys(asBotRecord(authStore.botInfo[key]) ?? {})"
+                            v-else v-show="!isBotRecord(asBotRecord(authStore.botInfo[key])?.[item])"
                             :key="'botinfo-' + key + item">
                             {{
-                                item + ': ' + paseBotInfo(item, authStore.botInfo[key][item])
+                                item + ': ' + paseBotInfo(item, asBotRecord(authStore.botInfo[key])?.[item])
                             }}
                         </span>
                     </span>
@@ -138,16 +138,22 @@ const napcat = import.meta.env.VITE_NAPCAT
  * @param name 键名
  * @param value 键值
  */
-function paseBotInfo(name: string, value: number | string) {
+function asBotRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
+}
+
+function isBotRecord(value: unknown): value is Record<string, unknown> {
+    return asBotRecord(value) !== undefined
+}
+
+function paseBotInfo(name: string, value: unknown) {
     if (
         typeof value == 'number' &&
         name.indexOf('time') > 0 &&
         value > 1000000000
     ) {
         // 尝试转换时间戳
-        if (value / 10000000000 < 1) {
-            value = value * 1000
-        }
+        const timestamp = value / 10000000000 < 1 ? value * 1000 : value
         return Intl.DateTimeFormat(getTrueLang(), {
             year: 'numeric',
             month: 'short',
@@ -155,9 +161,9 @@ function paseBotInfo(name: string, value: number | string) {
             hour: 'numeric',
             minute: 'numeric',
             second: 'numeric',
-        }).format(new Date(value))
+        }).format(new Date(timestamp))
     }
-    return value
+    return typeof value === 'string' || typeof value === 'number' ? value : String(value ?? '')
 }
 
 /**

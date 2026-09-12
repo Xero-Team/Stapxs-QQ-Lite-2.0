@@ -60,7 +60,7 @@ import { addDownloadTask, completeUploadTask } from '@renderer/components/FileMa
 import { refreshFavicon } from './favicon'
 import { Img } from './model/img'
 import { ensurePinyinLoaded, getPinyin, isPinyinReady } from './utils/pinyin'
-import { useAuthStore } from '@renderer/state/auth'
+import { createLoginInfo, useAuthStore, type LoginInfo } from '@renderer/state/auth'
 import { useContactStore, type SystemNotice } from '@renderer/state/contact'
 import { useChatStore } from '@renderer/state/chat'
 import { useConnectionStore } from '@renderer/state/connection'
@@ -700,7 +700,7 @@ const msgFunctions = {
             resetRimtime(authStore.loginInfo.uin != data.uin && !login.status)
 
             // 完成登陆初始化
-            authStore.loginInfo = data
+            authStore.loginInfo = { ...createLoginInfo(), ...data } as LoginInfo
             login.status = true
 
             // 保存用户信息到连接历史
@@ -2451,7 +2451,7 @@ export function resetRimtime(resetAll = false) {
     if (resetAll) {
         // Reset auth store
         const authStore = useAuthStore()
-        authStore.loginInfo = reactive({})
+        authStore.loginInfo = reactive(createLoginInfo())
         authStore.botInfo = reactive({})
         // Reset contact store
         const contactStore = useContactStore()

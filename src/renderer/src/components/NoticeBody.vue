@@ -82,7 +82,7 @@
     const info = ref(props.data) as { [key: string]: any }
 
     function isMe(id: number) {
-        return authStore.loginInfo.uin === id
+        return String(authStore.loginInfo.uin) === String(id)
     }
 
     function getName(id: number) {
