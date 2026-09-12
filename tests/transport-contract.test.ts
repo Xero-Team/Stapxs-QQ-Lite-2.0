@@ -21,7 +21,7 @@ describe('transport contracts', () => {
     it('supports the shared lifecycle hooks for stateless HTTP transport', async () => {
         const transport = new HttpTransport('http://bot/api')
         const closed: Array<{ code: number; reason: string }> = []
-        transport.onClose?.((event) => closed.push(event))
+        transport.onClose((event) => closed.push(event))
         await transport.connect()
         await transport.close()
         expect(transport.state).toBe('closed')

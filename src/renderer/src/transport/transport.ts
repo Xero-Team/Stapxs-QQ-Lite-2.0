@@ -11,8 +11,8 @@ export interface Transport {
     send(payload: unknown, options?: TransportRequest): Promise<void>
     close(): Promise<void>
     onMessage(handler: (payload: unknown) => void): () => void
-    onClose?(handler: (event: { code: number; reason: string }) => void): () => void
-    onError?(handler: () => void): () => void
+    onClose(handler: (event: { code: number; reason: string }) => void): () => void
+    onError(handler: () => void): () => void
 }
 
 export class TransportError extends Error {
