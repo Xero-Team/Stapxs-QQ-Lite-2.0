@@ -7,7 +7,17 @@ import globals from 'globals'
 
 export default [
     {
-        ignores: ['node_modules/**', 'dist/**', 'out/**', 'src/renderer/src/assets/img/qq-face/**'],
+        ignores: [
+            'node_modules/**',
+            '.vite/**',
+            'dist/**',
+            'out/**',
+            'coverage/**',
+            'ssqq.*/dist/**',
+            'src/renderer/public/bcui/js/**',
+            'src/renderer/public/sw.js',
+            'src/renderer/src/assets/img/qq-face/**',
+        ],
     },
     { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
     eslint.configs.recommended,
@@ -37,6 +47,17 @@ export default [
         rules: {
             'no-unused-vars': 'off',
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+        },
+    },
+    {
+        files: [
+            'src/renderer/src/components/History.vue',
+            'src/renderer/src/components/tooltip/Tooltip.vue',
+            'src/renderer/src/components/tooltip/Tooltips.vue',
+            'src/renderer/src/components/msg-component/jsonComp/**/*.vue',
+        ],
+        rules: {
+            'vue/multi-word-component-names': 'off',
         },
     },
     {

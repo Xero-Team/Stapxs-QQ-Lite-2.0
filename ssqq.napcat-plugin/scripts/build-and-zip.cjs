@@ -44,7 +44,7 @@ try {
   // 3. zip using system zip
   const out = path.join(root, 'napcat-plugin-ssqq.zip');
   // Remove existing zip
-  try { if (fs.existsSync(out)) fs.unlinkSync(out); } catch (e) {}
+  try { if (fs.existsSync(out)) fs.unlinkSync(out); } catch (e) { /* ignore cleanup failures */ }
 
   run('zip', ['-r', out].concat(files));
 
