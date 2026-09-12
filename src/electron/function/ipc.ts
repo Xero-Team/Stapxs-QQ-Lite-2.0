@@ -20,6 +20,7 @@ import { Connector } from './connector.ts'
 import { logLevel } from '../index.ts'
 import ScanNetwork from './scannetwork.ts'
 import { execSync } from 'child_process'
+import { parseExternalUrl } from './urlPolicy.ts'
 
 let connector = undefined as Connector | undefined
 const store = new Store()
@@ -60,47 +61,48 @@ export function regIpcListener() {
     })
     // 获取最终 URL
     ipcMain.handle('sys:getFinalRedirectUrl', async (_, str: string) => {
+        const url = parseExternalUrl(str)
+        if (!url) return null
         try {
-            const url = new URL(str);
-            if (!['http:', 'https:'].includes(url.protocol)) {
-                return str
-            }
-            if (str.length > 2000) {
-                return str
-            }
             const MAX_REDIRECTS = 10;
             const response = await axios.get(url.toString(), {
                 maxRedirects: MAX_REDIRECTS,
                 validateStatus: (status) => status < 400
             })
-            return response.request.res.responseUrl
-        } catch (error) {
-            return str
+            const finalUrl = response.request?.res?.responseUrl
+            return parseExternalUrl(finalUrl)?.toString() ?? url.toString()
+        } catch {
+            return url.toString()
         }
     })
     // 获取 html 内容
     ipcMain.handle('sys:getHtml', async (_, link: string) => {
+        const url = parseExternalUrl(link)
+        if (!url) return null
         try {
-            const res = await axios.get(link, {
+            const res = await axios.get(url.toString(), {
                 headers: { Accept: 'text/html' }
             })
             const contentType = res.headers['content-type']
             if(typeof contentType === 'string' && contentType.includes('text/html')) {
                 return res.data
             }
-        } catch (error) {
-            logger.error(error as Error, '获取 html 内容失败')
+        } catch {
+            logger.error('获取 html 内容失败')
         }
         return null
     })
     // 获取 api 数据
     ipcMain.handle('sys:getApi', async (_, link: string) => {
+        const url = parseExternalUrl(link)
+        if (!url) return null
         try {
-            const response = await axios.get(link, { timeout: 10000 })
+            const response = await axios.get(url.toString(), { timeout: 10000 })
             return response.data
-        } catch (error) {
-            logger.error(error as Error, '获取 api 数据失败')
+        } catch {
+            logger.error('获取 api 数据失败')
         }
+        return null
     })
     // 关闭窗口
     ipcMain.on('win:close', () => {
