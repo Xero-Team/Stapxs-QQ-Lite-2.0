@@ -395,7 +395,7 @@ export function parseCQ(data: unknown): JsonRecord {
 export function sendMsgRaw(
     id: string,
     type: string,
-    msg: string | any[] | undefined,
+    msg: string | JsonRecord[] | undefined,
     preShow = false,
     echo = 'sendMsgBack',
 ) {
@@ -418,7 +418,15 @@ export function sendMsgRaw(
                 item.url = resolveMediaUrl(item.file)
             }
         })
-        const showMsg = {
+        const showMsg: JsonRecord & {
+            message_id: string
+            message_type: string
+            time: number
+            message: JsonRecord[]
+            raw_message?: string
+            group_id?: number
+            user_id?: number
+        } = {
             revoke: true,
             fake_msg: true,
             message_id: msgUUID,
@@ -431,7 +439,7 @@ export function sendMsgRaw(
                 nickname: authStore.loginInfo.nickname,
             },
             message: preShowMsg,
-        } as { [key: string]: any }
+        }
         showMsg.raw_message = getMsgRawTxt(showMsg)
 
         if (showMsg.message_type == 'group') {
@@ -461,16 +469,17 @@ export function sendMsgRaw(
     // 检查消息体是否需要处理
     if (uiStore.msgType == BotMsgType.Array) {
         if (msg && typeof msg != 'string') {
-            const newMsg = [] as any
+            const newMsg: JsonRecord[] = []
             msg.forEach((item) => {
-                const newResult = {} as { [key: string]: any }
+                const newResult: JsonRecord = {}
                 newResult.type = item.type
-                newResult.data = item
-                delete newResult.data.type
+                const data = { ...item }
+                newResult.data = data
+                delete data.type
                 // 特殊处理，如果 newResult.data 里有 _type 字段，给它改成 type
-                if (newResult.data._type != undefined) {
-                    newResult.data.type = newResult.data._type
-                    delete newResult.data._type
+                if (data._type != undefined) {
+                    data.type = data._type
+                    delete data._type
                 }
                 newMsg.push(newResult)
             })
