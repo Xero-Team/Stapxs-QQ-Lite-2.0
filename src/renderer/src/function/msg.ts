@@ -1297,7 +1297,7 @@ const msgFunctions = {
                 }, 5000)
             } else {
                 // 列表内最近的一条 fake_msg（倒序查找）
-                let fakeMsg = null as any
+                let fakeMsg: MsgItemElem | null = null
                 for (let i = chatStore.messageList.length - 1; i > 0; i--) {
                     const msg = chatStore.messageList[i]
                     if (msg.fake_msg != undefined && info.sender == authStore.loginInfo.uin) {
@@ -1370,7 +1370,7 @@ const msgFunctions = {
     /**
      * 获取会话历史
      */
-    getRecentContact: (_: string, data: any) => {
+    getRecentContact: (_: string, data: MessagePayload) => {
         const authStore = useAuthStore()
         const contactStore = useContactStore()
         const settingsStore = useSettingsStore()
@@ -1841,12 +1841,12 @@ async function saveMsg(msg: any, append = undefined as undefined | string) {
     }
 }
 
-async function normalizeMessagesFromPayload(payload: any): Promise<any[] | undefined> {
+async function normalizeMessagesFromPayload(payload: MessagePayload): Promise<MessagePayload[] | undefined> {
     const rawList = getMsgData('message_list', payload, msgPath.message_list)
     return getMessageList(rawList)
 }
 
-export async function normalizeMessagesForPreview(payload: any): Promise<any[]> {
+export async function normalizeMessagesForPreview(payload: MessagePayload): Promise<MessagePayload[]> {
     const authStore = useAuthStore()
     const map = authStore.jsonMap
 
@@ -1889,7 +1889,7 @@ export async function normalizeMessagesForPreview(payload: any): Promise<any[]> 
         list.reverse()
     }
 
-    list.forEach((item: any) => {
+    list.forEach((item: MessagePayload) => {
         if (!item.post_type) {
             item.post_type = 'message'
         }
@@ -1898,7 +1898,7 @@ export async function normalizeMessagesForPreview(payload: any): Promise<any[]> 
     return Promise.all(list.map(msgPreprocess))
 }
 
-function normalizeNewIncomingMessage(data: any): any[] {
+function normalizeNewIncomingMessage(data: MessagePayload): MessagePayload[] {
     let list = getMsgData(
         'message_list',
         buildMsgList([data]),
