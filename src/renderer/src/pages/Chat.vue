@@ -633,7 +633,13 @@ import { addUploadTask, failUploadTask } from '@renderer/components/FileManager.
 defineOptions({ name: 'ViewChat' })
 
 const $t = i18n.global.t
-const { viewer: viewerRef } = inject<{ viewer: any }>('viewer', { viewer: null })
+interface ChatViewer {
+    value: {
+        edit: (image: string) => Promise<string>
+        open: (image: Img) => void
+    } | null
+}
+const { viewer: viewerRef } = inject<{ viewer: ChatViewer | null }>('viewer', { viewer: null })
 
 const { chat, list } = defineProps<{
     chat: any
