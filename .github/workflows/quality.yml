@@ -26,8 +26,12 @@ jobs:
               run: corepack enable
             - name: Install dependencies
               run: yarn install --immutable
+            - name: Check patch whitespace
+              run: git diff --check
             - name: TypeScript strict check
               run: yarn typecheck
+            - name: Electron TypeScript check
+              run: npx tsc --noEmit -p tsconfig.node.json
             - name: OneBot contract tests
               run: yarn test:contract
             - name: Lint protocol and platform primitives
@@ -36,6 +40,10 @@ jobs:
               run: yarn npm audit --all --recursive
             - name: Web build
               run: yarn build
+            - name: Electron renderer build
+              run: yarn electron-vite build
+              env:
+                  DESKTOP: '1'
             - name: Install Chromium for Playwright smoke
               run: npx --yes playwright install --with-deps chromium
             - name: Start Web preview
