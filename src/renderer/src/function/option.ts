@@ -33,7 +33,7 @@ import { backend } from '@renderer/runtime/backend'
 import { refreshFavicon } from './favicon'
 import { getLocalValue, setLocalValue } from '@renderer/storage'
 
-type OptionValue = string | number | boolean | null | Record<string, unknown> | unknown[]
+export type OptionValue = string | number | boolean | null | Record<string, unknown> | unknown[]
 type OptionRecord = Record<string, OptionValue>
 
 let cacheConfigs: OptionRecord

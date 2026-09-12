@@ -100,6 +100,7 @@
     import {
         extraOptionCards,
         runAS,
+        type OptionValue,
         type ExtraOptionItem,
     } from '@renderer/function/option'
 
@@ -110,16 +111,22 @@
 
     const cards = extraOptionCards
 
-    function getItemValue(item: ExtraOptionItem): any {
+    function isOptionValue(value: unknown): value is OptionValue {
+        return value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+            || Array.isArray(value) || (typeof value === 'object' && value !== null)
+    }
+
+    function getItemValue(item: ExtraOptionItem): OptionValue | undefined {
         const key = item.optionKey
         if (key && settingsStore.sysConfig &&
             Object.prototype.hasOwnProperty.call(settingsStore.sysConfig, key)) {
-            return (settingsStore.sysConfig as any)[key]
+            const value = settingsStore.sysConfig[key]
+            if (isOptionValue(value)) return value
         }
         return item.defaultValue
     }
 
-    function handleChange(item: ExtraOptionItem, value: any) {
+    function handleChange(item: ExtraOptionItem, value: OptionValue) {
         if (item.optionKey) {
             runAS(item.optionKey, value)
         }
@@ -152,7 +159,7 @@
     function onClickButton(item: ExtraOptionItem) {
         if (typeof item.callback === 'function') {
             try {
-                item.callback(getItemValue(item))
+                item.callback(getItemValue(item) ?? null)
             } catch (e) {
                 // eslint-disable-next-line no-console
                 console.error('extra option button callback error:', e)
