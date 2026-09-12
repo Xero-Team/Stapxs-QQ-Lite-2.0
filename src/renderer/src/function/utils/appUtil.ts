@@ -3,7 +3,6 @@ import FileDownloader from 'js-file-downloader'
 import option from '@renderer/function/option'
 import semver from 'semver'
 import appInfo from '../../../../../package.json'
-import Umami from '@stapxs/umami-logger-typescript'
 
 import AboutPan from '@renderer/components/AboutPan.vue'
 import UpdatePan from '@renderer/components/UpdatePan.vue'
@@ -1231,7 +1230,7 @@ export interface LocalStatEventRecord {
     time: number
 }
 
-export const LOCAL_STAT_EVENT_STORAGE_KEY = 'local_umami_stat_events'
+export const LOCAL_STAT_EVENT_STORAGE_KEY = 'local_usage_events'
 const LOCAL_STAT_EVENT_MAX_COUNT = 500
 
 function getBrowserLocalStatEvents(): LocalStatEventRecord[] {
@@ -1270,7 +1269,7 @@ export function sendStatEvent(event: string, data: { [key: string]: any }, saveL
     }
 
     if (!option.get('close_ga') && !import.meta.env.DEV) {
-        Umami.trackEvent(event, data)
+        // Statistics are intentionally local-only; no external telemetry is sent.
     }
 }
 
@@ -1280,7 +1279,7 @@ export function sendStatEvent(event: string, data: { [key: string]: any }, saveL
  */
 export function sendIdentifyData(data: { [key: string]: any }) {
     if (!option.get('close_ga') && !import.meta.env.DEV) {
-        Umami.trackIdentify(data)
+        // Identification data is discarded to preserve privacy.
     }
 }
 

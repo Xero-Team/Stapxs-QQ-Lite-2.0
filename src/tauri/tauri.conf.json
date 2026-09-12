@@ -1,8 +1,8 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "Stapxs QQ Lite",
+    "productName": "Xero QQ Lite",
     "version": "../../package.json",
-    "identifier": "cn.stapxs.qqweb",
+    "identifier": "team.xero.qqlite",
     "build": {
         "beforeDevCommand": "yarn dev",
         "devUrl": "http://localhost:8080",
@@ -22,14 +22,14 @@
     "plugins": {
         "deep-link": {
             "desktop": {
-                "schemes": ["stapxs-qq-lite"]
+        "schemes": ["xero-qq-lite"]
             }
         }
     },
     "bundle": {
         "active": true,
         "copyright": "Copyright © 2022-2026 Stapx Steve [林槐]",
-        "homepage": "https://github.com/Stapxs/Stapxs-QQ-Lite-2.0",
+        "homepage": "https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0",
         "longDescription": "一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。",
         "shortDescription": "一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。",
         "publisher": "stapxs",

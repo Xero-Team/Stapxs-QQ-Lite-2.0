@@ -16,7 +16,6 @@ import qed from '@renderer/assets/qed.txt?raw'
 import app from '@renderer/main'
 import Option from './option'
 
-import Umami from '@stapxs/umami-logger-typescript'
 
 import {
     buildMsgList,
@@ -2237,7 +2236,6 @@ function newMsg(_: string, data: any) {
                     ],
                 }
                 uiStore.popBoxList.push(popInfo)
-                Umami.trackEvent('show_qed', { times: qed_try_times })
             }
             qed_try_times++
         }

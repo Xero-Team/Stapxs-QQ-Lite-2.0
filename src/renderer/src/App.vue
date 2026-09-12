@@ -308,7 +308,6 @@
 <script setup lang="ts">
 import Spacing from 'spacingjs/src/spacing'
 import Option from '@renderer/function/option'
-import Umami from '@stapxs/umami-logger-typescript'
 import * as App from './function/utils/appUtil'
 import anime from 'animejs'
 import packageInfo from '../../../package.json'
@@ -601,13 +600,6 @@ function deleteHistoryConnection(index: number, event?: Event) {
  * @param show 是否显示聊天面板
  */
 function changeTab(_: string, view: string, show: boolean) {
-    // UM：发送页面路由分析
-    if (
-        !Option.get('close_ga') &&
-        !dev
-    ) {
-        Umami.trackPageView('/' + view)
-    }
     tags.showChat = show
     tags.page = view
     // 附加操作
@@ -1056,28 +1048,7 @@ onMounted(() => {
                 history.pushState('ssqqweb', '', location.href)
             }
         }
-        // UM：加载 Umami 统计功能
-        if (!Option.get('close_ga') && !dev) {
-            const config = {
-                baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
-                websiteId: import.meta.env.VITE_APP_MU_ID
-            } as any
-            // 给页面添加一个来源域名方便在非 web 端获取统计信息
-            if(!backend.isWeb()) {
-                config.hostName = backend.type + '.stapxs.cn'
-            } else if(napcat) {
-                config.hostName = 'napcat.stapxs.cn'
-            }
-            Umami.initialize(config)
-            // 上报一些应用基础信息
-            App.sendIdentifyData({
-                'app_version': import.meta.env.VITE_APP_CLIENT_TAG + ',' + packageInfo.version,
-                'os_version': backend.release,
-                'os_arch': backend.arch,
-            })
-        } else if (dev) {
-            logger.system('开发者，由于 Stapxs QQ Lite 运行在调试模式下，分析组件并未初始化 …… 系统将无法捕获开发者阁下的访问状态，请悉知。')
-        }
+    }
         App.checkUpdate() // 检查更新
         App.checkOpenTimes() // 检查打开次数
         App.checkNotice() // 检查公告

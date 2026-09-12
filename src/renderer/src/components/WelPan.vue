@@ -255,7 +255,7 @@
             <span>{{ $t('统计选项') }}</span>
             <div />
             <div>
-                <span>{{ $t('Stapxs QQ Lite 会将部分使用数据上传到自建的 umami 服务器中用于了解用户使用情况以及制作一些有趣的统计信息。') }}</span>
+                        <span>{{ $t('Xero QQ Lite 不会收集或上传使用统计；所有数据仅保留在本地设备。') }}</span>
                 <span style="margin-bottom: 20px;">{{ $t('如果你并不希望上传这些数据，可以选择关闭它。') }}</span>
                 <div class="opt-item wel-opt-item"
                     :style="{ 'background': settingsStore.sysConfig.close_ga !== true ? 'var(--color-card-1)' : 'none' }">

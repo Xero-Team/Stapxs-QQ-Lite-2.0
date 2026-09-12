@@ -2,8 +2,8 @@ import type { CapacitorConfig } from '@capacitor/cli'
 import { resolve } from 'path'
 
 const config: CapacitorConfig = {
-    appId: 'cn.stapxs.webqq',
-    appName: 'Stapxs QQ Lite',
+  appId: 'team.xero.qqlite',
+  appName: 'Xero QQ Lite',
     webDir: 'dist',
     loggingBehavior: 'none',
     // server: {

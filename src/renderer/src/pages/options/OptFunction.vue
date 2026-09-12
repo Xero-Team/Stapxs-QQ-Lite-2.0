@@ -367,70 +367,16 @@
                 </div>
             </div>
         </div>
-        <div class="ss-card">
-            <header>{{ $t('分析信息') }}</header>
-            <div
-                class="opt-item"
-                :style="{ 'background': settingsStore.sysConfig.close_ga !== true ? 'var(--color-card-1)' : 'none' }">
-                <div :class="checkDefault('close_ga')" />
-                <font-awesome-icon :icon="['fas', 'cloud']" />
-                <div>
-                    <label for="opt-function-close-ga">{{ $t('关闭分析') }}</label>
-                    <span>{{ $t('真的不让看吗（小声') }}</span>
-                </div>
-                <label class="ss-switch">
-                    <input id="opt-function-close-ga" v-model="settingsStore.sysConfig.close_ga" type="checkbox"
-                        name="close_ga" @change="save">
-                    <div style="background: var(--color-card-2)">
-                        <div />
-                    </div>
-                </label>
-            </div>
-            <div
-                v-if="settingsStore.sysConfig.close_ga !== true"
-                class="tip">
-                {{
-                    $t('我们使用 Umami 对应用的使用情况进行分析，它将不会上传精确到用户的信息；你也可以在这儿控制分析功能的开关和额外分析项。')
-                }}
-            </div>
-            <div v-if="settingsStore.sysConfig.close_ga !== true" class="opt-item">
-                <font-awesome-icon :icon="['fas', 'file-invoice']" />
-                <div>
-                    <span>{{ $t('分析统计信息') }}</span>
-                    <span>{{ $t('都有些什么数据呢') }}</span>
-                </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click=" showUmamiInfo">
-                    {{ $t('查看') }}
-                </button>
-            </div>
-            <div v-if="settingsStore.sysConfig.close_ga !== true"
-                class="opt-item">
-                <div :class="checkDefault('open_ga_bot')" />
-                <font-awesome-icon :icon="['fas', 'dice']" />
-                <div>
-                    <label for="opt-function-open-ga-bot">{{ $t('后端类型分析') }}</label>
-                    <span>{{ $t('在连接后上传所使用的 bot 的类型分析') }}</span>
-                </div>
-                <label class="ss-switch">
-                    <input id="opt-function-open-ga-bot" v-model="settingsStore.sysConfig.open_ga_bot" type="checkbox"
-                        name="open_ga_bot" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
-            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-    import { ref, watch, markRaw } from 'vue'
+    import { ref, watch } from 'vue'
     import { PopInfo, PopType } from '@renderer/function/base'
     import { runASWEvent as save, checkDefault, runAS } from '@renderer/function/option'
     import { i18n } from '@renderer/main'
 
-    import UmamiInfoPan from '@renderer/components/UmamiInfoPan.vue'
     import { backend } from '@renderer/runtime/backend'
     import { dbClearImages, dbGetStats } from '@renderer/function/utils/localHistoryUtil'
     import { useSettingsStore } from '@renderer/state/settings'
@@ -474,15 +420,6 @@
         return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
     }
 
-    function showUmamiInfo() {
-        const popInfo = {
-            title: '',
-            template: markRaw(UmamiInfoPan),
-            full: true,
-            allowQuickClose: false
-        }
-        uiStore.popBoxList.push(popInfo)
-    }
 
     function msgND() {
         ndt.value++
