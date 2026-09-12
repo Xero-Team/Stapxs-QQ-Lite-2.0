@@ -1,8 +1,8 @@
-# npx-web-quick-starter
+# Xero QQ Lite Web Quick Starter
 
 一个兼容 OneBot 的非官方网页版 QQ 客户端，Web 端快速启动包。
 
 ```bash
 npx ssqq-web hostname=0.0.0.0 port=8081
 ```
-注意：此工具将在首次启动后现场丛主仓库下载 dist 压缩包并解压启动，web 文件将会解压到 npx 执行所在的目录，下次启动也请先进入此目录；工具每次打开都将进行检查更新，如果启动后卡住不动，请检查与 Github 的网络连通性。
+注意：工具默认离线启动，不会请求远程更新服务。需要自动更新时，请显式设置 `XERO_QQ_LITE_UPDATE_ENDPOINT` 指向兼容的 JSON release endpoint（响应需包含 `tag_name` 和 `assets`），并确保下载地址可信。启用后，Web 文件会解压到 npx 执行所在的目录。
