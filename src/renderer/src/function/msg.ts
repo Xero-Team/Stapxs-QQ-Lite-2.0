@@ -67,6 +67,7 @@ import { useStickerStore } from '@renderer/state/sticker'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useQzoneStore } from '@renderer/state/qzone'
+import { normalizeLoginInfo, normalizeVersionInfo } from '@renderer/protocol/login'
 import {
     getSessionId,
     getMissingGroupPreviewSessions,
@@ -90,14 +91,6 @@ if (msgPathAt != undefined) {
 let listLoadTimes = 0
 const logger = new Logger()
 type MessagePayload = Record<string, unknown>
-interface VersionInfoPayload extends MessagePayload {
-    app_name?: string
-    app_version?: string
-}
-interface LoginInfoPayload extends MessagePayload {
-    uin: string
-    nickname: string
-}
 
 function asMessagePayload(value: unknown): MessagePayload | undefined {
     return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
@@ -661,7 +654,9 @@ const msgFunctions = {
      * 保存 Bot 信息
      */
     getVersionInfo: (_: string, msg: MessagePayload) => {
-        const data = getMsgData('version_info', msg, msgPath.version_info)[0] as VersionInfoPayload | undefined
+        const data = normalizeVersionInfo(
+            getMsgData('version_info', msg, msgPath.version_info)[0],
+        )
 
         if (data) {
             // 如果 runtime 存在（即不是第一次连接），且 app_name 不同，重置 runtime
@@ -696,8 +691,8 @@ const msgFunctions = {
     getLoginInfo: (_: string, msg: MessagePayload) => {
         const msgBody = getMsgData('login_info', msg, msgPath.login_info)
         if (msgBody) {
-            const data = msgBody[0] as LoginInfoPayload
-            if (typeof data.uin !== 'string' || typeof data.nickname !== 'string') return
+            const data = normalizeLoginInfo(msgBody[0])
+            if (!data) return
             const authStore = useAuthStore()
 
             // 如果 runtime 存在（即不是第一次连接），且 uin 不同，重置 runtime
