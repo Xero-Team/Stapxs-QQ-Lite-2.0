@@ -85,13 +85,12 @@ jobs:
                 force_orphan: true
 
     # ========================= 构建 Electron 版本 =========================
-    # build-electron:
-    #     name: 构建 Electron
-    #     needs: init
-
-    #     uses: ./.github/workflows/build-electron.yml
-    #     with:
-    #         version: ${{ needs.init.outputs.version }}
+    build-electron:
+        name: 构建 Electron
+        needs: init
+        uses: ./.github/workflows/build-electron.yml
+        with:
+            version: ${{ needs.init.outputs.version }}
 
     # ========================= 构建 Tauri 版本 =========================
 
@@ -102,6 +101,14 @@ jobs:
         with:
             version: ${{ needs.init.outputs.version }}
 
+    # ==================== 构建 Android 移动端 ====================
+    build-android:
+        name: 构建 Android
+        needs: init
+        uses: ./.github/workflows/build-mobile.yml
+        with:
+            version: ${{ needs.init.outputs.version }}
+
     # ========================= 发布构建结果 =========================
     release:
         name: 发布构建结果
@@ -109,8 +116,9 @@ jobs:
         needs:
             - init
             - build-root-web
-            # - build-electron
+            - build-electron
             - build-tauri
+            - build-android
         steps:
             # 下载构建结果
             - name: Download Artifacts

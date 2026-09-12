@@ -13,7 +13,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [windows-2022, ubuntu-latest]
+                os: [windows-2022, ubuntu-latest, macos-latest]
 
         steps:
             - name: 安装构建依赖
@@ -36,15 +36,9 @@ jobs:
               run: yarn install --immutable --mode=skip-build
 
             - name: 构建 Electron 应用
-              if: matrix.os == 'windows-2022'
               run: yarn build:electron
               env:
-                  GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-            - name: 构建 Electron 应用
-              if: matrix.os == 'ubuntu-latest'
-              run: yarn build:electron
-              env:
-                  GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+                  CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
             - name: 上传构建产物
               uses: actions/upload-artifact@v4

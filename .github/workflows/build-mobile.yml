@@ -1,0 +1,49 @@
+name: 构建 Android 移动端
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: "应用版本"
+                required: true
+                type: string
+
+permissions:
+    contents: read
+
+jobs:
+    android:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 拉取代码
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+                  persist-credentials: false
+            - name: 设置 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: yarn
+            - name: 启用 Corepack
+              run: corepack enable
+            - name: 设置 Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: '21'
+                  cache: gradle
+            - name: 安装依赖
+              run: yarn install --immutable --mode=skip-build
+            - name: 构建 Android
+              run: yarn build:android
+            - name: 收集 Android 产物
+              run: |
+                  mkdir -p upload
+                  find src/mobile/android -type f \( -name '*.apk' -o -name '*.aab' \) -exec cp {} upload/ \;
+                  test -n "$(find upload -type f -print -quit)"
+            - name: 上传 Android 产物
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ inputs.version }}-android
+                  path: upload/
