@@ -9,6 +9,22 @@
 <template>
     <div class="opt-page">
         <div class="ss-card">
+            <header>{{ $t('隐私与网络') }}</header>
+            <div class="opt-item">
+                <div :class="checkDefault('enable_external_services')" />
+                <font-awesome-icon :icon="['fas', 'globe']" />
+                <div>
+                    <label for="opt-function-enable-external-services">{{ $t('启用外部服务') }}</label>
+                    <span>{{ $t('允许更新检查和远程公告；默认关闭，OneBot 连接不受影响') }}</span>
+                </div>
+                <label class="ss-switch">
+                    <input id="opt-function-enable-external-services" v-model="settingsStore.sysConfig.enable_external_services"
+                        type="checkbox" name="enable_external_services" @change="save">
+                    <div><div /></div>
+                </label>
+            </div>
+        </div>
+        <div class="ss-card">
             <header>{{ $t('会话选项') }}</header>
             <div class="opt-item">
                 <div :class="checkDefault('bubble_sort_user')" />

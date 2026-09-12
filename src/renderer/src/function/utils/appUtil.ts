@@ -777,6 +777,7 @@ function setQuickLogin(address: string, port: number) {
 * 检查更新
 */
 export function checkUpdate() {
+    if (option.get('enable_external_services') !== true) return
     const repoName = import.meta.env.VITE_APP_REPO_NAME
     // 获取最新的 release 信息
     const packageUrl =
@@ -1050,6 +1051,7 @@ export function checkOpenTimes() {
 * 显示全局公告弹窗
 */
 export function checkNotice() {
+    if (option.get('enable_external_services') !== true) return
     const uiStore = useUIStore()
     let url = 'https://lib.stapxs.cn/download/stapxs-qq-lite/notice-config.json'
     if (import.meta.env.DEV) {

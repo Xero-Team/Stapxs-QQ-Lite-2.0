@@ -111,8 +111,10 @@ export const optDefault: { [key: string]: any } = {
     send_face: false,
     use_breakline: true,
     send_key: 'none',
-    close_ga: false,
-    open_ga_bot: true,
+    // Privacy-first defaults: no third-party requests unless explicitly enabled.
+    close_ga: true,
+    open_ga_bot: false,
+    enable_external_services: false,
     record_recent_emoji: '100times' as 'none' | 'order' | '100times' | '500times',
     enable_local_history: false,
     mixed_load_messages: false,

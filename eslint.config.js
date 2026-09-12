@@ -33,6 +33,7 @@ export default [
             parser: vueParser,
             parserOptions: { parser: tsParser, ecmaVersion: 'latest', sourceType: 'module' },
         },
+        plugins: { '@typescript-eslint': tseslint },
         rules: {
             'no-unused-vars': 'off',
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
