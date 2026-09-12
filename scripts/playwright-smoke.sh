@@ -13,4 +13,9 @@ grep -q "连接到 OneBot\|Connect to OneBot" <<<"$snapshot"
 "${cli[@]}" eval "() => { const item = [...document.querySelectorAll('li')].find((el) => el.textContent?.includes('设置') || el.textContent?.includes('Options')); item?.click(); return Boolean(item); }" | grep -q "true"
 "${cli[@]}" eval "() => document.querySelector('input[name=enable_external_services]')?.checked === false" | grep -q "true"
 "${cli[@]}" eval "() => [...document.querySelectorAll('button')].some((button) => /导出|Export/.test(button.textContent ?? ''))" | grep -q "true"
+"${cli[@]}" network-state-set offline
+"${cli[@]}" goto "$base_url"
+offline_snapshot="$(${cli[@]} snapshot)"
+grep -q "连接到 OneBot\|Connect to OneBot" <<<"$offline_snapshot"
+"${cli[@]}" eval "() => performance.getEntriesByType('resource').every((entry) => !/^https?:/.test(entry.name) || entry.name.startsWith(location.origin))" | grep -q "true"
 "${cli[@]}" close
