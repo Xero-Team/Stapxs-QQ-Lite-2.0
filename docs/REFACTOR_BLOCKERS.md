@@ -28,3 +28,4 @@
 - Lagrange forward-message conversion now validates node and segment records before building the OneBot payload, removing an untyped forwarding boundary.
 - Message value-map contracts now require string JSONPath mappings; remaining `any` is limited to legacy message list and raw-message compatibility APIs.
 - Outgoing message segments and preview records now use JSON record types; only the legacy JSONPath result and parser list signatures retain `any` in `msgUtil.ts`.
+- `parseMsgList` now validates unknown input into JSON records and returns typed records; the remaining `msgUtil.ts` `any` is the polymorphic JSONPath result retained for legacy map compatibility.
