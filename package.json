@@ -5,6 +5,10 @@
   "description": "一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。",
   "homepage": "https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0",
   "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.14.0",
+    "yarn": ">=4.12.0"
+  },
   "main": "./out/main/index.js",
   "type": "module",
   "scripts": {
