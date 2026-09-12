@@ -23,6 +23,7 @@ import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
 import { backoffDelay, HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
+import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -251,13 +252,34 @@ export class Connector {
     }
 
     static onmessage(message: string) {
-        const data = JSON.parse(message)
+        let parsed: unknown
+        try {
+            parsed = JSON.parse(message) as unknown
+        } catch (error: unknown) {
+            logger.error(error instanceof Error ? error : new Error('Invalid JSON payload'), '收到无效 OneBot 数据')
+            return
+        }
+        const data = asJsonRecord(parsed)
+        if (!data) {
+            logger.error(null, '收到非对象 OneBot 数据')
+            return
+        }
+        try {
+            if ('status' in data || 'retcode' in data) {
+                parseOneBotApiResponse(data)
+            } else if ('post_type' in data) {
+                parseOneBotEvent(data)
+            }
+        } catch (error: unknown) {
+            logger.error(error instanceof Error ? error : new Error('Invalid OneBot payload'), '收到无效 OneBot 数据')
+            return
+        }
         logger.add(LogType.WS, 'GET：', data)
         if (data.echo === undefined){
             dispatch(data)
         }
-        if (data.echo) {
-            let echo: string = data.echo
+        if (typeof data.echo === 'string' && data.echo !== '') {
+            let echo = data.echo
             delete data.echo
             // 旧回调系统处理
             if (echo.startsWith('send_')) {

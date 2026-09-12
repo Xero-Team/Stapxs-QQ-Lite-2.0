@@ -41,3 +41,4 @@
 - Removing the obsolete Umami style override also exposed a stray CSS declaration in the full-vibrancy stylesheet; it is now removed and the production Vite build completes without CSS syntax warnings.
 - Tauri workflows now use the maintained `dtolnay/rust-toolchain@stable` action instead of the archived `actions-rs/toolchain`; local `cargo check` passes with existing warning-only legacy code diagnostics.
 - Connector request timeouts now remove their pending echo entry before rejecting, preventing timed-out API calls from accumulating in the response map.
+- Connector inbound messages now reject invalid JSON, non-object payloads, and malformed OneBot events/API responses before dispatch; valid payloads continue through the existing echo and event handlers.
