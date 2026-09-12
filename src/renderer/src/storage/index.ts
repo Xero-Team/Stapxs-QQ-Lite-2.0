@@ -2,6 +2,7 @@ export {
     clearLocalData,
     exportLocalData,
     exportLocalDataJson,
+    importLocalData,
     getLocalValue,
     localStoreDb,
     setLocalValue,
