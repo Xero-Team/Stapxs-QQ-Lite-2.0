@@ -5713,6 +5713,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dexie@npm:^4.4.6":
+  version: 4.4.6
+  resolution: "dexie@npm:4.4.6"
+  checksum: 10c0/fc8be52970dc33c2a904ee77bfc459084afe6bb44f80cdce2ff5da989f0992bf56a5413cf3c3599d6e58f1fc1136632dde52cbf2d441cb9d430a92f5e99b28fc
+  languageName: node
+  linkType: hard
+
 "dezalgo@npm:^1.0.4":
   version: 1.0.4
   resolution: "dezalgo@npm:1.0.4"
@@ -11160,6 +11167,7 @@ __metadata:
     capacitor-onebot-connctor: "workspace:*"
     cross-env: "npm:^10.1.0"
     detect-browser: "npm:^5.3.0"
+    dexie: "npm:^4.4.6"
     echarts: "npm:^6.0.0"
     electron: "npm:^31.0.2"
     electron-builder: "npm:^24.13.3"
