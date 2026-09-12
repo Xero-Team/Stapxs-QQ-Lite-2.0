@@ -90,6 +90,14 @@ if (msgPathAt != undefined) {
 let listLoadTimes = 0
 const logger = new Logger()
 type MessagePayload = Record<string, unknown>
+interface VersionInfoPayload extends MessagePayload {
+    app_name?: string
+    app_version?: string
+}
+interface LoginInfoPayload extends MessagePayload {
+    uin: string
+    nickname: string
+}
 
 function asMessagePayload(value: unknown): MessagePayload | undefined {
     return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
@@ -616,7 +624,7 @@ const noticeFunctions = {
             }
         }
     },
-} as { [key: string]: (name: string, msg: { [key: string]: any }) => void }
+} as Record<string, (name: string, msg: MessagePayload) => void>
 
 const msgFunctions = {
     /**
@@ -652,8 +660,8 @@ const msgFunctions = {
     /**
      * 保存 Bot 信息
      */
-    getVersionInfo: (_: string, msg: { [key: string]: any }) => {
-        const data = getMsgData('version_info', msg, msgPath.version_info)[0]
+    getVersionInfo: (_: string, msg: MessagePayload) => {
+        const data = getMsgData('version_info', msg, msgPath.version_info)[0] as VersionInfoPayload | undefined
 
         if (data) {
             // 如果 runtime 存在（即不是第一次连接），且 app_name 不同，重置 runtime
@@ -685,10 +693,11 @@ const msgFunctions = {
     /**
      * 保存账号信息
      */
-    getLoginInfo: (_: string, msg: { [key: string]: any }) => {
+    getLoginInfo: (_: string, msg: MessagePayload) => {
         const msgBody = getMsgData('login_info', msg, msgPath.login_info)
         if (msgBody) {
-            const data = msgBody[0]
+            const data = msgBody[0] as LoginInfoPayload
+            if (typeof data.uin !== 'string' || typeof data.nickname !== 'string') return
             const authStore = useAuthStore()
 
             // 如果 runtime 存在（即不是第一次连接），且 uin 不同，重置 runtime
