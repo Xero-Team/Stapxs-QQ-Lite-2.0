@@ -137,7 +137,7 @@
         openPanel()
 
         // 处理进度回调
-        const onprocess = (event: ProgressEvent & { [key: string]: any }) => {
+        const onprocess = (event: ProgressEvent & { payload?: ProgressEvent }) => {
             const index = downloadTasksState.value.findIndex(t => t.id === task.id)
             // 忽略已取消、已完成或不存在的任务
             if (index === -1 ||
@@ -182,7 +182,7 @@
         }
 
         // 处理取消回调
-        const oncancel = (_: ProgressEvent & { [key: string]: any }) => {
+        const oncancel = (_: ProgressEvent & { payload?: ProgressEvent }) => {
             const currentTask = downloadTasksState.value.find(t => t.id === task.id)
             // 忽略已完成或已取消的任务
             if (currentTask && currentTask.status !== 'completed' && currentTask.status !== 'cancelled') {

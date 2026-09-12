@@ -210,6 +210,13 @@ interface LocalEmoji {
     url: string
 }
 
+function isLocalEmoji(value: unknown): value is LocalEmoji {
+    if (typeof value !== 'object' || value === null) return false
+    const candidate = value as Partial<LocalEmoji>
+    return typeof candidate.name === 'string' && typeof candidate.path === 'string'
+        && typeof candidate.url === 'string'
+}
+
 const popInfo = new PopInfo()
 const stickerStore = useStickerStore()
 const settingsStore = useSettingsStore()
@@ -352,17 +359,12 @@ async function reloadLocalEmojis() {
             // 对于 Tauri，需要使用 convertFileSrc 转换文件路径
             if (backend.type === 'tauri') {
                 const { convertFileSrc } = await import('@tauri-apps/api/core')
-                localEmojis.value = images.map((img: any) => ({
-                    name: img.name,
-                    path: img.path,
+                localEmojis.value = images.filter(isLocalEmoji).map((img) => ({
+                    ...img,
                     url: convertFileSrc(img.path),
                 }))
             } else {
-                localEmojis.value = images.map((img: any) => ({
-                    name: img.name,
-                    path: img.path,
-                    url: img.url,
-                }))
+                localEmojis.value = images.filter(isLocalEmoji)
             }
         } else {
             localEmojis.value = []
