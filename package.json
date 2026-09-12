@@ -92,7 +92,7 @@
     "@stapxs/capacitor-sync-version": "^1.0.10",
     "@tauri-apps/cli": "~2.11.4",
     "@types/jsonpath": "^0.2.4",
-    "@types/node": "^20.14.8",
+    "@types/node": "22.20.2",
     "@types/semver": "^7.5.8",
     "@untiny/capacitor-safe-area": "^1.0.3",
     "@vitejs/plugin-vue": "6.0.8",
