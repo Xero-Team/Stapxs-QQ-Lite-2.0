@@ -28,6 +28,6 @@ export default defineConfig({
     renderer: viteConfig.configFactory('out/renderer')({
         command: 'build',
         mode: process.env.NODE_ENV ?? 'production',
-        ssrBuild: false,
+        isSsrBuild: false,
     }),
 })

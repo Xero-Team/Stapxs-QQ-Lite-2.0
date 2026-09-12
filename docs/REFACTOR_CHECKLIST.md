@@ -43,7 +43,7 @@
 ## 5. 数据与协议层
 
 - [x] 建立 OneBot schema 包：事件/API 请求响应使用 Zod；必要时评估 protobuf 仅用于明确的高吞吐内部通道，不改变 OneBot 公共 JSON 协议。
-- [ ] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。
+- [x] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。实现位于 `src/renderer/src/transport/transport.ts`，并由 9 项 transport 契约测试覆盖；真实 OneBot 服务联调仍由发布验证矩阵负责。
 - [x] 用 Dexie/idb 迁移聊天历史、缓存和设置；设计版本化 schema、迁移、导出/清除和容量策略。
 - [x] 消息解析、CQ 码、媒体 URL、转发消息全部使用纯函数和兼容性测试。
 
@@ -53,4 +53,4 @@
 - [ ] Playwright 覆盖连接、收发消息、图片/文件、撤回/回复、设置迁移、离线和隐私开关。已新增 `scripts/playwright-onebot-smoke.sh`：用隔离浏览器验证 Lagrange/NapCat 的数字与字符串账号登录、初始化请求、连接历史和默认隐私状态；收发消息、媒体、撤回/回复和设置迁移仍待覆盖。运行方式见 `docs/TESTING.md`。
 - [ ] 在 Linux、Windows、macOS 至少验证 Web、主桌面端和一个移动端构建；记录体积、启动时间和内存回归。
 - [ ] 完成 SBOM、许可证、依赖漏洞、CSP、签名和发布产物校验。
-- [ ] 发布迁移工具和回滚说明；所有清单项完成后再删除旧实现。
+- [x] 发布迁移工具和回滚说明；`scripts/migrate-local-data.mjs` 只写入新输出文件、保留源文件并拒绝未经 `--force` 的覆盖，回滚步骤见 `docs/DATA_MIGRATION.md`。所有清单项完成后再删除旧实现。
