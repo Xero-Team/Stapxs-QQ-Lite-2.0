@@ -102,7 +102,7 @@ async (page) => {
                 // Exercise the browser transport with one real UI send and one
                 // server-pushed OneBot message. Keep the login matrix fast by
                 // running this extended flow only once.
-                let messageFlow = { sent: false, received: false }
+                let messageFlow = { sent: false, received: false, replySent: false }
                 if (backend === 'Lagrange.OneBot' && accountId === 10001) {
                     await smokePage.locator('#bar-friends').click()
                     const friend = smokePage.locator('#user-20002')
@@ -137,12 +137,36 @@ async (page) => {
                         time: Math.floor(Date.now() / 1000),
                         self_id: 10001,
                         user_id: 30003,
-                        message_id: 'mock-incoming-1',
+                        message_id: 30003001,
                         message: [{ type: 'text', data: { text: 'hello from OneBot' } }],
                         raw_message: 'hello from OneBot',
                     }))
                     await smokePage.getByText('hello from OneBot', { exact: true }).waitFor()
                     messageFlow.received = true
+
+                    const incomingMessage = smokePage.getByText('hello from OneBot', { exact: true }).first()
+                    await incomingMessage.click({ button: 'right' })
+                    const replyAction = smokePage.locator('#msgMenu').getByText('回复', { exact: true })
+                    // The menu keeps actions hidden while the pointer leaves
+                    // the message; dispatch the same click through the
+                    // rendered action node once it has been mounted.
+                    await replyAction.waitFor({ state: 'attached' })
+                    await replyAction.evaluate((element) => element.click())
+                    await input.fill('reply smoke')
+                    await input.press('Enter')
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        if (requestPayloads.some((request) =>
+                            request.action === 'send_private_msg'
+                            && Array.isArray(request.params?.message)
+                            && request.params.message.some((segment) =>
+                                segment?.type === 'reply' && String(segment.data?.id ?? segment.id) === '30003001'))) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.replySent = requestPayloads.some((request) =>
+                        request.action === 'send_private_msg'
+                        && Array.isArray(request.params?.message)
+                        && request.params.message.some((segment) =>
+                            segment?.type === 'reply' && String(segment.data?.id ?? segment.id) === '30003001'))
 
                     // Exercise the actual file input and ensure the outgoing
                     // OneBot payload contains an image segment. A tiny PNG
@@ -222,7 +246,7 @@ async (page) => {
                 if (!checks.historyIsNormalized || !checks.externalServicesDisabled
                     || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0
                     || (backend === 'Lagrange.OneBot' && accountId === 10001
-                        && (!messageFlow.sent || !messageFlow.received
+                        && (!messageFlow.sent || !messageFlow.received || !messageFlow.replySent
                             || !messageFlow.imageSent || !messageFlow.fileSent))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
