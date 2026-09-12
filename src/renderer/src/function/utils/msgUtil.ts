@@ -163,7 +163,7 @@ export function buildMsgList(msgList: JsonRecord | JsonRecord[]): JsonRecord {
 export function parseMsgList(
     list: any,
     map: string,
-    valueMap: { [key: string]: any },
+    valueMap: Record<string, Record<string, string>>,
 ): any[] {
     const uiStore = useUIStore()
     const authStore = useAuthStore()
@@ -227,7 +227,7 @@ export function parseMsgList(
                     }
                     content.forEach((item: JsonRecord) => {
                         if (item.type == type) {
-                            item[key] = jp.query(item, value as string)[0]
+                            item[key] = jp.query(item, value)[0]
                         }
                         // 顺便把没用的 data 删了，这边要注意 item.data 必须是个对象
                         // 因为有些消息类型的 data 就叫 data
