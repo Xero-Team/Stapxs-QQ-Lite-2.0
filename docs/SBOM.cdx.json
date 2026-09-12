@@ -624,7 +624,7 @@
     {
       "type": "library",
       "name": "@vitejs/plugin-vue",
-      "version": "5.2.4",
+      "version": "6.0.8",
       "licenses": [
         {
           "license": {
@@ -632,7 +632,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@vitejs/plugin-vue@5.2.4",
+      "purl": "pkg:npm/@vitejs/plugin-vue@6.0.8",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -852,7 +852,7 @@
     {
       "type": "library",
       "name": "electron",
-      "version": "31.7.7",
+      "version": "44.3.0",
       "licenses": [
         {
           "license": {
@@ -860,7 +860,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/electron@31.7.7",
+      "purl": "pkg:npm/electron@44.3.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -871,7 +871,7 @@
     {
       "type": "library",
       "name": "electron-builder",
-      "version": "24.13.3",
+      "version": "26.15.3",
       "licenses": [
         {
           "license": {
@@ -879,7 +879,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/electron-builder@24.13.3",
+      "purl": "pkg:npm/electron-builder@26.15.3",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -909,7 +909,7 @@
     {
       "type": "library",
       "name": "electron-vite",
-      "version": "2.3.0",
+      "version": "5.0.0",
       "licenses": [
         {
           "license": {
@@ -917,7 +917,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/electron-vite@2.3.0",
+      "purl": "pkg:npm/electron-vite@5.0.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1232,7 +1232,7 @@
     {
       "type": "library",
       "name": "vite",
-      "version": "5.4.21",
+      "version": "7.3.6",
       "licenses": [
         {
           "license": {
@@ -1240,7 +1240,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vite@5.4.21",
+      "purl": "pkg:npm/vite@7.3.6",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1251,7 +1251,7 @@
     {
       "type": "library",
       "name": "vite-plugin-pwa",
-      "version": "0.21.2",
+      "version": "1.3.0",
       "licenses": [
         {
           "license": {
@@ -1259,7 +1259,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vite-plugin-pwa@0.21.2",
+      "purl": "pkg:npm/vite-plugin-pwa@1.3.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1327,7 +1327,7 @@
     {
       "type": "library",
       "name": "vue",
-      "version": "3.5.26",
+      "version": "3.5.42",
       "licenses": [
         {
           "license": {
@@ -1335,7 +1335,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vue@3.5.26",
+      "purl": "pkg:npm/vue@3.5.42",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1403,7 +1403,7 @@
     {
       "type": "library",
       "name": "vue-tsc",
-      "version": "2.2.12",
+      "version": "3.3.11",
       "licenses": [
         {
           "license": {
@@ -1411,7 +1411,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vue-tsc@2.2.12",
+      "purl": "pkg:npm/vue-tsc@3.3.11",
       "properties": [
         {
           "name": "xero:dependency-scope",
