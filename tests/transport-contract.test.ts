@@ -48,6 +48,22 @@ describe('transport contracts', () => {
         expect(transport.state).toBe('closed')
     })
 
+    it('reports a connection timeout when a socket never opens', async () => {
+        class HangingSocket {
+            binaryType = ''
+            readyState = 0
+            onopen: (() => void) | null = null
+            onmessage: ((event: { data: unknown }) => void) | null = null
+            onclose: (() => void) | null = null
+            onerror: (() => void) | null = null
+            send() {}
+            close() {}
+        }
+        vi.stubGlobal('WebSocket', HangingSocket)
+        const transport = new WebSocketTransport('ws://hanging')
+        await expect(transport.connect({ timeoutMs: 1 })).rejects.toMatchObject({ code: 'timeout' })
+    })
+
     it('parses SSE events and exposes receive-only semantics', async () => {
         class FakeSource {
             onopen: (() => void) | null = null

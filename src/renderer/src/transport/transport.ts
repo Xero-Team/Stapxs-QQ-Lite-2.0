@@ -22,13 +22,14 @@ export class TransportError extends Error {
 
 export function withTimeout<T>(operation: (signal: AbortSignal) => Promise<T>, options: TransportRequest = {}): Promise<T> {
     const controller = new AbortController()
-    const timeout = options.timeoutMs === undefined ? undefined : setTimeout(() => controller.abort(), options.timeoutMs)
+    let timedOut = false
+    const timeout = options.timeoutMs === undefined ? undefined : setTimeout(() => { timedOut = true; controller.abort() }, options.timeoutMs)
     if (options.signal) {
         if (options.signal.aborted) controller.abort()
         else options.signal.addEventListener('abort', () => controller.abort(), { once: true })
     }
     return operation(controller.signal).catch((error: unknown) => {
-        if (controller.signal.aborted) throw new TransportError('Transport operation aborted or timed out', options.timeoutMs === undefined ? 'aborted' : 'timeout')
+        if (controller.signal.aborted) throw new TransportError('Transport operation aborted or timed out', timedOut ? 'timeout' : 'aborted')
         throw error
     }).finally(() => { if (timeout) clearTimeout(timeout) })
 }
@@ -64,10 +65,10 @@ export interface WebSocketLike {
     readyState: number
     onopen: (() => void) | null
     onmessage: ((event: { data: unknown }) => void) | null
-    onclose: (() => void) | null
+    onclose: ((event?: { code?: number; reason?: string }) => void) | null
     onerror: (() => void) | null
     send(data: string): void
-    close(): void
+    close(code?: number, reason?: string): void
 }
 
 /** Small browser WebSocket adapter used by all renderer transports. */
@@ -75,6 +76,8 @@ export class WebSocketTransport implements Transport {
     private socket: WebSocketLike | undefined
     private currentState: TransportState = 'idle'
     private readonly handlers = new Set<(payload: unknown) => void>()
+    private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
+    private readonly errorHandlers = new Set<() => void>()
 
     constructor(private readonly url: string, private readonly protocols?: string | string[]) {}
 
@@ -82,15 +85,27 @@ export class WebSocketTransport implements Transport {
 
     connect(options: TransportRequest = {}): Promise<void> {
         return withTimeout((signal) => new Promise<void>((resolve, reject) => {
+            if (this.currentState === 'authenticated') { resolve(); return }
             this.currentState = 'connecting'
+            let settled = false
             const Socket = globalThis.WebSocket as unknown as new (url: string, protocols?: string | string[]) => WebSocketLike
             const socket = new Socket(this.url, this.protocols)
             this.socket = socket
-            socket.onopen = () => { this.currentState = 'authenticated'; resolve() }
+            socket.onopen = () => { settled = true; this.currentState = 'authenticated'; resolve() }
             socket.onmessage = (event) => this.handlers.forEach((handler) => handler(event.data))
-            socket.onerror = () => { this.currentState = 'error'; reject(new TransportError('WebSocket connection failed', 'network')) }
-            socket.onclose = () => { this.currentState = 'closed' }
+            socket.onerror = () => {
+                this.currentState = 'error'
+                this.errorHandlers.forEach((handler) => handler())
+                if (!settled) { settled = true; reject(new TransportError('WebSocket connection failed', 'network')) }
+            }
+            socket.onclose = (event) => {
+                this.currentState = 'closed'
+                this.closeHandlers.forEach((handler) => handler({ code: event?.code ?? 1006, reason: event?.reason ?? '' }))
+            }
             signal.addEventListener('abort', () => socket.close(), { once: true })
+            signal.addEventListener('abort', () => {
+                if (!settled) { settled = true; reject(new TransportError('WebSocket connection aborted', 'aborted')) }
+            }, { once: true })
         }), options)
     }
 
@@ -102,8 +117,8 @@ export class WebSocketTransport implements Transport {
         }, options)
     }
 
-    async close(): Promise<void> {
-        this.socket?.close()
+    async close(code?: number, reason?: string): Promise<void> {
+        this.socket?.close(code, reason)
         this.socket = undefined
         this.currentState = 'closed'
     }
@@ -111,6 +126,16 @@ export class WebSocketTransport implements Transport {
     onMessage(handler: (payload: unknown) => void): () => void {
         this.handlers.add(handler)
         return () => this.handlers.delete(handler)
+    }
+
+    onClose(handler: (event: { code: number; reason: string }) => void): () => void {
+        this.closeHandlers.add(handler)
+        return () => this.closeHandlers.delete(handler)
+    }
+
+    onError(handler: () => void): () => void {
+        this.errorHandlers.add(handler)
+        return () => this.errorHandlers.delete(handler)
     }
 }
 
@@ -157,6 +182,7 @@ export class SseTransport implements Transport {
     private source: EventSourceLike | undefined
     private currentState: TransportState = 'idle'
     private readonly handlers = new Set<(payload: unknown) => void>()
+    private readonly errorHandlers = new Set<() => void>()
 
     constructor(private readonly endpoint: string) {}
     get state(): TransportState { return this.currentState }
@@ -164,18 +190,27 @@ export class SseTransport implements Transport {
         return withTimeout((signal) => new Promise<void>((resolve, reject) => {
             const Source = globalThis.EventSource as unknown as new (url: string) => EventSourceLike
             this.currentState = 'connecting'
+            let settled = false
             const source = new Source(this.endpoint)
             this.source = source
-            source.onopen = () => { this.currentState = 'authenticated'; resolve() }
+            source.onopen = () => { settled = true; this.currentState = 'authenticated'; resolve() }
             source.onmessage = (event) => {
                 try { this.handlers.forEach((handler) => handler(JSON.parse(event.data) as unknown)) }
                 catch { this.currentState = 'error' }
             }
-            source.onerror = () => { this.currentState = 'error'; reject(new TransportError('SSE connection failed', 'network')) }
+            source.onerror = () => {
+                this.currentState = 'error'
+                this.errorHandlers.forEach((handler) => handler())
+                if (!settled) { settled = true; reject(new TransportError('SSE connection failed', 'network')) }
+            }
             signal.addEventListener('abort', () => source.close(), { once: true })
+            signal.addEventListener('abort', () => {
+                if (!settled) { settled = true; reject(new TransportError('SSE connection aborted', 'aborted')) }
+            }, { once: true })
         }), options)
     }
     async send(): Promise<void> { throw new TransportError('SSE is receive-only; use HttpTransport for API calls', 'protocol') }
     async close(): Promise<void> { this.source?.close(); this.source = undefined; this.currentState = 'closed' }
     onMessage(handler: (payload: unknown) => void): () => void { this.handlers.add(handler); return () => this.handlers.delete(handler) }
+    onError(handler: () => void): () => void { this.errorHandlers.add(handler); return () => this.errorHandlers.delete(handler) }
 }

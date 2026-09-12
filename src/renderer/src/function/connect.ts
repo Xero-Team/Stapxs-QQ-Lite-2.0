@@ -22,7 +22,7 @@ import { backend } from '@renderer/runtime/backend'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
-import { HttpTransport } from '@renderer/transport/transport'
+import { HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -31,6 +31,8 @@ let retry = 0
 let forceCloseReason: string | undefined = undefined
 
 export let websocket: WebSocket | undefined = undefined
+let webSocketTransport: WebSocketTransport | undefined
+let sseTransport: SseTransport | undefined
 const WS_PROTOCOL = 'ws' + '://'
 const WSS_PROTOCOL = 'wss' + '://'
 
@@ -148,19 +150,17 @@ export class Connector {
                 return
             }
             logger.add(LogType.WS, '使用 SSE 连接模式')
-            const sse = new EventSource(appendAccessToken(import.meta.env.VITE_APP_SSE_EVENT_ADDRESS, token))
-            sse.onopen = () => {
-                login.creating = false
-                this.onopen(address, token)
-            }
-            sse.onmessage = (e) => {
-                this.onmessage(e.data)
-            }
-            sse.onerror = () => {
+            if (sseTransport?.state === 'authenticated' || sseTransport?.state === 'connecting') return
+            sseTransport = new SseTransport(appendAccessToken(import.meta.env.VITE_APP_SSE_EVENT_ADDRESS, token))
+            sseTransport.onMessage((payload) => this.onmessage(typeof payload === 'string' ? payload : JSON.stringify(payload)))
+            sseTransport.onError(() => {
                 login.creating = false
                 popInfo.add(PopType.ERR, $t('连接不稳定'))
-                return
-            }
+            })
+            void sseTransport.connect({ timeoutMs: 10_000 }).then(() => {
+                login.creating = false
+                this.onopen(address, token)
+            }).catch(() => { login.creating = false })
             return
         } else {
             // PS：只有在未设定 wss 类型的情况下才认为是首次连接
@@ -189,31 +189,25 @@ export class Connector {
                 url = appendAccessToken(withWebSocketProtocol(address, true), token)
             }
 
-            if (!websocket) {
-                websocket = new WebSocket(url)
-            }
-
-            websocket.onopen = () => {
+            if (webSocketTransport?.state === 'authenticated' || webSocketTransport?.state === 'connecting') return
+            webSocketTransport = new WebSocketTransport(url)
+            const transport = webSocketTransport
+            transport.onMessage((payload) => this.onmessage(typeof payload === 'string' ? payload : JSON.stringify(payload)))
+            transport.onClose((event) => {
+                login.creating = false
+                const reason = forceCloseReason ?? event.reason
+                forceCloseReason = undefined
+                if (webSocketTransport === transport) webSocketTransport = undefined
+                this.onclose(event.code, reason, address, token)
+            })
+            transport.onError(() => {
+                login.creating = false
+                popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('未知错误'))
+            })
+            void transport.connect({ timeoutMs: 10_000 }).then(() => {
                 login.creating = false
                 this.onopen(address, token)
-            }
-            websocket.onmessage = (e) => {
-                this.onmessage(e.data)
-            }
-            websocket.onclose = (e) => {
-                login.creating = false
-                const reason = forceCloseReason ?? e.reason
-                forceCloseReason = undefined
-                this.onclose(e.code, reason, address, token)
-            }
-            websocket.onerror = (e) => {
-                login.creating = false
-                if (e instanceof ErrorEvent) {
-                    popInfo.add(PopType.ERR, $t('连接失败') + ': ' + e.message)
-                } else {
-                    popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('未知错误'))
-                }
-            }
+            }).catch(() => { login.creating = false })
         }
     }
 
@@ -308,6 +302,8 @@ export class Connector {
         }
         connectionStore.metaEventTimeoutTriggered = false
         websocket = undefined
+        webSocketTransport = undefined
+        sseTransport = undefined
         updateMenu({ parent: 'account', id: 'logout', action: 'visible', value: 'false' })
         updateMenu({ parent: 'account', id: 'userName', action: 'label', value: $t('连接') })
 
@@ -365,7 +361,11 @@ export class Connector {
                 PopType.INFO,
                 app.config.globalProperties.$t('正在断开链接……'),
             )
-            if (websocket) websocket.close(1000)
+            if (sseTransport) {
+                void sseTransport.close()
+                this.onclose(1000, undefined, login.address, login.token)
+            }
+            else if (webSocketTransport) void webSocketTransport.close(1000, 'normal closure')
         }
     }
 
@@ -385,8 +385,13 @@ export class Connector {
             this.onclose(1006, reason, login.address, login.token)
             return
         }
-        if (websocket) {
-            websocket.close(4000, reason)
+        if (sseTransport) {
+            void sseTransport.close()
+            this.onclose(1006, reason, login.address, login.token)
+            return
+        }
+        if (webSocketTransport) {
+            void webSocketTransport.close(4000, reason)
             return
         }
         this.onclose(1006, reason, login.address, login.token)
@@ -493,8 +498,10 @@ export class Connector {
         // 发送
         if(!backend.isWeb()) {
             backend.call('Onebot', 'onebot:send', false, json)
-        } else if (websocket) {
-            websocket.send(json)
+        } else if (webSocketTransport) {
+            void webSocketTransport.send(actionData).catch((error: unknown) => {
+                logger.error(error instanceof Error ? error : new Error('WebSocket transport failed'), '发送消息失败')
+            })
         }
 
         if (Option.get('log_level') === 'debug') {
