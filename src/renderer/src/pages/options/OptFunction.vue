@@ -23,6 +23,21 @@
                     <div><div /></div>
                 </label>
             </div>
+            <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'database']" />
+                <div>
+                    <label>{{ $t('本地数据') }}</label>
+                    <span>{{ $t('导出或清除本地缓存；聊天记录不会上传到第三方') }}</span>
+                </div>
+                <div class="button-group">
+                    <button class="ss-button" type="button" @click="exportLocalDataFile">
+                        {{ $t('导出') }}
+                    </button>
+                    <button class="ss-button" type="button" @click="clearLocalDataCache">
+                        {{ $t('清除') }}
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('会话选项') }}</header>
@@ -395,10 +410,31 @@
     import { backend } from '@renderer/runtime/backend'
     import { dbClearImages, dbGetStats } from '@renderer/function/utils/localHistoryUtil'
     import { useSettingsStore } from '@renderer/state/settings'
+    import { clearLocalData, exportLocalData } from '@renderer/storage'
+    import { clearNetworkAudit, readNetworkAudit } from '@renderer/network/policy'
     import { useAuthStore } from '@renderer/state/auth'
     import { useUIStore } from '@renderer/state/ui'
 
     const settingsStore = useSettingsStore()
+
+    async function exportLocalDataFile() {
+        const payload = {
+            records: await exportLocalData(),
+            networkAudit: readNetworkAudit(),
+        }
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = `xero-qq-lite-data-${new Date().toISOString().slice(0, 10)}.json`
+        link.click()
+        URL.revokeObjectURL(link.href)
+    }
+
+    async function clearLocalDataCache() {
+        if (!window.confirm($t('确定清除本地缓存吗？'))) return
+        await clearLocalData()
+        clearNetworkAudit()
+    }
     const authStore = useAuthStore()
     const uiStore = useUIStore()
     const $t = i18n.global.t
