@@ -1,6 +1,6 @@
 <!--
  - @FileDescription: 设置页面（群/好友设置页面）
- - @Author: Stapxs
+ - @Author: Xero-Team
  - @Date: 2023/2/7
  - @Version: 1.0 - 初始版本
 -->

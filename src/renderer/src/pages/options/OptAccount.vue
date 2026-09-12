@@ -1,6 +1,6 @@
 <!--
  - @FileDescription: 设置页面（账号子页面）
- - @Author: Stapxs
+ - @Author: Xero-Team
  - @Date: 2022/9/29
           2022/12/9
  - @Version: 1.0 - 初始版本

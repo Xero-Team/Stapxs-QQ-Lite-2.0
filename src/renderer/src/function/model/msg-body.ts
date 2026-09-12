@@ -1,6 +1,6 @@
 /*
  * @FileDescription: MsgBody.vue 所使模块用的通用的消息显示相关
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2022/11/29
  * @Version: 1.0
  * @Description: 此模块抽离出了本来在 MsgBody.vue 中的一些较为通用的方法便于进行多 Bot 适配。

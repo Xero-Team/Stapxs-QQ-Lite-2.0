@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 设置页面（开发者子页面）
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2022/09/28
  * @Version: 1.0
 -->

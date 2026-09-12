@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 表情面板模板
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: missing
  * @Version: 1.0
 -->

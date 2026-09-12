@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 聊天面板页面（系统消息面板）
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2023/01/09
  * @Version: 1.0 - 初始版本
  * @Description: 此面板为点击系统消息后单独显示的面板，用于覆盖聊天面板

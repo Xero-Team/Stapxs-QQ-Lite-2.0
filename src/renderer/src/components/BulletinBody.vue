@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 公告列表项模板
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2022-12-01
  * @Version: 1.0
 -->

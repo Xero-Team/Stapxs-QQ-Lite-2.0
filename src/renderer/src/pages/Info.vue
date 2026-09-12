@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 群 / 好友信息页面
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: missing
  * @Version: 1.0
 -->

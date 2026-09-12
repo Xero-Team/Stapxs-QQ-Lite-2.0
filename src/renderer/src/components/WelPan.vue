@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 首次使用的欢迎面板
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2023-01-18
  * @Version: 1.0
 -->

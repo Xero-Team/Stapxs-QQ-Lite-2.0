@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 群文件列表项模板
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: missing
  * @Version: 1.0
 -->

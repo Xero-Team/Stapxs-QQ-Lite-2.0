@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 联系人 / 消息列表项模板
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2022/08/14
  * @Version: 1.0
 -->

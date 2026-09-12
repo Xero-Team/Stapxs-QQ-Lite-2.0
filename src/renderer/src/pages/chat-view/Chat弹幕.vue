@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 聊天面板页面（弹幕样式）
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2024/07/17
  * @Version: 1.0 - 初始版本
  * @Description: 这是个弹幕样式的聊天面板

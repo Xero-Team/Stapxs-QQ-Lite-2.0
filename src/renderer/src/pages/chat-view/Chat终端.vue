@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 聊天面板页面（命令行样式）
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2023/01/11
  * @Version: 1.0 - 初始版本
  * @Description: 这是个命令行样式的聊天面板，摸鱼专用.gif

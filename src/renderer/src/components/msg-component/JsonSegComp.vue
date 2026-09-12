@@ -1,6 +1,6 @@
 <!--
  * @FileDescription: 卡片消息消息组件
- * @Author: Stapxs
+ * @Author: Xero-Team
  * @Date: 2023/05/23
  *        2026/02/13
  * @Version: 1.0 - 初始版本
