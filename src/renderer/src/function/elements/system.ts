@@ -30,7 +30,7 @@ export interface PopInfoElem {
 
 export interface BotActionElem {
     action: string
-    params?: { [key: string]: any }
+    params?: Record<string, unknown>
     echo?: string
 }
 
