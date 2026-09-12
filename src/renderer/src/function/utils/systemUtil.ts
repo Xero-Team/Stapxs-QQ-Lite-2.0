@@ -649,7 +649,9 @@ export async function copyToClipboard(text: string)
  * 复制内容到剪贴板
  * @param content
  */
+// eslint-disable-next-line no-redeclare
 export async function copyToClipboard(content: ClipboardItem[])
+// eslint-disable-next-line no-redeclare
 export async function copyToClipboard(content: ClipboardItem[] | string) {
     if (window.navigator.clipboard === undefined) {
         new PopInfo().add(PopType.ERR, i18n.global.t('当前环境不支持剪贴板操作'))
@@ -660,5 +662,4 @@ export async function copyToClipboard(content: ClipboardItem[] | string) {
     else
         await window.navigator.clipboard.write(content)
 }
-
 

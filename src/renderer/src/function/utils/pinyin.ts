@@ -25,8 +25,8 @@ function scheduleIdleTask(task: () => void) {
 
     const idleWindow = window as Window & {
         requestIdleCallback?: (
-            callback: IdleRequestCallback,
-            options?: IdleRequestOptions
+            callback: () => void,
+            options?: { timeout?: number }
         ) => number
     }
 

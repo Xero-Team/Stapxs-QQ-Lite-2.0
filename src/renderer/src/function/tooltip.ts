@@ -33,17 +33,32 @@ export function closeTooltip(id: string) {
     }
 }
 
-type IUser = any
+type IUser = {
+    user_id: number
+    nickname?: string
+    card?: string
+    role?: string
+    level?: number
+    is_robot?: boolean
+    join_time?: number
+    banTime?: number
+}
 
 type VUserTooltipBinding = IUser | number | (() => IUser | number)
 
 export const vUserTooltip: ObjectDirective<HTMLElement, VUserTooltipBinding> = {
     mounted(el: HTMLElement, binding: DirectiveBinding<VUserTooltipBinding>) {
-        (vTooltip as any).mounted(el, {
-            value: { comp: markRaw(UserInfoTooltip), props: { user: binding.value } }
-        })
+        const tooltipBinding = {
+            value: { comp: markRaw(UserInfoTooltip), props: { user: binding.value } },
+            oldValue: undefined,
+            instance: null,
+            dir: vTooltip,
+            arg: undefined,
+            modifiers: {},
+        } as unknown as Parameters<typeof vTooltip.mounted>[1]
+        vTooltip.mounted(el, tooltipBinding)
     },
     unmounted(el: HTMLElement) {
-        (vTooltip as any).unmounted(el)
+        vTooltip.unmounted(el)
     }
 }

@@ -72,7 +72,9 @@ export function appendAccessToken(url: string, token?: string) {
 }
 
 export function decodeStoredToken(token: string): string
+// eslint-disable-next-line no-redeclare
 export function decodeStoredToken(token: undefined): undefined
+// eslint-disable-next-line no-redeclare
 export function decodeStoredToken(token: string | undefined) {
     if (token === undefined) return undefined
     if (token === '') return ''
@@ -325,8 +327,8 @@ export class Connector {
     static onclose(
         code: number,
         msg: string | undefined,
-        address: string,
-        token: string | undefined,
+        _address: string,
+        _token: string | undefined,
     ) {
         const { $t } = app.config.globalProperties
         const connectionStore = useConnectionStore()
