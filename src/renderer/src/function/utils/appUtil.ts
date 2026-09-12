@@ -226,8 +226,9 @@ export function reloadUsers() {
         let friendName = 'get_friend_list'
         let groupName = 'get_group_list'
         if (authStore.jsonMap.user_list?.name) {
-            friendName = authStore.jsonMap.user_list.name.split('|')[0]
-            groupName = authStore.jsonMap.user_list.name.split('|')[1]
+            const [mappedFriend, mappedGroup] = authStore.jsonMap.user_list.name.split('|')
+            friendName = mappedFriend ?? friendName
+            groupName = mappedGroup ?? groupName
         } else if (
             authStore.jsonMap.friend_list?.name &&
             authStore.jsonMap.group_list?.name
@@ -265,6 +266,7 @@ export function jumpToChat(userId: string, msgId: string) {
             // 从缓存列表里寻找这个 ID
             for (let i = 0; i < contactStore.userList.length; i++) {
                 const item = contactStore.userList[i]
+                if (!item) continue
                 const id =
                     item.user_id !== undefined ? item.user_id : item.group_id
                 if (String(id) === userId) {
@@ -502,7 +504,7 @@ export function createIpc() {
                 item.new_msg = false
                 contactStore.newMsgCount--
             }
-            item.highlight = undefined
+            delete item.highlight
             contactStore.baseOnMsgList.set(Number(id), item)
         }
     })
@@ -664,7 +666,7 @@ export async function loadMobile() {
                             item.new_msg = false
                             contactStore.newMsgCount--
                         }
-                        item.highlight = undefined
+                        delete item.highlight
                         contactStore.baseOnMsgList.set(Number(notification.extra.userId), item)
                     }
                 }
@@ -918,7 +920,7 @@ function showReleaseLog(data: ReleaseInfo, isUpdated: boolean) {
     const { $t } = app.config.globalProperties
     let msg = data.body
     // 处理 title，取开头到下一个 “\r\n” 之间的内容
-    const title = msg.split('\r\n')[0].substring(1)
+    const title = (msg.split('\r\n')[0] ?? '').substring(1)
     // 处理 msg，取 “## 更新内容” 到下一个 “##” 之间的内容
     const start = msg.indexOf('## 更新内容\r\n')
     if (start != -1) {
@@ -1002,7 +1004,7 @@ export function showReleaseHistory() {
                     const data = parseRelease(rawData)
                     if (!data) return []
                     let msg = data.body
-                    const title = msg.split('\r\n')[0].substring(1)
+                    const title = (msg.split('\r\n')[0] ?? '').substring(1)
                     const start = msg.indexOf('## 更新内容\r\n')
                     if (start != -1) {
                         msg = msg.substring(start + 9)
@@ -1116,7 +1118,9 @@ export function checkNotice() {
                     noticeBody.show_date.forEach((dateInterval: number[]) => {
                         if (dateInterval.length == 2) {
                             // 判断是否在时间区间内
-                            if (now >= dateInterval[0] && now <= dateInterval[1]) {
+                            const startDate = dateInterval[0]
+                            const endDate = dateInterval[1]
+                            if (startDate !== undefined && endDate !== undefined && now >= startDate && now <= endDate) {
                                 noticeBody.is_show = true
                             }
                         }
@@ -1126,6 +1130,7 @@ export function checkNotice() {
                         for (let i = 0; i < noticeBody.pops.length; i++) {
                             // 添加弹窗
                             const info = noticeBody.pops[i]
+                            if (!info) continue
                             type NoticeButton = { text: string, master?: boolean, fun: () => void }
                             let popInfo: {
                                 title: string
@@ -1639,6 +1644,7 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
         (event: TouchEvent) => {
             if (event.touches.length > 0) {
                 const touch = event.touches[0]
+                if (!touch) return undefined
                 return { x: touch.clientX, y: touch.clientY }
             }
             return undefined
@@ -1981,6 +1987,7 @@ function createVMove<T extends HTMLElement>(): Directive<T, VMoveOptions<T>> {
                 if (!moveFlag.touchLast) return
                 const touch = event.changedTouches[0]
                 const lastTouch = moveFlag.touchLast.changedTouches[0]
+                if (!touch || !lastTouch) return
                 const deltaX = touch.clientX - lastTouch.clientX
                 const deltaY = touch.clientY - lastTouch.clientY
                 const absX = Math.abs(deltaX)
@@ -2003,6 +2010,7 @@ function createVMove<T extends HTMLElement>(): Directive<T, VMoveOptions<T>> {
                 }
                 const touch = event.changedTouches[0]
                 const lastTouch = moveFlag.touchLast?.changedTouches[0]
+                if (!touch) return
                 if (lastTouch) {
                     const deltaX = touch.clientX - lastTouch.clientX
                     const deltaY = touch.clientY - lastTouch.clientY
