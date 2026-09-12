@@ -36,3 +36,4 @@
 - Removed the development chat-menu action and friend-removal console output that exposed complete messages or user identifiers; remaining startup banners and structured logger output are being reviewed separately.
 - Connector response storage now uses `unknown` and validates API responses as JSON records before JSONPath mapping, preventing malformed or non-object replies from crossing the protocol boundary.
 - All GitHub Actions dependency-install steps now use `yarn install --immutable --mode=skip-build`, matching the reproducible install path that avoids the environment's native `sharp` postinstall failure; the quality workflow remains red until legacy lint and audit findings are resolved.
+- The `lint` script is now a non-mutating check for CI; the previous auto-fixing behavior is available explicitly as `lint:fix`, so failed gates cannot rewrite a checkout during validation.
