@@ -21,4 +21,4 @@
 - Core protocol, transport, storage, network, and contract-test modules now use a typed ESLint project with `consistent-type-imports` and `no-floating-promises` enforced; legacy application modules still prevent enabling the same gate repository-wide.
 - Message map intermediate values and the login animation timer now use explicit unknown-safe or platform timer types; the public message handler surface still contains legacy `any` and requires a larger staged migration.
 - Native download listener callbacks now use typed progress events and explicit cleanup return values; broader platform utility and message payload boundaries still need migration.
-- DOM directive lifecycle state in `appUtil.ts` now uses `WeakMap` registries instead of custom `any` properties; legacy utility payloads and two pre-existing `DocumentEventMap` lint errors remain.
+- DOM directive lifecycle state in `appUtil.ts` now uses `WeakMap` registries instead of custom `any` properties; legacy utility payloads remain for the broader type migration.
