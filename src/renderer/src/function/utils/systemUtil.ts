@@ -619,7 +619,7 @@ export function getInch(): number {
 }
 
 /**
- * 请求 API，暂时未支持 method: string, data: any
+ * 请求 API，暂时未支持 method: string, data: unknown
  * @param url 请求的地址
  */
 export async function getApi(url: string) {
@@ -662,4 +662,3 @@ export async function copyToClipboard(content: ClipboardItem[] | string) {
     else
         await window.navigator.clipboard.write(content)
 }
-
