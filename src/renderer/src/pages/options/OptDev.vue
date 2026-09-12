@@ -409,13 +409,6 @@
             })
             }
         }
-        /* eslint-disable no-console */
-        console.log('=========================')
-        console.log('settingsStore:', settingsStore.$state)
-        console.log('authStore:', authStore.$state)
-        console.log('uiStore:', uiStore.$state)
-        console.log('=========================')
-        /* eslint-enable no-console */
         if(!backend.isMobile()) {
             backend.call(undefined, 'win:openDevTools', false)
         }
