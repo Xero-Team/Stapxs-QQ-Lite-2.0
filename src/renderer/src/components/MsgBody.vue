@@ -442,6 +442,16 @@ type IUser = {
     is_robot?: boolean
     join_time?: number
     banTime?: number
+    title?: string
+}
+
+interface ViewerInjection {
+    viewer?: {
+        value?: {
+            open: (image: Img) => void
+            openBySrc: (image: Img, source: string) => void
+        }
+    }
 }
 
 defineOptions({ name: 'MsgBody' })
@@ -464,12 +474,12 @@ const {
 
 provide('message-content', data)
 
-const { viewer: viewerRef } = inject<{ viewer: any }>('viewer', { viewer: null })
+const { viewer: viewerRef } = inject<ViewerInjection>('viewer', { viewer: undefined })
 
 const emit = defineEmits<{
-    scrollToMsg: [...args: any[]]
-    imageLoaded: [...args: any[]]
-    sendPoke: [...args: any[]]
+    scrollToMsg: [messageId: string, showAnimation: boolean]
+    imageLoaded: [height: number]
+    sendPoke: [userId: number]
     leftMove: [msg: Msg]
     rightMove: [msg: Msg]
     showMenu: [event: MenuEventData, msg: Msg]
@@ -517,7 +527,7 @@ const isDebugMsg = Option.get('debug_msg')
 const linkViewStyle = ref('')
 const pageViewInfo = ref(undefined as { [key: string]: any } | undefined)
 const gotLink = ref(false)
-const senderInfo = ref(null as any)
+const senderInfo = ref<IUser | null>(null)
 const trueLang = getTrueLang()
 const textIndex = ref({} as { [key: string]: number })
 const resolvedImages = ref({} as Record<string, string>)
@@ -623,7 +633,7 @@ function getAtName(item: { [key: string]: any }) {
 }
 
 function scrollToMsg(id: string) {
-    emit('scrollToMsg', 'chat-' + id)
+    emit('scrollToMsg', 'chat-' + id, true)
 }
 
 function imgStyle(length: number, at: number, isFace: boolean) {
