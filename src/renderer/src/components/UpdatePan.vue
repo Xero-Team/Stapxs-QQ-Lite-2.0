@@ -38,7 +38,7 @@
                     <a class="release-version">{{ release.version }} - {{ release.info.title.replace('Release', '') }}</a>
                     <div class="release-meta">
                         <img :src="release.user.avatar">
-                        <a :href="release.user.url" target="_blank">{{ release.user.name }}</a>
+                        <a href="#" @click.prevent="openLink(release.user.url)">{{ release.user.name }}</a>
                         <span>
                             {{
                                 Intl.DateTimeFormat(getTrueLang(), {
@@ -78,10 +78,25 @@ import {
     gitmojiToEmoji,
 } from '@renderer/function/utils/systemUtil'
 import { openLink } from '@renderer/function/utils/appUtil'
+import { z } from 'zod'
 
 defineOptions({ name: 'UpdatePan' })
 
 const $t = i18n.global.t
+
+const ReleaseSchema = z.object({
+    version: z.string().catch(''),
+    date: z.union([z.string(), z.number()]).catch(''),
+    message: z.string().catch(''),
+    html_url: z.string().url().catch(''),
+    user: z.object({
+        avatar: z.string().url().catch(''),
+        url: z.string().url().catch(''),
+        name: z.string().catch(''),
+    }).catch({ avatar: '', url: '', name: '' }),
+})
+type Release = z.infer<typeof ReleaseSchema>
+type ParsedRelease = Release & { info: ReturnType<typeof parseMessage> }
 
 const props = defineProps<{
     version?: string
@@ -89,7 +104,7 @@ const props = defineProps<{
     user?: { avatar: string; url: string; name: string }
     message?: string
     updated?: boolean
-    releases?: any[]
+    releases?: unknown[]
 }>()
 
 const repoName = import.meta.env.VITE_APP_REPO_NAME
@@ -99,7 +114,7 @@ const info = ref({
     content: [] as { [key: string]: string }[],
 })
 
-const releaseList = ref<any[]>([])
+const releaseList = ref<ParsedRelease[]>([])
 
 function parseMessage(message: string) {
     let msg = message
@@ -158,16 +173,10 @@ function parseMessage(message: string) {
 onMounted(() => {
     // 如果是多条记录模式
     if (props.releases && props.releases.length > 0) {
-        releaseList.value = props.releases.map((release: any) => {
-            const parsedInfo = parseMessage(release.message)
-            return {
-                version: release.version,
-                date: release.date,
-                user: release.user,
-                info: parsedInfo,
-                html_url: release.html_url,
-            }
-        })
+        releaseList.value = props.releases
+            .map((release) => ReleaseSchema.safeParse(release))
+            .filter((result): result is { success: true; data: Release } => result.success)
+            .map(({ data: release }) => ({ ...release, info: parseMessage(release.message) }))
     } else {
         // 单条记录模式（原有逻辑）
         info.value = parseMessage(props.message || '')
