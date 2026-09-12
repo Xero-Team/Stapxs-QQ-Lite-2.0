@@ -2515,7 +2515,7 @@ export function resetRimtime(resetAll = false) {
                 user_info: {},
                 me_info: {},
                 group_members: [],
-                group_files: {},
+                group_files: [],
                 group_sub_files: {},
                 jin_info: { list: [] as MessagePayload[], pages: 0 },
             },
