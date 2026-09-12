@@ -8,17 +8,18 @@ export enum BotMsgType {
 export interface ChatInfoElem {
     show: BaseChatInfoElem
     info: {
-        group_info: { [key: string]: any }
-        user_info: { [key: string]: any }
-        me_info: { [key: string]: any }
+        group_info: Record<string, unknown>
+        user_info: Record<string, unknown>
+        me_info: Record<string, unknown>
         group_members: GroupMemberInfoElem[]
-        group_files: { [key: string]: any }
-        group_sub_files: { [key: string]: any }
-        group_notices?: { [key: string]: any }
-        now_member_info?: { [key: string]: any }
+        /** Legacy OneBot file payload; validated at protocol boundary. */
+        group_files: (GroupFileElem & GroupFileFolderElem)[]
+        group_sub_files: Record<string, unknown>
+        group_notices?: Record<string, unknown>[]
+        now_member_info?: Record<string, unknown>
         image_list?: { index: number; message_id: string; img_url: string }[]
         jin_info: {
-            list: { [key: string]: any }[]
+            list: Record<string, unknown>[]
             is_end?: boolean
             pages: number
         }
@@ -109,14 +110,16 @@ export interface SQCodeElem {
 
 export interface MsgItemElem {
     type: string
+    // Legacy extension fields are validated by the OneBot schema before use.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any
 }
 
 export interface MergeStackData {
-    messageList: any[]      // 消息列表
-    imageList: any[]        // 图片列表
+    messageList: MsgItemElem[]      // 消息列表
+    imageList: Array<{ img_url: string }>        // 图片列表
     placeCache: number      // 位置缓存
-    forwardMsg: any         // 原合并转发消息
+    forwardMsg: MsgItemElem         // 原合并转发消息
 }
 
 export interface MenuEventData {

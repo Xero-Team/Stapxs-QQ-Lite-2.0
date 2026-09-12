@@ -690,10 +690,10 @@ function changeChat(data: BaseChatInfoElem) {
             user_info: {},
             me_info: {},
             group_members: [],
-            group_files: {},
+            group_files: [],
             group_sub_files: {},
             jin_info: {
-                list: [] as { [key: string]: any }[],
+            list: [] as Record<string, unknown>[],
                 pages: 0,
             },
         },
@@ -887,7 +887,9 @@ onMounted(() => {
         }
         // 加载设置项
         const loadedConfig = await Option.load()
-        const migratedBackground = await migrateInlineBackgroundImage(loadedConfig.chat_background)
+        const migratedBackground = await migrateInlineBackgroundImage(
+            typeof loadedConfig.chat_background === 'string' ? loadedConfig.chat_background : null,
+        )
         if (migratedBackground) {
             loadedConfig.chat_background = migratedBackground
             Option.runAS('chat_background', migratedBackground)

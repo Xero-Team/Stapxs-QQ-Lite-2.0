@@ -10,7 +10,7 @@ export const useChatStore = defineStore('chat', () => {
             user_info: {},
             me_info: {},
             group_members: [],
-            group_files: {},
+            group_files: [],
             group_sub_files: {},
             jin_info: {
                 list: [],
@@ -22,7 +22,7 @@ export const useChatStore = defineStore('chat', () => {
     const messageList = ref<MsgItemElem[]>([])
     const mergeMsgStack = ref<MergeStackData[]>([])
     const mergeMessageList = ref<MsgItemElem[] | undefined>(undefined)
-    const mergeMessageImgList = ref<MsgItemElem[] | undefined>(undefined)
+    const mergeMessageImgList = ref<Array<{ img_url: string }> | undefined>(undefined)
 
     return {
         chatInfo,

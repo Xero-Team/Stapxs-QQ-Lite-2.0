@@ -33,7 +33,10 @@ import { backend } from '@renderer/runtime/backend'
 import { refreshFavicon } from './favicon'
 import { getLocalValue, setLocalValue } from '@renderer/storage'
 
-let cacheConfigs: { [key: string]: any }
+type OptionValue = string | number | boolean | null | Record<string, unknown> | unknown[]
+type OptionRecord = Record<string, OptionValue>
+
+let cacheConfigs: OptionRecord
 
 // =============== 附加设置结构 ===============
 
@@ -49,12 +52,12 @@ export interface ExtraOptionItem {
      * 绑定到配置中的键名；如需持久化并参与 Option.save / load，请提供。
      */
     optionKey?: string
-    defaultValue?: any
+    defaultValue?: OptionValue
     /**
      * 选项列表（仅 select 使用）
      */
     options?: { value: string | number | boolean; label: string }[]
-    callback?: (value: any) => void
+    callback?: (value: OptionValue) => void
 }
 
 export interface ExtraOptionCard {
@@ -70,7 +73,7 @@ export interface ExtraOptionCard {
 export const extraOptionCards = reactive<ExtraOptionCard[]>([])
 
 // 设置项的初始值，防止下拉菜单选项为空或者首次使用初始错误
-export const optDefault: { [key: string]: any } = {
+export const optDefault: OptionRecord = {
     // System
     address: '',
     top_info: {},
@@ -143,7 +146,7 @@ export const optDefault: { [key: string]: any } = {
 
 // =============== 设置项事件 ===============
 
-const configFunction: { [key: string]: (value: any) => void } = {
+const configFunction = {
     language: setLanguage,
     opt_dark: setDarkMode,
     opt_auto_dark: setAutoDark,
@@ -160,7 +163,7 @@ const configFunction: { [key: string]: (value: any) => void } = {
     use_favicon_notice: setFaviconNotice,
     custom_css: injectCustomCss,
     opt_ind_message: updateChatPan
-}
+} as Record<string, (value: unknown) => void>
 
 // =============== 附加设置注册接口 ===============
 
@@ -221,10 +224,10 @@ export function registerExtraOptionItem(cardId: string, item: ExtraOptionItem) {
     if (item.optionKey) {
         const key = item.optionKey
         if (Object.prototype.hasOwnProperty.call(item, 'defaultValue')) {
-            if (optDefault[key] === undefined) {
+            if (optDefault[key] === undefined && item.defaultValue !== undefined) {
                 optDefault[key] = item.defaultValue
             }
-            if (cacheConfigs && cacheConfigs[key] === undefined) {
+            if (cacheConfigs && cacheConfigs[key] === undefined && item.defaultValue !== undefined) {
                 cacheConfigs[key] = item.defaultValue
                 saveAll()
             }
@@ -553,8 +556,8 @@ function changeChatView(name: string | undefined) {
  * 读取并序列化 localStorage 中的设置项（electron 读取 electron-store 存储）
  * @returns 设置项集合
  */
-export async function load(): Promise<{ [key: string]: any }> {
-    let data = {} as { [key: string]: any }
+export async function load(): Promise<Record<string, unknown>> {
+    let data = {} as OptionRecord
 
     if ('electron' == backend.type) {
         data = backend.callSync('opt:getAll')
@@ -589,8 +592,8 @@ export async function load(): Promise<{ [key: string]: any }> {
     return loadOptData(data)
 }
 
-function loadOptData(data: { [key: string]: any }) {
-    const options: { [key: string]: any } = {}
+function loadOptData(data: OptionRecord) {
+    const options: OptionRecord = {}
     Object.keys(data).forEach((key) => {
         const value = data[key]
         if (value === 'true' || value === 'false') {
@@ -658,7 +661,7 @@ function loadOptData(data: { [key: string]: any }) {
  * @param name 设置项名称
  * @param value 设置项值
  */
-export function run(name: string, value: any) {
+export function run(name: string, value: unknown) {
     if (typeof configFunction[name] === 'function') configFunction[name](value)
 }
 
@@ -667,14 +670,22 @@ export function run(name: string, value: any) {
  * @param name 设置项名称
  * @returns 设置项值（如果没有则为 null）
  */
-export function get(name: string): any {
+/* eslint-disable no-redeclare -- overload declarations share one runtime implementation. */
+export function get(name: 'fs_adaptation'): number
+export function get(name: 'glass_effect' | 'option_view_no_window' | 'close_notice' | 'open_ga_bot' | 'enable_external_services' | 'debug_msg' | 'use_breakline' | 'opt_dark' | 'opt_auto_dark' | 'opt_auto_win_color' | 'chat_more_blur' | 'close_respond'): boolean
+export function get(name: 'chat_background' | 'glagame_prompt' | 'openai_api' | 'openai_token' | 'openai_model' | 'log_level' | 'custom_css'): string
+export function get(name: 'theme_color' | 'glagame_max_tokens'): number
+export function get(name: 'notice_group'): Record<string, number[]> | null
+export function get(name: 'connection_history'): unknown[]
+export function get(name: string): OptionValue
+export function get(name: string): OptionValue {
     if (cacheConfigs) {
         const names = Object.keys(cacheConfigs)
         for (let i = 0; i < names.length; i++) {
             if (names[i] === name) {
                 const get = cacheConfigs[names[i]]
                 try {
-                    return JSON.parse(get)
+                    return typeof get === 'string' ? JSON.parse(get) as OptionValue : get
                 } catch (e: unknown) {
                     return get
                 }
@@ -683,6 +694,7 @@ export function get(name: string): any {
     }
     return null
 }
+/* eslint-enable no-redeclare */
 
 /**
  * 获取原始设置项值
@@ -722,11 +734,11 @@ export function getRaw(name: string) {
  * @param name 设置项名称
  * @param value 设置项值
  */
-export function save(name: string, value: any) {
+export function save(name: string, value: OptionValue) {
     cacheConfigs[name] = value
     saveAll()
 }
-export function saveAll(config = {} as { [key: string]: any }) {
+export function saveAll(config: Record<string, unknown> = {}) {
     if (Object.keys(config).length == 0) {
         Object.assign(config, cacheConfigs)
     }
@@ -737,7 +749,7 @@ export function saveAll(config = {} as { [key: string]: any }) {
             key +
             ':' +
             encodeURIComponent(
-                isObject ? JSON.stringify(config[key]) : config[key],
+                isObject ? JSON.stringify(config[key]) : String(config[key] ?? ''),
             ) +
             '&'
     })
@@ -750,7 +762,7 @@ export function saveAll(config = {} as { [key: string]: any }) {
         const saveConfig = config
         Object.keys(config).forEach((key) => {
             const isObject = typeof config[key] == 'object'
-            saveConfig[key] = isObject ? JSON.stringify(config[key]): config[key]
+            saveConfig[key] = isObject ? JSON.stringify(config[key]): String(config[key] ?? '')
         })
         backend.call(undefined, 'opt:saveAll', false,
             backend.type == 'tauri' ? { data: saveConfig } : saveConfig)
@@ -762,7 +774,7 @@ export function saveAll(config = {} as { [key: string]: any }) {
  * @param name 设置项名称
  * @param value 设置项值
  */
-export function runAS(name: string, value: any) {
+export function runAS(name: string, value: OptionValue) {
     save(name, value)
     run(name, value)
 }
@@ -806,7 +818,7 @@ export function runASWEvent(event: Event) {
             }
         }
         if (name !== null) {
-            runAS(name, value)
+            runAS(name, value as OptionValue)
         }
     }
     // 有些设置项需要重启/刷新

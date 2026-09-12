@@ -238,7 +238,7 @@ export class Connector {
             settingsStore.sysConfig.save_password &&
             settingsStore.sysConfig.save_password != ''
         ) {
-            Option.save('save_password', token)
+            Option.save('save_password', token ?? '')
         }
         // 清空应用通知
         popInfo.clear()

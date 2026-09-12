@@ -97,7 +97,7 @@ async function initChat() {
         // 初始化基础提示词
         getCurrentMessages().push({
             role: 'system',
-            content: get('glagame_prompt') || optDefault.glagame_prompt,
+            content: get('glagame_prompt') || String(optDefault.glagame_prompt ?? ''),
         })
         getCurrentMessages().push({
             role: 'system',
