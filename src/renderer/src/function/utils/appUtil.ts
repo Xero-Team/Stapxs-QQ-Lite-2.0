@@ -967,7 +967,7 @@ export function showReleaseHistory() {
  * Show the first-run guide without tracking launch counts or linking to
  * project sponsors and upstream pages.
  */
-export function checkOpenTimes() {
+export function checkFirstRunGuide() {
     const uiStore = useUIStore()
     // 使用引导
     const guide = localStorage.getItem('guide')

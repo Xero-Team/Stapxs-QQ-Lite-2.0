@@ -1051,7 +1051,7 @@ onMounted(() => {
         }
 
         App.checkUpdate() // 检查更新
-        App.checkOpenTimes() // 检查打开次数
+        App.checkFirstRunGuide() // 显示首次启动引导
         App.checkNotice() // 检查公告
         // 加载愚人节附加
         if (new Date().getMonth() == 3 && new Date().getDate() == 1) {
