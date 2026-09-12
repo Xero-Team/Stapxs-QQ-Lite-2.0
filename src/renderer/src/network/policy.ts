@@ -18,6 +18,16 @@ export function isExternalRequestAllowed(url: string, enabled: unknown): boolean
     }
 }
 
+/** Validate URLs before handing them to a browser or native shell. */
+export function isSafeExternalUrl(url: string): boolean {
+    try {
+        const parsed = new URL(url)
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    } catch {
+        return false
+    }
+}
+
 /** Keep a bounded, local-only audit trail without query strings or request data. */
 export function auditExternalRequest(url: string, purpose: string): void {
     try {

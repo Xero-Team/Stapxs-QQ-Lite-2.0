@@ -87,6 +87,7 @@ export function scrollToMsg(seqName: string, showAnimation: boolean, showHighlig
  * @param external 是否外部打开
  */
 export function openLink(url: string) {
+    if (!isSafeExternalUrl(url)) return
     // 判断是不是 Electron，是的话打开内嵌 iframe
     if (backend.isDesktop()) {
         const shell = window.electron?.shell
@@ -652,7 +653,7 @@ import horizontalCss from '@renderer/assets/css/append/mobile/append_mobile_hori
 import verticalCss from '@renderer/assets/css/append/mobile/append_mobile_vertical.css?raw'
 import { ActionType, LocalNotificationSchema } from '@capacitor/local-notifications'
 import { backend } from '@renderer/runtime/backend'
-import { auditExternalRequest, isExternalRequestAllowed } from '@renderer/network/policy'
+import { auditExternalRequest, isExternalRequestAllowed, isSafeExternalUrl } from '@renderer/network/policy'
 import { NoticeBodyV3 } from '../elements/system'
 import { wheelMask } from '../input'
 import { addTooltip, TooltipController } from '../tooltip'
