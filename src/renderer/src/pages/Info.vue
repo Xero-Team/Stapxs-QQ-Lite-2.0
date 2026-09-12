@@ -31,8 +31,7 @@
                     <header>
                         <span>{{ $t('介绍') }}</span>
                     </header>
-                    <span v-html=" chat.info.group_info.gIntro === undefined || chat.info.group_info.gIntro === '' ?
-                        $t('群主很懒，还没有群介绍哦～') : chat.info.group_info.gIntro" />
+                    <span v-html="safeGroupIntro" />
                     <div class="tags">
                         <div v-for="item in chat.info.group_info.tags" :key="item.md">
                             {{ item.tag }}
@@ -240,7 +239,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import { Connector } from '@renderer/function/connect'
 import { PopInfo, PopType } from '@renderer/function/base'
-import { toRaw, ref, nextTick } from 'vue'
+import { toRaw, ref, nextTick, computed } from 'vue'
 import { delay, getTrueLang } from '@renderer/function/utils/systemUtil'
 import { useAuthStore } from '@renderer/state/auth'
 import { useContactStore } from '@renderer/state/contact'
@@ -251,6 +250,7 @@ import {
     UserGroupElem,
 } from '@renderer/function/elements/information'
 import { qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
+import xss from 'xss'
 
 defineOptions({ name: 'ViewInfo' })
 
@@ -269,6 +269,14 @@ const emit = defineEmits<{
 }>()
 
 const { t: $t } = i18n.global
+
+const safeGroupIntro = computed(() => {
+    const intro = props.chat.info.group_info.gIntro
+    const fallback = $t('群主很懒，还没有群介绍哦～')
+    return typeof intro === 'string' && intro.length > 0
+        ? xss(intro, { whiteList: { br: [], strong: [], em: [], a: ['href', 'target', 'rel'] } })
+        : fallback
+})
 
 // Constants
 const trueLang = getTrueLang()
