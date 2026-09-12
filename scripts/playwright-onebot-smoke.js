@@ -99,10 +99,14 @@ async (page) => {
                     await smokePage.locator('#friendTab').waitFor({ state: 'visible' })
                     await friend.waitFor({ state: 'attached' })
                     await friend.evaluate((element) => {
-                        const visible = [...document.querySelectorAll('#user-20002')]
-                            .find((candidate) => (candidate instanceof HTMLElement) && candidate.offsetParent !== null)
-                        ;(visible ?? element).dispatchEvent(new MouseEvent('click', { bubbles: true }))
+                        const candidate = [...document.querySelectorAll('#user-20002')]
+                            .find((node) => {
+                                const rect = node.getBoundingClientRect()
+                                return rect.width > 0 && rect.height > 0
+                            })
+                        ;(candidate ?? element).click()
                     })
+                    await smokePage.locator('#bar-msg').click()
                     const input = smokePage.locator('#main-input')
                     await input.waitFor()
                     await input.fill('hello from Playwright')
