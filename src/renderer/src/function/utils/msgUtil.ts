@@ -263,18 +263,18 @@ export function parseMsgList(
  * @param message 待处理的消息对象
  * @returns 字符串
  */
-export function getMsgRawTxt(data: any): string {
+export function getMsgRawTxt(data: JsonRecord): string {
     const { $t } = app.config.globalProperties
     const chatStore = useChatStore()
 
-    const message = data.message as [{ [key: string]: any }]
+    const message = Array.isArray(data.message) ? data.message.map(asJsonRecord) : []
     const fromId = data.group_id ?? data.user_id
     let back = ''
     for (let i = 0; i < message.length; i++) {
         try {
             switch (message[i].type) {
                 case 'at':
-                    if (message[i].text == undefined) {
+                    if (typeof message[i].text !== 'string') {
                         // 群内才可以 at，如果 at 消息中没有 text 字段
                         // 尝试去群成员列表中找到对应的昵称，群成员列表只在当前打开的群才有
                         if (
@@ -296,7 +296,7 @@ export function getMsgRawTxt(data: any): string {
                     }
                 // eslint-disable-next-line
                 case 'text':
-                    back += message[i].text
+                    back += String(message[i].text ?? '')
                         .replaceAll('\n', ' ')
                         .replaceAll('\r', ' ')
                     break
@@ -307,11 +307,11 @@ export function getMsgRawTxt(data: any): string {
                     back += '[' + $t('表情') + ']'
                     break
                 case 'bface':
-                    back += message[i].text
+                    back += String(message[i].text ?? '')
                     break
                 case 'image':
                     back +=
-                        (!message[i].summary || message[i].summary == '') ? '[' + $t('图片') + ']' : message[i].summary
+                        (typeof message[i].summary !== 'string' || message[i].summary === '') ? '[' + $t('图片') + ']' : message[i].summary
                     break
                 case 'record':
                     back += '[' + $t('语音') + ']'
@@ -320,19 +320,23 @@ export function getMsgRawTxt(data: any): string {
                     back += '[' + $t('视频') + ']'
                     break
                 case 'file':
-                    back += '[' + $t('文件') + ']' + message[i].name
+                    back += '[' + $t('文件') + ']' + String(message[i].name ?? '')
                     break
                 case 'json': {
                     try {
-                        back += JSON.parse(message[i].data).prompt
+                        const rawData = message[i].data
+                        const card = typeof rawData === 'string' ? JSON.parse(rawData) as JsonRecord : undefined
+                        back += String(card?.prompt ?? '')
                     } catch (error) {
                         back += '[' + $t('卡片消息') + ']'
                     }
                     break
                 }
                 case 'xml': {
-                    let name = message[i].data.substring(
-                        message[i].data.indexOf('<source name="') + 14,
+                    const rawData = message[i].data
+                    const xml = typeof rawData === 'string' ? rawData : ''
+                    let name = xml.substring(
+                        xml.indexOf('<source name="') + 14,
                     )
                     name = name.substring(0, name.indexOf('"'))
                     back += '[' + name + ']'
