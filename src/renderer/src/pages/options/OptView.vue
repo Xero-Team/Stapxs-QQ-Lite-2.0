@@ -513,10 +513,15 @@ onMounted(() => {
         },
     )
     // 获取当前使用的图标
-    const Onebot = (window.Capacitor as any)?.Plugins?.Onebot
+    const capacitor = window.Capacitor as unknown as {
+        Plugins?: { Onebot?: { addListener: (event: string, cb: (data: unknown) => void) => void, getUsedIcon: () => void } }
+    }
+    const Onebot = capacitor.Plugins?.Onebot
     if (Onebot) {
-        Onebot.addListener('onebot:icon', (data: any) => {
-            usedIcon.value = data.name.replace('AppIcon', '')
+        Onebot.addListener('onebot:icon', (data: unknown) => {
+            if (typeof data === 'object' && data !== null && 'name' in data && typeof data.name === 'string') {
+                usedIcon.value = data.name.replace('AppIcon', '')
+            }
         })
         Onebot.getUsedIcon()
     }
@@ -826,15 +831,19 @@ function getAppendChatView() {
 
 function getIconList() {
     const iconList = import.meta.glob('@renderer/assets/img/icons/*.png', { eager: true })
-    const iconListInfo = [] as { name: string, icon: any }[]
+    const iconListInfo = [] as { name: string, icon: string }[]
     Object.keys(iconList).forEach((key: string) => {
         const name = key.split('/').pop()?.split('.')[0]
         const iconName = name?.replace('AppIcon', '')
         if( name && name.indexOf('AppIcon') >= 0 && iconName != undefined) {
             if(!settingsStore.darkMode && !iconName.endsWith('Dark')) {
-                iconListInfo.push({ name: iconName, icon: (iconList[key] as any).default })
+                const icon = iconList[key]
+                if (typeof icon === 'object' && icon !== null && 'default' in icon && typeof icon.default === 'string')
+                    iconListInfo.push({ name: iconName, icon: icon.default })
             } else if(settingsStore.darkMode && iconName.endsWith('Dark')) {
-                iconListInfo.push({ name: iconName.replace('Dark', ''), icon: (iconList[key] as any).default })
+                const icon = iconList[key]
+                if (typeof icon === 'object' && icon !== null && 'default' in icon && typeof icon.default === 'string')
+                    iconListInfo.push({ name: iconName.replace('Dark', ''), icon: icon.default })
             }
         }
     })
