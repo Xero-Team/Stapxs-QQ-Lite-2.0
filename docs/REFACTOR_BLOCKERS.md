@@ -14,3 +14,4 @@
 - Playwright CLI smoke passed against the production preview, covering the first screen, OneBot entry point, and the default disabled external-services setting.
 - Full repository ESLint still reports legacy errors and warnings. Targeted protocol, transport, storage, network-policy, and smoke files pass their checks.
 - `yarn check` was re-run after the Electron hardening work; the typecheck portion passes, while repository lint still reports 335 legacy errors (mostly `any` boundaries, generated bcui JavaScript, and legacy component naming). The failing files remain outside the migrated protocol/transport/storage gates.
+- The Capacitor OneBot connector now targets Capacitor 8 and TypeScript 5.5, and its web adapter builds successfully. The npx quick-start package no longer depends on the deprecated `request` module and keeps remote updates opt-in.

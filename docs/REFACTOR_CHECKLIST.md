@@ -30,7 +30,7 @@
 - [ ] 每次大版本升级单独提交，记录阻塞项（例如 TypeScript 与 vue-tsc/Vue 兼容性）和替代方案。
 - [x] 用维护中的库替换弃用或自研实现：Zod 做运行时校验，Dexie/idb 做 IndexedDB，标准 Web Crypto/系统 keychain 做密钥，成熟 Markdown/XSS 库做内容处理。
 - [ ] 移除重复跨端实现，统一平台适配接口；明确主桌面运行时，其他运行时保持兼容。
-- [ ] 升级 `ssqq.capacitor-onebot-connector` 和 npx 工具，消除 workspace 内部版本漂移和已知过时依赖（如 request）。
+- [x] 升级 `ssqq.capacitor-onebot-connector` 和 npx 工具，消除 workspace 内部版本漂移和已知过时依赖（如 request）。Connector 已升级到 Capacitor 8 / TypeScript 5.5；npx 工具已移除弃用的 `request`，使用 `fetch`、`semver` 和 TypeScript 5.6。
 
 ## 4. 规范化与类型安全
 
