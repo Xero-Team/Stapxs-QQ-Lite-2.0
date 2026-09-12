@@ -2,7 +2,7 @@
 name = "xero-qq-lite"
 version = "3.5.0"
 description = "一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。"
-authors = ["stapxs"]
+authors = ["Xero-Team"]
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
