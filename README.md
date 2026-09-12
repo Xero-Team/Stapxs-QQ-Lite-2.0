@@ -17,7 +17,7 @@
     <br />
     <a href="https://xeroteam.github.io/Stapxs-QQ-Lite-2.0/" target="blank"><strong>🌎 访问 DEMO</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
     <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases" target="blank"><strong>📦️ 下载程序</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-    <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/new?assignees=Stapxs&labels=%3Abug%3A+%E9%94%99%E8%AF%AF&template=----.md&title=%5B%E9%94%99%E8%AF%AF%5D" target="blank"><strong>💬 反馈问题</strong></a>
+    <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/new?labels=%3Abug%3A+%E9%94%99%E8%AF%AF&template=----.md&title=%5B%E9%94%99%E8%AF%AF%5D" target="blank"><strong>💬 反馈问题</strong></a>
     <br />
     <br />
     <strong>本网页应用仅供学习交流使用，请勿用于其他用途</strong><br>
@@ -26,14 +26,6 @@
 </p>
 
 ![view](README/view.png)
-
-## ☕️ 赞助项目
-<p align="center">
-    <a href="https://www.ifdian.net/a/stapxs" target="_blank">
-    <img src="README/sponsor.png" width="600">
-    </a>
-</p>
-https://www.ifdian.net/a/stapxs
 
 ## 社区版本
 以下是一些社区支持的版本，非常推荐大家试用：
@@ -92,15 +84,12 @@ npx ssqq-web hostname=127.0.0.1 port=8081
 
 ### > 使用 Docker 部署网页
 
-Xero QQ Lite 已经原生支持了 Docker 部署，使用命令
-``` bash
-docker pull ghcr.io/stapxs/stapxs-qq-lite-2.0:latest
+仓库不提供默认的第三方镜像地址。你可以从本仓库构建镜像，再按自己的 registry 发布和部署：
+
+```bash
+docker build -t xero-qq-lite:local .
+docker run --rm -p 8080:80 xero-qq-lite:local
 ```
-来拉取最新的镜像，如果您无法使用或者GHCR速度很慢，可以使用命令
-``` bash
-docker pull ghcr.nju.edu.cn/stapxs/stapxs-qq-lite-2.0:latest
-```
-来从镜像站拉取镜像，使用时请将容器内的```8080```端口对外开放，```80```端口可以忽略。
 ## 💬 提醒和问题
 以下是关于使用 QQ Bot 和第三方客户端的常见疑问，你也可以查看 [常见问题](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/117) issue 获取更多使用和部署相关的问题解答。
 

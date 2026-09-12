@@ -15,14 +15,14 @@
     "Package.swift",
     "CapacitorOnebotConnctor.podspec"
   ],
-  "author": "Stapx Steve [林槐]",
+  "author": "Xero-Team",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Stapxs/Stapxs-QQ-Lite-2.0.git"
+    "url": "git+https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0.git"
   },
   "bugs": {
-    "url": "https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/issues"
+    "url": "https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues"
   },
   "keywords": [
     "onebot",

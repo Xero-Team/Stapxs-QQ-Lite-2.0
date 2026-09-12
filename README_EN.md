@@ -14,7 +14,7 @@
     <br />
     <a href="https://xeroteam.github.io/Stapxs-QQ-Lite-2.0/" target="blank"><strong>🌎 Visit DEMO</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
     <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases" target="blank"><strong>📦️ Download</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-    <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/new?assignees=Stapxs&labels=%3Abug%3A+%E9%94%99%E8%AF%AF&template=----.md&title=%5B%E9%94%99%E8%AF%AF%5D" target="blank"><strong>💬 Report Issues</strong></a>
+    <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/new?labels=%3Abug%3A+%E9%94%99%E8%AF%AF&template=----.md&title=%5B%E9%94%99%E8%AF%AF%5D" target="blank"><strong>💬 Report Issues</strong></a>
     <br />
     <br />
     <strong>This web application is for learning and communication purposes only. Please do not use it for other purposes.</strong><br>
@@ -23,13 +23,6 @@
 </p>
 
 ![view](README/view.png)
-
-## ☕️ Sponsor the Project
-<p align="center">
-    <a href="https://www.ifdian.net/a/stapxs" target="_blank">
-    <img src="README/sponsor.png" width="600">
-    </a>
-</p>
 
 ## Community Versions
 The following are some community-supported versions, highly recommended to try:
@@ -88,15 +81,12 @@ npx ssqq-web hostname=127.0.0.1 port=8081
 
 ### > Deploy with Docker
 
-Xero QQ Lite natively supports Docker deployment. Use the command
-``` bash
-docker pull ghcr.io/stapxs/stapxs-qq-lite-2.0:latest
+The repository does not publish a default third-party image. Build and publish an image through a registry you control:
+
+```bash
+docker build -t xero-qq-lite:local .
+docker run --rm -p 8080:80 xero-qq-lite:local
 ```
-to pull the latest image. If you cannot access GHCR or it is too slow, you can use
-``` bash
-docker pull ghcr.nju.edu.cn/stapxs/stapxs-qq-lite-2.0:latest
-```
-to pull the image from a mirror. When running, expose port ```8080``` inside the container externally; port ```80``` can be ignored.
 
 ## 💬 Reminders and FAQs
 The following are common questions about using QQ Bots and third-party clients. You can also view the [FAQ](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/issues/117) issue for more usage and deployment-related answers.
