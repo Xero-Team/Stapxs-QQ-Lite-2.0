@@ -175,6 +175,28 @@ async (page) => {
                         request.action === 'send_private_msg'
                         && Array.isArray(request.params?.message)
                         && request.params.message.some((segment) => segment?.type === 'image'))
+
+                    // The file path uses the same transport but exercises the
+                    // upload queue and FileReader conversion first.
+                    await smokePage.locator('#choice-file').evaluate((input) => {
+                        const file = new File(['file smoke payload'], 'smoke.txt', { type: 'text/plain' })
+                        const transfer = new DataTransfer()
+                        transfer.items.add(file)
+                        input.files = transfer.files
+                        input.dispatchEvent(new Event('change', { bubbles: true }))
+                    })
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        const fileSent = requestPayloads.some((request) =>
+                            request.action === 'send_private_msg'
+                            && Array.isArray(request.params?.message)
+                            && request.params.message.some((segment) => segment?.type === 'file'))
+                        if (fileSent) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.fileSent = requestPayloads.some((request) =>
+                        request.action === 'send_private_msg'
+                        && Array.isArray(request.params?.message)
+                        && request.params.message.some((segment) => segment?.type === 'file'))
                 }
 
                 // Validate the persisted account type through the public settings format.
@@ -200,7 +222,8 @@ async (page) => {
                 if (!checks.historyIsNormalized || !checks.externalServicesDisabled
                     || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0
                     || (backend === 'Lagrange.OneBot' && accountId === 10001
-                        && (!messageFlow.sent || !messageFlow.received || !messageFlow.imageSent))) {
+                        && (!messageFlow.sent || !messageFlow.received
+                            || !messageFlow.imageSent || !messageFlow.fileSent))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })
