@@ -256,7 +256,7 @@
                                 <font-awesome-icon v-if="getMsgInfo(item.id) != ''" :icon="['fas', 'turn-up']" />
                             </div>
                             <MsgBody v-if="getMsg(item.id)"
-                                :data="getMsg(item.id, true)!"
+                                :data="(getMsg(item.id, true) || {}) as MsgItemElem"
                                 :type="'body'"
                                 :global-me="isMe ? 'Y' : ''" />
                             <a v-else class="msg-unknown">
@@ -409,7 +409,7 @@ import {
     getTrueLang,
     getViewTime } from '@renderer/function/utils/systemUtil'
 import { linkView } from '@renderer/function/utils/linkViewUtil'
-import { MenuEventData, MergeStackData } from '@renderer/function/elements/information'
+import { MenuEventData, MergeStackData, MsgItemElem } from '@renderer/function/elements/information'
 import { backend } from '@renderer/runtime/backend'
 import { i18n } from '@renderer/main'
 import { useUIStore } from '@renderer/state/ui'
@@ -432,8 +432,17 @@ import XmlSegComp from './msg-component/XmlSegComp.vue'
 import VoiceMsg from './VoiceMsg.vue'
 import { addMusic, MusicInfo } from './MusicPlayer.vue'
 
-type Msg = any
-type IUser = any
+type Msg = MsgItemElem
+type IUser = {
+    user_id: number
+    nickname?: string
+    card?: string
+    role?: string
+    level?: number
+    is_robot?: boolean
+    join_time?: number
+    banTime?: number
+}
 
 defineOptions({ name: 'MsgBody' })
 
@@ -446,7 +455,7 @@ const {
     globalMe,
     imageListHeader,
 } = defineProps<{
-    data: any
+    data: MsgItemElem
     selected?: boolean
     type?: 'merge' | 'body'
     globalMe?: string
@@ -523,14 +532,14 @@ function getAtMember(id: number): IUser | number {
     const re = getUserById(id) ?? id
     return re
 }
-function getUserById(id: number): IUser | undefined {
+function getUserById(id: number): IUser | number {
     if (chatStore.chatInfo.show.type === 'group') {
         if (!chatStore.chatInfo.info.group_members) return id
-        const user = chatStore.chatInfo.info.group_members.find((item: IUser) => item.user_id == id)
+        const user = chatStore.chatInfo.info.group_members.find((item) => item.user_id == id)
         if (user) return user
         else return id
     }else {
-        const user = contactStore.userList.find((item: IUser) => item.user_id === id)
+        const user = contactStore.userList.find((item) => item.user_id === id)
         if (user) return user
         else return id
     }
