@@ -615,7 +615,7 @@ function getAtClass(who: number | string) {
     return back
 }
 
-function getAtName(item: { [key: string]: any }) {
+function getAtName(item: MsgItemElem) {
     if (item.qq == 'all') {
         return '@' + $t('全体成员')
     }
@@ -935,7 +935,7 @@ function getMsg(message_id: string, filter: boolean = false) {
             'xml',
             'forward'
         ])
-        const needTextFallback = (msg.message ?? []).some((seg: any) => textFallbackTypes.has(seg?.type))
+        const needTextFallback = (msg.message ?? []).some((seg: MsgItemElem) => textFallbackTypes.has(seg?.type ?? ''))
         if (needTextFallback) {
             return filter ? null : false
         }
@@ -946,8 +946,8 @@ function getMsg(message_id: string, filter: boolean = false) {
                 'forward',
             ])
             let hasMedia = false
-            const message = (msg.message ?? []).filter((seg: any) => {
-                if (!mediaTypes.has(seg?.type)) {
+            const message = (msg.message ?? []).filter((seg: MsgItemElem) => {
+                if (!mediaTypes.has(seg?.type ?? '')) {
                     return true
                 }
                 if (hasMedia) {
