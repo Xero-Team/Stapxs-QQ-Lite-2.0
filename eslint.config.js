@@ -17,6 +17,14 @@ export default [
             'src/renderer/public/bcui/js/**',
             'src/renderer/public/sw.js',
             'src/renderer/src/assets/img/qq-face/**',
+            'dist_electron/**',
+            'dist_capacitor/**',
+            '.gitignore',
+            'src/renderer/public/**',
+            'src/renderer/src/assets/**',
+            'src/mobile/**',
+            'ssqq.capacitor-onebot-connector/**',
+            'ssqq.napcat-plugin/**',
         ],
     },
     { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
@@ -32,7 +40,9 @@ export default [
         rules: {
             'no-unused-vars': 'off',
             '@typescript-eslint/no-explicit-any': 'error',
-            '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+            '@typescript-eslint/no-unused-vars': ['error', {
+                argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none',
+            }],
             'no-console': 'warn',
             'no-debugger': 'warn',
         },
@@ -46,7 +56,9 @@ export default [
         plugins: { '@typescript-eslint': tseslint },
         rules: {
             'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+            '@typescript-eslint/no-unused-vars': ['error', {
+                argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none',
+            }],
         },
     },
     {
