@@ -1263,15 +1263,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/android@npm:^6.0.0":
-  version: 6.2.1
-  resolution: "@capacitor/android@npm:6.2.1"
-  peerDependencies:
-    "@capacitor/core": ^6.2.0
-  checksum: 10c0/2c571d02bb98a84aff9c721b9a989d3beb452205f8b3018ef69b52005aa433cf62a6e0d49472e604ac3ac654455b2be75a63aa109e2c7640191a4e46aab30c40
-  languageName: node
-  linkType: hard
-
 "@capacitor/android@npm:^8.0.0":
   version: 8.3.1
   resolution: "@capacitor/android@npm:8.3.1"
@@ -1368,15 +1359,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/core@npm:^6.0.0":
-  version: 6.2.1
-  resolution: "@capacitor/core@npm:6.2.1"
-  dependencies:
-    tslib: "npm:^2.1.0"
-  checksum: 10c0/09562ab35724eda31f9675fba11905b60d8bc31831e1d4b8f08476c043ca5bf4e5f674ec5ba63a5544e759c2269cb23b6bfe246ad6e998ecceef3f0e8d0129bb
-  languageName: node
-  linkType: hard
-
 "@capacitor/core@npm:^8.0.0":
   version: 8.3.1
   resolution: "@capacitor/core@npm:8.3.1"
@@ -1398,15 +1380,6 @@ __metadata:
   bin:
     docgen: bin/docgen
   checksum: 10c0/2c51f060144db356cffac25f298d3e08aa27384206219f344927313ab7e82712b237bd7c188cbcec2bba5513e2269e3bffa2f91a1cd0b4422f96335ad0e32526
-  languageName: node
-  linkType: hard
-
-"@capacitor/ios@npm:^6.0.0":
-  version: 6.2.1
-  resolution: "@capacitor/ios@npm:6.2.1"
-  peerDependencies:
-    "@capacitor/core": ^6.2.0
-  checksum: 10c0/abad20dfee938f14bbf2c8201c97e40c0be8f198a0fccb40a8bac7790fc2960a73dd2b8eff59182412cb20e5b0274abebf48fddaea575da683b44d2aee98bf9b
   languageName: node
   linkType: hard
 
@@ -4855,10 +4828,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "capacitor-onebot-connctor@workspace:ssqq.capacitor-onebot-connector"
   dependencies:
-    "@capacitor/android": "npm:^6.0.0"
-    "@capacitor/core": "npm:^6.0.0"
+    "@capacitor/android": "npm:^8.0.0"
+    "@capacitor/core": "npm:^8.0.0"
     "@capacitor/docgen": "npm:^0.2.2"
-    "@capacitor/ios": "npm:^6.0.0"
+    "@capacitor/ios": "npm:^8.0.0"
     "@ionic/eslint-config": "npm:^0.4.0"
     "@ionic/prettier-config": "npm:^4.0.0"
     "@ionic/swiftlint-config": "npm:^2.0.0"
@@ -4868,9 +4841,9 @@ __metadata:
     rimraf: "npm:^6.0.1"
     rollup: "npm:^4.24.0"
     swiftlint: "npm:^2.0.0"
-    typescript: "npm:~4.1.5"
+    typescript: "npm:~5.5.2"
   peerDependencies:
-    "@capacitor/core": ^6.0.0
+    "@capacitor/core": ^8.0.0
   languageName: unknown
   linkType: soft
 
@@ -12239,16 +12212,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~4.1.5":
-  version: 4.1.6
-  resolution: "typescript@npm:4.1.6"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/afc8e2d2cc0d3dceb91d592326a259b0db88f60fa3419e4b2b47bf5e321027f5da1426cd6862acf0c29fde5d3224f7c8337ad24bcd8da8e25514cc53b750b129
-  languageName: node
-  linkType: hard
-
 "typescript@npm:~4.2.4":
   version: 4.2.4
   resolution: "typescript@npm:4.2.4"
@@ -12256,6 +12219,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/add3dcc8661784e2959d8411f6a2f1c75b063532aae0112bed4a217f58c0f6da194da6a05bc40dc1b2b171e5c595e88370d5fa97fdb680c47fbb8fab4190e02d
+  languageName: node
+  linkType: hard
+
+"typescript@npm:~5.5.2":
+  version: 5.5.4
+  resolution: "typescript@npm:5.5.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/422be60f89e661eab29ac488c974b6cc0a660fb2228003b297c3d10c32c90f3bcffc1009b43876a082515a3c376b1eefcce823d6e78982e6878408b9a923199c
   languageName: node
   linkType: hard
 
@@ -12269,16 +12242,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A~4.1.5#optional!builtin<compat/typescript>":
-  version: 4.1.6
-  resolution: "typescript@patch:typescript@npm%3A4.1.6#optional!builtin<compat/typescript>::version=4.1.6&hash=4a8eb8"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/84238344c2b1fead8ab239fef22f821edd88c29a989e281441fb4344fceceacd70cf56991d3084b95799c4b0a7aec997b6aec5489db453db5260a9bd70ee09d7
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@npm%3A~4.2.4#optional!builtin<compat/typescript>":
   version: 4.2.4
   resolution: "typescript@patch:typescript@npm%3A4.2.4#optional!builtin<compat/typescript>::version=4.2.4&hash=334f98"
@@ -12286,6 +12249,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/c18a8bba07cbc5918f6224238199af421dd94a08e3342f5af269297ddf69eafe3fbaea560eb81def28382a420617844ee16740cced11895d3f1821943d1b00e7
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A~5.5.2#optional!builtin<compat/typescript>":
+  version: 5.5.4
+  resolution: "typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=379a07"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/73409d7b9196a5a1217b3aaad929bf76294d3ce7d6e9766dd880ece296ee91cf7d7db6b16c6c6c630ee5096eccde726c0ef17c7dfa52b01a243e57ae1f09ef07
   languageName: node
   linkType: hard
 

@@ -7,15 +7,15 @@ export class OnebotWeb extends WebPlugin implements OnebotPlugin {
         console.warn('本插件不提供 Web 端实现。');
         return Promise.resolve({ url: options.url });
     }
-    getHtml(options: { url: string; }): Promise<{ data: string; }> {
+    getHtml(_options: { url: string; }): Promise<{ data: string; }> {
         console.warn('本插件不提供 Web 端实现。');
         return Promise.resolve({ data: '' });
     }
-    getApi(options: { url: string; }): Promise<{ data: string; }> {
+    getApi(_options: { url: string; }): Promise<{ data: string; }> {
         console.warn('本插件不提供 Web 端实现。');
         return Promise.resolve({ data: '' });
     }
-    getImageData(options: { url: string; }): Promise<{ data: string; }> {
+    getImageData(_options: { url: string; }): Promise<{ data: string; }> {
         console.warn('本插件不提供 Web 端实现。');
         return Promise.resolve({ data: '' });
     }
