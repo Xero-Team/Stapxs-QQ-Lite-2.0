@@ -899,27 +899,29 @@ export function getDifferencesWithRanges(a: string, b: string) {
  * lgr专用发送消息，懒得写了，不做通用适配，胡乱应付下吧
  * @param msg 消息内容
  */
-function lgrSendMsg(id: string, msg: any, type: string, cb: string) {
-    if (msg[0].type === 'node') {
-        const sendMsgs = [] as any[]
-        msg.forEach((item) => {
-            const msg = {
-                type: item.type,
+function lgrSendMsg(id: string, msg: string | JsonRecord[], type: string, cb: string) {
+    const first = Array.isArray(msg) ? asJsonRecord(msg[0]) : undefined
+    if (first?.type === 'node') {
+        const sendMsgs: JsonRecord[] = []
+        for (const item of msg) {
+            const node = asJsonRecord(item)
+            const data = asJsonRecord(node.data)
+            const content = Array.isArray(data.content) ? data.content.flatMap((rawSegment) => {
+                const segment = asJsonRecord(rawSegment)
+                if (typeof segment.type !== 'string') return []
+                const copy = { ...segment }
+                delete copy.type
+                return [{ type: segment.type, data: copy }]
+            }) : []
+            sendMsgs.push({
+                type: node.type,
                 data: {
-                    user_id: item.data.user_id.toString(),
-                    nickname: item.data.nickname,
-                    content: item.data.content.map((item) => {
-                        const copy = { ...item }
-                        delete copy.type
-                        return {
-                            type: item.type,
-                            data: { ...copy }
-                        }
-                    }),
+                    user_id: String(data.user_id ?? ''),
+                    nickname: data.nickname,
+                    content,
                 },
-            }
-            sendMsgs.push(msg)
-        })
+            })
+        }
         if (type === 'group') {
             Connector.send(
                 'send_group_forward_msg',
