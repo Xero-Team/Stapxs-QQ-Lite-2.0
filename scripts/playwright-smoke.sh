@@ -8,4 +8,6 @@ cli=(npx --yes --package @playwright/cli playwright-cli -s=xero-qq-lite-smoke)
 snapshot="$(${cli[@]} snapshot)"
 grep -q "Xero QQ Lite" <<<"$snapshot"
 grep -q "连接到 OneBot\|Connect to OneBot" <<<"$snapshot"
+"${cli[@]}" eval "() => { const item = [...document.querySelectorAll('li')].find((el) => el.textContent?.includes('设置') || el.textContent?.includes('Options')); item?.click(); return Boolean(item); }" | grep -q "true"
+"${cli[@]}" eval "() => document.querySelector('input[name=enable_external_services]')?.checked === false" | grep -q "true"
 "${cli[@]}" close
