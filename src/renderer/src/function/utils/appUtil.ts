@@ -83,6 +83,10 @@ function parseNotice(value: unknown): NoticeBodyV3 | undefined {
     return candidate as NoticeBodyV3
 }
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
+}
+
 /**
  * 滚动到目标消息（不自动加载）
  * @param seqName DOM 名（chat-xx）
@@ -768,8 +772,8 @@ export async function loadAppendStyle() {
     }
 
     // 透明 UI 附加样式
-    let subVersion = backend.release?.split(' ')?.[1]?.split('.') as any
-    subVersion = subVersion ? Number(subVersion[2]) : 0
+    const subVersionParts = backend.release?.split(' ')?.[1]?.split('.')
+    const subVersion = subVersionParts ? Number(subVersionParts[2]) : 0
     if (backend.isDesktop() &&
         (platform == 'darwin' || (platform == 'win32' && subVersion > 22621))) {
         import('@renderer/assets/css/append/append_vibrancy.css').then(() => {
@@ -779,11 +783,13 @@ export async function loadAppendStyle() {
     if (backend.isDesktop() && platform == 'linux') {
         const gnomeExtInfo = await backend.call(undefined, 'sys:getGnomeExt', true)
         if (gnomeExtInfo) {
-            gnomeExtInfo.then((info: any) => {
+            gnomeExtInfo.then((rawInfo: unknown) => {
+                const info = asRecord(rawInfo)
+                if (!info) return
+                const whitelist = typeof info.whitelist === 'string' ? info.whitelist : ''
                 if (
                     info['enable-all'] == 'true' ||
-                    (info['whitelist'] != undefined &&
-                        info['whitelist'].indexOf('xero-qq-lite')) > 0
+                    whitelist.indexOf('xero-qq-lite') > 0
                 ) {
                     import(
                         '@renderer/assets/css/append/append_vibrancy.css'
@@ -1149,7 +1155,7 @@ export function checkNotice() {
 * @param data 数据
 */
 export function BackendRequest(type: 'GET' | 'POST', url: string,
-    cookies: string[], data: any = undefined) {
+    cookies: string[], data: unknown = undefined) {
     backend.call(undefined, 'sys:requestHttp', false, {
         type: type,
         url: url,
@@ -1164,7 +1170,7 @@ export function BackendRequest(type: 'GET' | 'POST', url: string,
 * @returns 映射表
 */
 export function loadJsonMap(name: string) {
-    let msgPath = undefined as { [key: string]: any } | undefined
+    let msgPath: Record<string, unknown> | undefined
     if (name !== undefined) {
         try {
             const msgPathList = import.meta.glob(
@@ -1173,29 +1179,30 @@ export function loadJsonMap(name: string) {
                 return key.includes(name)
             })
             if (msgPathKey) {
-                msgPath = (msgPathList[msgPathKey] as any).default
+                msgPath = asRecord(asRecord(msgPathList[msgPathKey])?.default)
             }
             if (msgPath) {
-                logger.system('开发者，请稍等一下（翻找），正在为阁下加载 ' + msgPath.name + ' 的服务映射表。')
-                if (msgPath.redirect) {
+                const mapName = typeof msgPath.name === 'string' ? msgPath.name : name
+                logger.system('开发者，请稍等一下（翻找），正在为阁下加载 ' + mapName + ' 的服务映射表。')
+                const redirect = typeof msgPath.redirect === 'string' ? msgPath.redirect : undefined
+                if (redirect) {
                     // eslint-disable-next-line
                     const newMsgPathKey = Object.keys(msgPathList).find((key) => {
-                        return key.includes(msgPath?.redirect)
+                        return key.includes(redirect)
                     })
-                    let newMsgPath = undefined as
-                        { [key: string]: any } | undefined
+                    let newMsgPath: Record<string, unknown> | undefined
                     if (newMsgPathKey) {
-                        newMsgPath = (msgPathList[newMsgPathKey] as any).default
+                        newMsgPath = asRecord(asRecord(msgPathList[newMsgPathKey])?.default)
                     }
                     // 合并映射表
                     if (newMsgPath) {
                         msgPath = {
                             ...newMsgPath,
                             ...msgPath,
-                            name: msgPath.name,
+                            name: mapName,
                         }
                     }
-                    logger.system('非常抱歉开发者，已帮阁下将映射表重定向加载为 ：' + msgPath?.name + ' （慌张）')
+                    logger.system('非常抱歉开发者，已帮阁下将映射表重定向加载为 ：' + (typeof msgPath.name === 'string' ? msgPath.name : name) + ' （慌张）')
                 }
             } else {
                 logger.system('开发者，没有找到你需要的映射表……')
