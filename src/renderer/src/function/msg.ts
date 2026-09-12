@@ -1731,7 +1731,7 @@ function saveClassInfo(
     settingsStore.classes = list
 }
 
-async function saveMsg(msg: any, append = undefined as undefined | string) {
+async function saveMsg(msg: MessagePayload, append = undefined as undefined | string) {
     const uiStore = useUIStore()
     const authStore = useAuthStore()
     const chatStore = useChatStore()
@@ -1757,13 +1757,13 @@ async function saveMsg(msg: any, append = undefined as undefined | string) {
             }
         }
         // 将消息中 message 字段为空数组的消息过滤掉
-        list = list.filter((item: any) => {
-            return item.message.length > 0
+        list = list.filter((item: MessagePayload) => {
+            return Array.isArray(item.message) && item.message.length > 0
         })
 
         // 上拉历史时按时间戳作为边界（兼容增量/全量两种分页模式）。
         if (hasHistoryBeforeTime && append === 'top') {
-            list = list.filter((item: any) => {
+            list = list.filter((item: MessagePayload) => {
                 const t = Number(item?.time)
                 return Number.isFinite(t) && t <= historyBeforeTime
             })
@@ -2413,7 +2413,7 @@ function newMsg(_: string, data: any) {
                     tag: `${sessionId}/${data.message_id}`,
                     icon:
                         data.message_type === 'group' ? avatarUrl(id, 'group') : avatarUrl(id),
-                    image: undefined as any,
+                    image: undefined,
                     type: data.group_id ? 'group' : 'user',
                     is_important: isImportant,
                 } as NotifyInfo
@@ -2455,8 +2455,11 @@ function updateSysInfo(
 
 // ==============================================================
 
-function formatMessageData(data: any, isGroup: boolean) {
-    const name = data.sender?.card && data.sender.card !== '' ? data.sender.card : data.sender?.nickname
+function formatMessageData(data: MessagePayload, isGroup: boolean) {
+    const sender = asMessagePayload(data.sender)
+    const card = typeof sender?.card === 'string' ? sender.card : ''
+    const nickname = typeof sender?.nickname === 'string' ? sender.nickname : undefined
+    const name = card !== '' ? card : nickname
 
     return {
         message_id: data.message_id,
