@@ -111,9 +111,11 @@ the current evidence rather than being suppressed.
 ## Dependency audit refresh (2026-09-13)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
-`markdown-it` 14.3.2, `uuid` 11.1.1, and `ws` 8.21.3. The audit no longer
-reports those packages. Remaining advisories are limited to the deprecated
-ESLint 8 line, Rollup 4.54.0 pulled by the connector workspace, and deprecated
-vue-i18n 10; their upgrades require compatibility work and
-remain release blockers. Contract tests pass after the dependency refresh;
-Yarn's optional `sharp` native build is still environment-dependent.
+`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 3.2.6. A fresh
+recursive audit still exits 1 with 137 advisory entries across 54 packages
+(2 critical, 79 high, 50 moderate, 6 low). Remaining exposure is primarily
+transitive build tooling (`sharp`, `tar`, `postcss`, `nanoid`, Rollup), plus
+Vitest's current transitive mocker advisory and deprecated Vue I18n 10. These
+upgrades require compatibility work and remain release blockers. Contract
+tests pass after the dependency refresh; Yarn's optional `sharp` native build
+is still environment-dependent.
