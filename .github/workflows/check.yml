@@ -34,7 +34,7 @@ jobs:
                   node-version: 22.x
                   cache: 'yarn'
             - name: 更新依赖
-              run: yarn
+              run: yarn install --immutable --mode=skip-build
             # 代码检查
             - name: 前端代码检查
               run: yarn check

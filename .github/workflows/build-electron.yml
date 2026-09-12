@@ -33,7 +33,7 @@ jobs:
                   node-version: 22.x
                   cache: 'yarn'
             - name: 更新依赖
-              run: yarn
+              run: yarn install --immutable --mode=skip-build
 
             - name: 构建 Electron 应用
               if: matrix.os == 'windows-2022'

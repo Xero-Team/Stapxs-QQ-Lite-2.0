@@ -68,7 +68,7 @@ jobs:
                   cache: 'yarn'
             # 更新依赖
             - name: Install
-              run: yarn
+              run: yarn install --immutable --mode=skip-build
             # 构建
             - name: Build
               run: yarn build
