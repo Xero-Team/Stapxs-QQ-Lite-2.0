@@ -18,6 +18,7 @@
     "check": "yarn lint && yarn typecheck",
     "lint": "eslint . --fix",
     "lint:tauri": "cargo check --manifest-path src/tauri/Cargo.toml",
+    "deps:inventory": "node ./scripts/generate-dependency-inventory.mjs",
     "update:icon": "npx @capacitor/assets generate --assetPath 'src/mobile/_assets' --iosProject 'src/mobile/ios/App' --androidProject 'src/mobile/android' --android --ios",
     "update:version": "node ./scripts/update-version.cjs android ios",
     "dev": "vite dev",

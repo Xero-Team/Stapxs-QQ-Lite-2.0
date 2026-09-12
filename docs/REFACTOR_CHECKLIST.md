@@ -5,7 +5,7 @@
 ## 0. 基线与治理
 
 - [x] 建立 `refactor` 分支、变更日志和 ADR 目录；记录当前 Web/Electron/Tauri/Capacitor 构建基线。
-- [ ] 安装 Node 22+、Corepack/Yarn，锁定包管理器和 CI 版本；生成依赖清单与许可证清单。
+- [x] 安装 Node 22+、Corepack/Yarn，锁定包管理器和 CI 版本；生成依赖清单与许可证清单。
 - [x] 为 OneBot 11 消息、事件、API 建立兼容性样例集；覆盖常见 Bot（NapCat、Lagrange 等）。
 - [ ] 增加 CI 门禁：格式、ESLint、TypeScript、依赖审计、Web 构建、Rust check、Playwright smoke。
 
