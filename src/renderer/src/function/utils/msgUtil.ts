@@ -29,6 +29,11 @@ import {
 } from '@renderer/protocol/message'
 
 const logger = new Logger()
+type JsonRecord = Record<string, unknown>
+
+function asJsonRecord(value: unknown): JsonRecord {
+    return typeof value === 'object' && value !== null ? value as JsonRecord : {}
+}
 
 /**
  * 根据 JSON Path 映射数据返回需要的内容体
@@ -342,11 +347,12 @@ export function getMsgRawTxt(data: any): string {
  * @param data
  * @returns CQCode 字符串
  */
-export function parseJSONCQCode(data: any) {
+export function parseJSONCQCode(data: unknown) {
     if (!Array.isArray(data)) return ''
-    return serializeCqSegments(data.map((item: any) => {
-        const { type, data: nestedData, ...rest } = item ?? {}
-        const fields = nestedData && typeof nestedData === 'object' ? nestedData : rest
+    return serializeCqSegments(data.map((item: unknown) => {
+        const record = asJsonRecord(item)
+        const { type, data: nestedData, ...rest } = record
+        const fields = nestedData && typeof nestedData === 'object' && !Array.isArray(nestedData) ? nestedData as JsonRecord : rest
         return { type: String(type ?? 'text'), data: Object.fromEntries(
             Object.entries(fields).map(([key, value]) => [key, String(value ?? '')]),
         ) }
@@ -358,12 +364,13 @@ export function parseJSONCQCode(data: any) {
  * @param msg CQCode 消息
  * @returns 消息对象
  */
-export function parseCQ(data: any) {
-    const parsed = parseCqText(typeof data?.message === 'string' ? data.message : '')
-    if (parsed.reply) data.source = parsed.reply
-    data.message = parsed.segments
+export function parseCQ(data: unknown): JsonRecord {
+    const record = asJsonRecord(data)
+    const parsed = parseCqText(typeof record.message === 'string' ? record.message : '')
+    if (parsed.reply) record.source = parsed.reply
+    record.message = parsed.segments
     logger.debug('解析 CQ 消息结果: ' + JSON.stringify(parsed.segments))
-    return data
+    return record
 }
 
 /**
@@ -582,8 +589,8 @@ export function updateBaseOnMsgList() {
     topList.sort(sortFun)
     normalList.sort(sortFun)
 
-    let onMsgList = [] as any[]
-    let groupAssistList = [] as any[]
+    let onMsgList: Array<UserFriendElem & UserGroupElem> = []
+    let groupAssistList: Array<UserFriendElem & UserGroupElem> = []
     if (settingsStore.sysConfig.bubble_sort_user) {
         // 将 normalList 进行拆分
         const shouldShowInMainList = (item: UserFriendElem & UserGroupElem) => {
@@ -670,9 +677,10 @@ export function pokeAnime(animeBody: HTMLElement | null, windowInfo = null as {
     }
 }
 
-export function sendMsgAppendInfo(msg: any) {
-    if (msg.message) {
-        msg.message.forEach(() => {
+export function sendMsgAppendInfo(msg: unknown) {
+    const record = asJsonRecord(msg)
+    if (Array.isArray(record.message)) {
+        record.message.forEach(() => {
             // TODO: 消息附加功能，暂时没用到
         })
     }
@@ -824,11 +832,13 @@ export async function getImageUrlData(imageUrl: string): Promise<{ buffer: Uint8
  * 判断这个消息是不是[已删除]
  * @param msg
  */
-export function isDeleteMsg(msg: any): boolean {
+export function isDeleteMsg(msg: unknown): boolean {
+    const record = asJsonRecord(msg)
+    const sender = asJsonRecord(record.sender)
     const authStore = useAuthStore()
-    if (!['message', 'message_sent'].includes(msg.post_type)) return false
-    if (msg.sender.user_id !== authStore.loginInfo.uin) return false
-    if (msg.raw_message !== '&#91;已删除&#93;') return false
+    if (!['message', 'message_sent'].includes(String(record.post_type))) return false
+    if (sender.user_id !== authStore.loginInfo.uin) return false
+    if (record.raw_message !== '&#91;已删除&#93;') return false
     return true
 }
 
