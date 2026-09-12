@@ -219,7 +219,7 @@ export function parseMsgList(
                     if (!Array.isArray(content)) {
                         return
                     }
-                    content.forEach((item: any) => {
+                    content.forEach((item: JsonRecord) => {
                         if (item.type == type) {
                             item[key] = jp.query(item, value as string)[0]
                         }
