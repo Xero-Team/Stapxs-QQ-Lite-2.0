@@ -125,9 +125,7 @@ Before building, please install the dependencies. Make sure `yarn` is installed:
 yarn install
 ```
 
-Additionally, Xero QQ Lite uses the Amap (AutoNavi) API to display location-sharing maps. A default Amap API Key is provided in the `.env` file. If you plan to self-host, it is recommended to apply for your own API Key at [here](https://lbs.amap.com/dev/key/app) and replace the default value.
-
-We strongly recommend using your own API Key, as the default Key has a usage limit.
+Location cards show their address by default. To load maps, configure your own [Amap API Key](https://lbs.amap.com/dev/key/app) in the deployment environment and enable external services in Settings. The project does not provide a default key.
 
 ### > Build the Web Page
 
@@ -139,12 +137,14 @@ The following are the commands to build the project. The build output will be pl
 # Run local debug server
 yarn dev
 
-# Lint and auto-format code
+# Lint code (use yarn lint:fix for automatic fixes)
 yarn lint
 
 # Build the application
 yarn build
 ```
+
+See [regression checks](docs/TESTING.md) for contract tests and Playwright smoke commands.
 
 #### SSE Mode
 Xero QQ Lite supports SSE mode. In this mode, the application connects to the QQ Bot backend via HTTP SSE + HTTP API, providing a faster and more lightweight connection; you can even disable SSE event push entirely and communicate only via HTTP API.

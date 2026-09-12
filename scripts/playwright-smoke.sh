@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_dir"
 base_url="${XERO_QQ_LITE_SMOKE_URL:-http://127.0.0.1:4173}"
-cli=(npx --yes --package @playwright/cli playwright-cli -s=xero-qq-lite-smoke)
+export PLAYWRIGHT_MCP_OUTPUT_DIR="$repo_dir/output/playwright"
+cli=(npx --yes --package @playwright/cli@0.1.19 playwright-cli "-s=xero-qq-lite-smoke-$$")
+trap '"${cli[@]}" close >/dev/null 2>&1 || true' EXIT
 
 "${cli[@]}" open "$base_url"
 snapshot="$(${cli[@]} snapshot)"
@@ -18,4 +22,3 @@ grep -q "连接到 OneBot\|Connect to OneBot" <<<"$snapshot"
 offline_snapshot="$(${cli[@]} snapshot)"
 grep -q "连接到 OneBot\|Connect to OneBot" <<<"$offline_snapshot"
 "${cli[@]}" eval "() => performance.getEntriesByType('resource').every((entry) => !/^https?:/.test(entry.name) || entry.name.startsWith(location.origin))" | grep -q "true"
-"${cli[@]}" close

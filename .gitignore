@@ -19,3 +19,5 @@ notice_local.json
 *.tsbuildinfo
 .npmrc
 *.log*
+.playwright-cli/
+output/playwright/

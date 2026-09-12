@@ -127,9 +127,7 @@ git submodule update --init
 yarn install
 ```
 
-另外，Xero QQ Lite 使用了高德地图 API 来显示位置共享地图。`.env` 文件中提供了一个默认的高德地图 API Key，如果你打算自行部署，建议在 [这里](https://lbs.amap.com/dev/key/app) 申请属于你自己的 API Key 并替换默认值。
-
-我们强烈建议使用自己的 API Key，因为默认 Key 有使用次数限制。
+位置卡片默认只显示地址。需要地图时，请自行申请 [高德地图 API Key](https://lbs.amap.com/dev/key/app)，在部署环境中配置，并在设置中启用外部服务。项目不提供默认 Key。
 
 ### > 构建 Web 页面
 
@@ -141,12 +139,14 @@ Xero QQ Lite 是一个基于 Vue 的单页应用，如果你想自行部署到�
 # 运行本地调试
 yarn dev
 
-# 代码检查和自动格式化
+# 代码检查（自动修复使用 yarn lint:fix）
 yarn lint
 
 # 构建应用
 yarn build
 ```
+
+协议测试和 Playwright 冒烟测试的运行方式见 [验证说明](docs/TESTING.md)。
 
 #### SSE 模式
 Xero QQ Lite 支持 SSE 模式。在此模式下，应用将以 HTTP SSE + HTTP API 的方式连接到 QQ Bot 后端，提供更快速和轻量化的连接；甚至可以直接禁用 SSE 通知推送，仅使用 HTTP API 进行通信。
