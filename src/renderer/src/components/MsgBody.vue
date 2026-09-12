@@ -1035,7 +1035,7 @@ function getTxtUrl(view: any) {
 
 function hasCard() {
     let hasCard = false
-    data.message.forEach((item: any) => {
+    data.message.forEach((item: MsgItemElem) => {
         if (item.type === 'json' || item.type === 'xml') {
             hasCard = true
         }
@@ -1045,7 +1045,7 @@ function hasCard() {
 
 function hasMarkdown() {
     let hasMarkdown = false
-    data.message.forEach((item: any) => {
+    data.message.forEach((item: MsgItemElem) => {
         if (item.type === 'markdown') {
             hasMarkdown = true
         }
@@ -1172,7 +1172,7 @@ function openMerge(){
     chatStore.mergeMsgStack.push(mergeData)
 }
 
-function isFace(item: any) {
+function isFace(item: MsgItemElem) {
     if (item.asface) return true
     else if (item.subType == 7) return true
     else if (item.subType == 1) return true
@@ -1197,14 +1197,14 @@ onMounted(() => {
         () => {
             senderInfo.value =
                 chatStore.chatInfo.info.group_members.filter(
-                    (item: any) => {
+                    (item: MsgItemElem) => {
                         return item.user_id == data.sender.user_id
                     },
                 )[0]
         },
     )
     senderInfo.value = chatStore.chatInfo.info.group_members.filter(
-        (item: any) => {
+        (item: MsgItemElem) => {
             return item.user_id == data.sender.user_id
         },
     )[0]
