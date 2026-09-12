@@ -507,14 +507,14 @@ const noticeFunctions = {
     /**
      * 戳一戳
      */
-    poke: (_: string, msg: { [key: string]: any }) => {
+    poke: (_: string, msg: MessagePayload) => {
         const { $t } = app.config.globalProperties
         const authStore = useAuthStore()
         const chatStore = useChatStore()
 
         const groupId = msg.group_id
         const userIds = [msg.user_id, msg.target_id]
-        const info = msg.raw_info
+        const info = Array.isArray(msg.raw_info) ? msg.raw_info : []
 
         // 如果的当前打开的会话
         if (groupId == chatStore.chatInfo.show.id) {
@@ -543,13 +543,15 @@ const noticeFunctions = {
             })
             // 遍历内容段
             let getQQTimes = 0
-            info.forEach((item: any) => {
-                switch (item.type) {
+            info.forEach((item) => {
+                const itemPayload = asMessagePayload(item)
+                if (!itemPayload) return
+                switch (stringField(itemPayload, 'type')) {
                     case 'img':
-                        str += `<img src="${backend.proxyUrl(item.src)}"/>`
+                        str += `<img src="${backend.proxyUrl(stringField(itemPayload, 'src') ?? '')}"/>`
                         break
                     case 'nor':
-                        str += item.txt
+                        str += stringField(itemPayload, 'txt') ?? ''
                         break
                     case 'qq': {
                         str += userInfo[getQQTimes].txt
