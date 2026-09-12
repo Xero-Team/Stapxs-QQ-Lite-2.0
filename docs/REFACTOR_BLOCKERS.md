@@ -94,3 +94,13 @@ storage and network modules and runs as part of `yarn typecheck`.
 `tests/browser/tsconfig.json` enforces the same flags for the XML harness.
 The migration must expand to the Web and Node projects before the full strict
 item can be checked off. No compiler flags were disabled to pass these checks.
+
+## Dependency audit refresh (2026-09-13)
+
+Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
+`markdown-it` 14.3.2, and `uuid` 11.1.1. The audit no longer reports those
+packages. Remaining advisories are limited to the deprecated ESLint 8 line,
+Rollup 4.54.0 pulled by the connector workspace, Vitest 2.1.9, deprecated
+vue-i18n 10, and `ws` 8.18.3; their upgrades require compatibility work and
+remain release blockers. Contract tests pass after the dependency refresh;
+Yarn's optional `sharp` native build is still environment-dependent.
