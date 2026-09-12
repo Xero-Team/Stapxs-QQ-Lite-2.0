@@ -258,24 +258,24 @@
             </div>
         </Transition>
         <Transition name="modal">
-            <div v-if="uiStore.popBoxList.length > 0" id="pop-box" class="pop-box">
+            <div v-if="activePopBox" id="pop-box" class="pop-box">
                 <div :class="'pop-box-body ss-card' +
-                         (uiStore.popBoxList[0].full ? ' full' : '') +
+                         (activePopBox.full ? ' full' : '') +
                          (get('option_view_no_window') == true ? '' : ' window')"
                     :style="{ 'margin-bottom': get('fs_adaptation') > 0 ? `${40 + Number(get('fs_adaptation'))}px` : '' }">
-                    <header v-show="uiStore.popBoxList[0].title != undefined">
-                        <div v-if="uiStore.popBoxList[0].svg != undefined">
-                            <font-awesome-icon :icon="['fas', uiStore.popBoxList[0].svg]" />
+                    <header v-show="activePopBox.title != undefined">
+                        <div v-if="activePopBox.svg != undefined">
+                            <font-awesome-icon :icon="['fas', activePopBox.svg]" />
                         </div>
-                        <a>{{ uiStore.popBoxList[0].title }}</a>
-                        <font-awesome-icon v-if="uiStore.popBoxList[0].allowClose != false"
+                        <a>{{ activePopBox.title }}</a>
+                        <font-awesome-icon v-if="activePopBox.allowClose != false"
                             :icon="['fas', 'xmark']" @click="removePopBox" />
                     </header>
-                    <div v-if="uiStore.popBoxList[0].html" v-html="sanitizePopupHtml(uiStore.popBoxList[0].html)" />
-                    <component :is="uiStore.popBoxList[0].template" v-else :data="uiStore.popBoxList[0].data"
-                        v-bind="uiStore.popBoxList[0].templateValue" />
-                    <div v-show="uiStore.popBoxList[0].button" class="button">
-                        <button v-for="(button, index) in uiStore.popBoxList[0].button"
+                    <div v-if="activePopBox.html" v-html="sanitizePopupHtml(activePopBox.html)" />
+                    <component :is="activePopBox.template" v-else :data="activePopBox.data"
+                        v-bind="activePopBox.templateValue" />
+                    <div v-show="activePopBox.button" class="button">
+                        <button v-for="(button, index) in activePopBox.button"
                             :key="'pop-box-btn' + index" :class="'ss-button' + (button.master == true ? ' master' : '')"
                             @click="button.fun">
                             {{ button.text }}
@@ -287,7 +287,7 @@
                             :style="{ 'margin': `-${2 * (index - 1)}px ${(20 * index - 1 - 2 * (index - 1))}px 0 ${(20 * index - 1 - 2 * (index - 1))}px` }" />
                     </div>
                 </div>
-                <div @click="popQuickClose(uiStore.popBoxList[0].allowQuickClose != false && uiStore.popBoxList[0].allowClose != false)" />
+                <div @click="popQuickClose(activePopBox.allowQuickClose != false && activePopBox.allowClose != false)" />
             </div>
         </Transition>
         <!-- 全局搜索栏 -->
@@ -364,6 +364,7 @@ const sse = import.meta.env.VITE_APP_SSE_MODE == 'true'
 const get = Option.get
 const popInfo = new PopInfo()
 const appMsgs = popList
+const activePopBox = computed(() => uiStore.popBoxList[0])
 const loadHistory = App.loadHistory
 const isNarrowLayout = shallowRef(window.innerWidth <= 500)
 
