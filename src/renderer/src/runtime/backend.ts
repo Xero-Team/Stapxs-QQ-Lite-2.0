@@ -22,6 +22,10 @@ function asUnknownFunction(value: unknown): UnknownFunction | undefined {
     return typeof value === 'function' ? value as UnknownFunction : undefined
 }
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
+}
+
 export const backend = {
     type: 'web' as 'electron' | 'tauri' | 'capacitor' | 'web',
     platform: undefined as 'win32' | 'darwin' | 'linux' | 'android' | 'ios' | 'web' | undefined,
@@ -37,7 +41,7 @@ export const backend = {
         plugins: CapacitorPluginRegistry,
         vConsole: VConsole
     } | undefined,
-    listener: undefined as ((event: string, ...args: unknown[]) => void) | undefined,
+    listener: undefined as UnknownFunction | undefined,
 
     isDesktop() {
         return this.type == 'electron' || this.type == 'tauri'
@@ -107,13 +111,13 @@ export const backend = {
         if (window.electron != undefined) {
             this.type = 'electron';
             this.function = window.electron.ipcRenderer;
-            this.listener = window.electron.ipcRenderer.on as unknown as (event: string, ...args: unknown[]) => void;
+            this.listener = window.electron.ipcRenderer.on as unknown as UnknownFunction;
         } else if (window.__TAURI_INTERNALS__ != undefined) {
             this.type = 'tauri';
             this.function = {
                 invoke: (await import('@tauri-apps/api/core')).invoke
             }
-            this.listener = (await import('@tauri-apps/api/event')).listen as unknown as (event: string, ...args: unknown[]) => void;
+            this.listener = (await import('@tauri-apps/api/event')).listen as unknown as UnknownFunction;
         } else if (window.Capacitor != undefined && window.Capacitor.isNativePlatform()) {
             this.type = 'capacitor';
             const capacitor = window.Capacitor as unknown as CapacitorBridge
@@ -125,9 +129,9 @@ export const backend = {
                     theme: useSettingsStore().darkMode ? 'dark' : 'light',
                 })
             }
-            this.listener = (type: string, name: string, callBack: (...args: unknown[]) => void) => {
+            this.listener = ((type: string, name: string, callBack: UnknownFunction) => {
                 plugins[type]?.addListener?.(name, callBack)
-            }
+            }) as unknown as UnknownFunction
         }
 
 
@@ -248,8 +252,9 @@ export const backend = {
                     }
                     if (!functionGet) throw new Error('Capacitor method is unavailable')
                     const back = await functionGet(args[0])
-                    if (Object.prototype.toString.call(back) === '[object Object]' && Object.keys(back).length == 1) {
-                        return back[Object.keys(back)[0]]
+                    const backRecord = asRecord(back)
+                    if (backRecord && Object.keys(backRecord).length == 1) {
+                        return backRecord[Object.keys(backRecord)[0]]
                     } else {
                         return back
                     }
