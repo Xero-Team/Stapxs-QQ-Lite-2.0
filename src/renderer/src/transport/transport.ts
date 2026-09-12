@@ -92,3 +92,69 @@ export class WebSocketTransport implements Transport {
         return () => this.handlers.delete(handler)
     }
 }
+
+export class HttpTransport implements Transport {
+    private currentState: TransportState = 'idle'
+    private readonly handlers = new Set<(payload: unknown) => void>()
+
+    constructor(private readonly endpoint: string, private readonly headers: Record<string, string> = {}) {}
+    get state(): TransportState { return this.currentState }
+
+    async connect(): Promise<void> { this.currentState = 'authenticated' }
+
+    async send(payload: unknown, options: TransportRequest = {}): Promise<void> {
+        this.currentState = 'connecting'
+        await withTimeout(async (signal) => {
+            const response = await fetch(this.endpoint, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json', ...this.headers },
+                body: JSON.stringify(payload),
+                signal,
+            })
+            if (!response.ok) throw new TransportError(`HTTP transport failed (${response.status})`, 'network')
+            const data: unknown = await response.json()
+            this.handlers.forEach((handler) => handler(data))
+            this.currentState = 'authenticated'
+        }, options).catch((error: unknown) => {
+            this.currentState = 'error'
+            throw error
+        })
+    }
+
+    async close(): Promise<void> { this.currentState = 'closed' }
+    onMessage(handler: (payload: unknown) => void): () => void { this.handlers.add(handler); return () => this.handlers.delete(handler) }
+}
+
+export interface EventSourceLike {
+    onopen: (() => void) | null
+    onmessage: ((event: { data: string }) => void) | null
+    onerror: (() => void) | null
+    close(): void
+}
+
+export class SseTransport implements Transport {
+    private source: EventSourceLike | undefined
+    private currentState: TransportState = 'idle'
+    private readonly handlers = new Set<(payload: unknown) => void>()
+
+    constructor(private readonly endpoint: string) {}
+    get state(): TransportState { return this.currentState }
+    connect(options: TransportRequest = {}): Promise<void> {
+        return withTimeout((signal) => new Promise<void>((resolve, reject) => {
+            const Source = globalThis.EventSource as unknown as new (url: string) => EventSourceLike
+            this.currentState = 'connecting'
+            const source = new Source(this.endpoint)
+            this.source = source
+            source.onopen = () => { this.currentState = 'authenticated'; resolve() }
+            source.onmessage = (event) => {
+                try { this.handlers.forEach((handler) => handler(JSON.parse(event.data) as unknown)) }
+                catch { this.currentState = 'error' }
+            }
+            source.onerror = () => { this.currentState = 'error'; reject(new TransportError('SSE connection failed', 'network')) }
+            signal.addEventListener('abort', () => source.close(), { once: true })
+        }), options)
+    }
+    async send(): Promise<void> { throw new TransportError('SSE is receive-only; use HttpTransport for API calls', 'protocol') }
+    async close(): Promise<void> { this.source?.close(); this.source = undefined; this.currentState = 'closed' }
+    onMessage(handler: (payload: unknown) => void): () => void { this.handlers.add(handler); return () => this.handlers.delete(handler) }
+}
