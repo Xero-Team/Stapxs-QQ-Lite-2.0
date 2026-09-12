@@ -36,5 +36,18 @@ jobs:
               run: yarn npm audit --all --recursive
             - name: Web build
               run: yarn build
+            - name: Install Chromium for Playwright smoke
+              run: npx --yes playwright install --with-deps chromium
+            - name: Start Web preview
+              run: |
+                  yarn preview --host 127.0.0.1 > /tmp/xero-qq-lite-preview.log 2>&1 &
+                  for attempt in $(seq 1 30); do
+                    curl --fail --silent http://127.0.0.1:4173/ >/dev/null && exit 0
+                    sleep 1
+                  done
+                  cat /tmp/xero-qq-lite-preview.log
+                  exit 1
+            - name: Playwright smoke
+              run: bash scripts/playwright-smoke.sh
             - name: Rust check
               run: yarn lint:tauri
