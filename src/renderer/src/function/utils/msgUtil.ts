@@ -30,6 +30,10 @@ import {
 
 const logger = new Logger()
 type JsonRecord = Record<string, unknown>
+type MessagePathMap = JsonRecord & {
+    source?: string
+    list?: Record<string, string>
+}
 
 function asJsonRecord(value: unknown): JsonRecord {
     return typeof value === 'object' && value !== null ? value as JsonRecord : {}
@@ -43,30 +47,31 @@ function asJsonRecord(value: unknown): JsonRecord {
  */
 export function getMsgData(
     name: string,
-    msg: { [key: string]: any },
-    map: string | { [key: string]: any },
+    msg: JsonRecord,
+    map: string | MessagePathMap,
 ) {
     let back = undefined as any
     // 解析数据
     if (map != undefined) {
-        if (typeof map == 'string' || map.source != undefined) {
+        if (typeof map == 'string' || typeof map.source === 'string') {
             try {
                 back = jp.query(
                     msg,
-                    replaceJPValue(typeof map == 'string' ? map : map.source),
+                    replaceJPValue(typeof map == 'string' ? map : map.source!),
                 )
-                if (back && typeof map != 'string' && map.list != undefined) {
+                const listMap = typeof map == 'string' ? undefined : map.list
+                if (back && listMap != undefined) {
                     const backList: JsonRecord[] = []
                     back.forEach((item) => {
                         const itemObj: JsonRecord = {}
-                        Object.keys(map.list).forEach((key: string) => {
-                            if (map.list[key] && map.list[key] != '') {
-                                if (map.list[key].startsWith('/'))
+                        Object.keys(listMap).forEach((key: string) => {
+                            if (listMap[key] && listMap[key] != '') {
+                                if (listMap[key].startsWith('/'))
                                     itemObj[key] =
-                                        item[map.list[key].substring(1)]
+                                        item[listMap[key].substring(1)]
                                 else {
-                                    let nameKey = map.list[key]
-                                    let regexKey = null
+                                    let nameKey = listMap[key]
+                                    let regexKey: string | null = null
                                     if (nameKey.indexOf('@') > -1) {
                                         const [name, key] = nameKey.split('@')
                                         nameKey = name
@@ -106,7 +111,10 @@ export function getMsgData(
                     !key.startsWith('_')
                 )
                     try {
-                        data[key] = jp.query(msg, replaceJPValue(map[key]))[0]
+                        const path = map[key]
+                        if (typeof path === 'string') {
+                            data[key] = jp.query(msg, replaceJPValue(path))[0]
+                        }
                     } catch (ex) {
                         logger.error(
                             ex as Error,
