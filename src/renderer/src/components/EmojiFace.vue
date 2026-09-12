@@ -27,6 +27,6 @@
 import Emoji from '@renderer/function/model/emoji';
 
 const { emoji = undefined } = defineProps<{
-    emoji?: Emoji
+    emoji?: Emoji | undefined
 }>()
 </script>

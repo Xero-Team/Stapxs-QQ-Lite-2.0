@@ -450,7 +450,7 @@ interface ViewerInjection {
             open: (image: Img) => void
             openBySrc: (image: Img, source: string) => void
         }
-    }
+    } | undefined
 }
 
 defineOptions({ name: 'MsgBody' })
@@ -623,6 +623,7 @@ function getAtName(item: MsgItemElem) {
     } else {
         for (let i = 0; i < chatStore.chatInfo.info.group_members.length; i++) {
             const user = chatStore.chatInfo.info.group_members[i]
+            if (!user) continue
             if (user.user_id == Number(item.qq)) {
                 return ('@' + (user.card != '' && user.card != null? user.card: user.nickname))
             }
@@ -700,7 +701,8 @@ async function imageLoaded(event: Event) {
     if (aspectRatio > 2.5) {
         img.classList.add('long-img')
         try {
-            const picLight = ( await getForegroundToneGridFromImageUrl(backend.proxyUrl(img.src), 0.4))[1][1] === 'light'
+            const toneGrid = await getForegroundToneGridFromImageUrl(backend.proxyUrl(img.src), 0.4)
+            const picLight = toneGrid.at(1)?.at(1) === 'light'
             if(picLight) {
                 img.classList.add('light')
             }
@@ -821,7 +823,9 @@ async function parseText(index: number) {
                         const ogTags = {} as {[key: string]: string}
                         let match: string[] | null
                         while ((match = ogRegex.exec(html)) !== null) {
-                            ogTags[`og:${match[1]}`] = match[2]
+                            const key = match[1]
+                            const value = match[2]
+                            if (key !== undefined && value !== undefined) ogTags[`og:${key}`] = value
                         }
                         linkData = ogTags
                     }
@@ -891,7 +895,7 @@ function linkViewPicErr() {
 
 function hiddenUserInfo() {
     if (chatStore.chatInfo.info.now_member_info !== undefined) {
-        chatStore.chatInfo.info.now_member_info = undefined
+        delete chatStore.chatInfo.info.now_member_info
     }
 }
 
@@ -899,11 +903,12 @@ function getMsgInfo(message_id: string) {
     const list = chatStore.messageList.filter((item) => {
         return item.message_id == message_id
     })
-    if (list.length === 1 && list[0].message.length > 0) {
+    const first = list[0]
+    if (first && first.message.length > 0) {
         const time = Intl.DateTimeFormat(trueLang,
-                getTimeConfig(new Date(getViewTime(list[0].time))))
-            .format(getViewTime(getViewTime(list[0].time)))
-        return (list[0].sender.nickname + ' ' + time)
+                getTimeConfig(new Date(getViewTime(first.time))))
+            .format(getViewTime(getViewTime(first.time)))
+        return (first.sender.nickname + ' ' + time)
     }
     else return ''
 
@@ -913,7 +918,7 @@ function getMsgStr(message_id: string) {
     const list = chatStore.messageList.filter((item) => {
         return item.message_id == message_id
     })
-    if (list.length === 1) {
+    if (list.length === 1 && list[0]) {
         return getMsgRawTxt(list[0])
     }
     return ''
@@ -1067,7 +1072,7 @@ function sendPoke() {
 
 async function showPock() {
     if (data.message_id ==
-        chatStore.messageList[chatStore.messageList.length - 1].message_id &&
+        chatStore.messageList.at(-1)?.message_id &&
         (new Date().getTime() - getViewTime(data.time)) / 1000 < 5) {
         let windowInfo = null as {
             x: number
@@ -1093,7 +1098,7 @@ function isSuperFaceMsg() {
     if (settingsStore.sysConfig.use_super_face === false) return false
     if (data.message.length !== 1) return false
     const seg = data.message.at(0)
-    if (seg.type !== 'face') return
+    if (!seg || seg.type !== 'face') return
     return Emoji.allSuperList.has(Number(seg.id))
 }
 
@@ -1104,18 +1109,20 @@ function getMdHTML(str: string, id: string) {
     const imgs = div.getElementsByTagName('img')
     for(let i=0; i<imgs.length; i++) {
         const img = imgs[i]
+        if (!img) continue
         const alt = img.getAttribute('alt')
         if(alt) {
             const size = alt.split('#')
             if(size.length == 3) {
-                img.style.width = size[1]
-                img.style.height = size[2]
+                img.style.width = size[1] ?? ''
+                img.style.height = size[2] ?? ''
             }
         }
     }
     const links = div.getElementsByTagName('a')
     for(let i=0; i<links.length; i++) {
         const link = links[i]
+        if (!link) continue
         const href = link.getAttribute('href')
         if(href) {
             link.setAttribute('data-link', href)
@@ -1208,14 +1215,14 @@ onMounted(() => {
                     (item: MsgItemElem) => {
                         return item.user_id == data.sender.user_id
                     },
-                )[0]
+                )[0] ?? null
         },
     )
     senderInfo.value = chatStore.chatInfo.info.group_members.filter(
         (item: MsgItemElem) => {
             return item.user_id == data.sender.user_id
         },
-    )[0]
+    )[0] ?? null
     for (let i = 0; i < data.message.length; i++) {
         const item = data.message[i]
         if(item.type == 'text') {
