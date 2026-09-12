@@ -2,6 +2,15 @@
 /// <reference types="vite-plugin-pwa/client" />
 
 declare module 'vue3-danmaku'
+
+// Border Card UI currently ships an in-repository Vue SFC that is not strict-mode safe.
+// Keep its public component boundary typed while the upstream package is migrated.
+declare module 'vue3-bcui/packages/bc-tab' {
+    import type { DefineComponent } from 'vue'
+    const component: DefineComponent
+    export default component
+}
+
 declare module '*.vue' {
     import type { DefineComponent } from 'vue'
     const component: DefineComponent

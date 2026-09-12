@@ -302,8 +302,10 @@ function viewRevolve(value: boolean) {
 
 function updateWinColorOpt(value: boolean) {
     if (value == true) {
-        backend.addListener(undefined, 'sys:WinColorChanged', (_, params) => {
-            updateWinColor(params, backend.platform == 'win32' ? 'windows' : 'macos')
+        backend.addListener(undefined, 'sys:WinColorChanged', (_event: unknown, params: unknown) => {
+            if (typeof params === 'string') {
+                updateWinColor(params, backend.platform == 'win32' ? 'windows' : 'macos')
+            }
         })
         loadWinColor()
     }

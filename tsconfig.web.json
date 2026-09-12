@@ -18,6 +18,9 @@
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"
+      ],
+      "vue3-bcui/packages/bc-tab": [
+        "src/renderer/src/types/bc-tab-shim.d.ts"
       ]
     }
   }

@@ -87,6 +87,20 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
 }
 
+type RuntimeRecord = Record<string, unknown>
+
+function runtimeString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : typeof value === 'number' ? String(value) : undefined
+}
+
+function runtimeNumber(value: unknown): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+}
+
+function runtimePayload(event: RuntimeRecord, data?: RuntimeRecord): RuntimeRecord {
+    return asRecord(data) ?? asRecord(event.payload) ?? {}
+}
+
 /**
  * 滚动到目标消息（不自动加载）
  * @param seqName DOM 名（chat-xx）
@@ -457,9 +471,11 @@ export function createIpc() {
     const contactStore = useContactStore()
     const uiStore = useUIStore()
     // 服务发现
-    backend.addListener(undefined, 'sys:serviceFound', (event, data) => {
-        const info = data ?? event.payload
-        setQuickLogin(info.address, info.port)
+    backend.addListener(undefined, 'sys:serviceFound', (event: RuntimeRecord, data?: RuntimeRecord) => {
+        const info = runtimePayload(event, data)
+        const address = runtimeString(info.address)
+        const port = runtimeNumber(info.port)
+        if (address !== undefined && port !== undefined) setQuickLogin(address, port)
     })
     // bot 功能
     backend.addListener(undefined, 'bot:flushUser', () => {
@@ -470,19 +486,23 @@ export function createIpc() {
         option.remove('auto_connect')
         Connector.close()
     })
-    backend.addListener(undefined, 'bot:quickReply', (event, data) => {
-        const info = data ?? event.payload
-        sendMsgRaw(info.id, info.type,
-            parseMsg(info.content, [{ type: 'reply', id: String(info.msg) }], []), true)
+    backend.addListener(undefined, 'bot:quickReply', (event: RuntimeRecord, data?: RuntimeRecord) => {
+        const info = runtimePayload(event, data)
+        const id = runtimeString(info.id)
+        const type = runtimeString(info.type)
+        const content = runtimeString(info.content)
+        const msg = runtimeString(info.msg)
+        if (id === undefined || type === undefined || content === undefined || msg === undefined) return
+        sendMsgRaw(id, type, parseMsg(content, [{ type: 'reply', id: msg }], []), true)
         // 去消息列表内寻找，去除新消息标记
-        const item = contactStore.baseOnMsgList.get(info.id)
+        const item = contactStore.baseOnMsgList.get(Number(id))
         if (item) {
             if (item.new_msg) {
                 item.new_msg = false
                 contactStore.newMsgCount--
             }
             item.highlight = undefined
-            contactStore.baseOnMsgList.set(Number(info.id), item)
+            contactStore.baseOnMsgList.set(Number(id), item)
         }
     })
     // 应用功能
@@ -501,32 +521,45 @@ export function createIpc() {
     backend.addListener(undefined, 'sys:handleUri', () => {
         logger.info('收到 URI 处理请求')
     })
-    backend.addListener(undefined, 'app:changeTab', (event, name) => {
+    backend.addListener(undefined, 'app:changeTab', (event: RuntimeRecord, name?: unknown) => {
         window.focus()
-        document.getElementById('bar-' + (name ?? event.payload).toLowerCase())?.click()
+        const tabName = runtimeString(name) ?? runtimeString(event.payload)
+        if (tabName !== undefined) document.getElementById('bar-' + tabName.toLowerCase())?.click()
     })
-    backend.addListener(undefined, 'app:openLink', (event, link) => {
-        openLink(link ?? event.payload)
+    backend.addListener(undefined, 'app:openLink', (event: RuntimeRecord, link?: unknown) => {
+        const target = runtimeString(link) ?? runtimeString(event.payload)
+        if (target !== undefined) openLink(target)
     })
-    backend.addListener(undefined, 'app:error', (event, text) => {
-        new Logger().add(LogType.ERR, text ?? event.payload)
+    backend.addListener(undefined, 'app:error', (event: RuntimeRecord, text?: unknown) => {
+        const message = runtimeString(text) ?? runtimeString(event.payload)
+        if (message !== undefined) new Logger().add(LogType.ERR, message)
     })
-    backend.addListener(undefined, 'app:jumpChat', (event, data) => {
-        const info = data ?? event.payload
-        jumpToChat(info.userId, info.msgId)
-        new Notify().closeAll(info.userId)
+    backend.addListener(undefined, 'app:jumpChat', (event: RuntimeRecord, data?: RuntimeRecord) => {
+        const info = runtimePayload(event, data)
+        const userId = runtimeString(info.userId)
+        const msgId = runtimeString(info.msgId)
+        if (userId === undefined || msgId === undefined) return
+        jumpToChat(userId, msgId)
+        new Notify().closeAll(userId)
     })
     // 后端连接模式
-    backend.addListener(undefined, 'onebot:onopen', (event, data) => {
-        const info = data ?? event.payload
-        Connector.onopen(info.address, info.token)
+    backend.addListener(undefined, 'onebot:onopen', (event: RuntimeRecord, data?: RuntimeRecord) => {
+        const info = runtimePayload(event, data)
+        const address = runtimeString(info.address) ?? login.address
+        const token = runtimeString(info.token)
+        Connector.onopen(address, token)
     })
-    backend.addListener(undefined, 'onebot:onmessage', (event, message) => {
-        Connector.onmessage(message ?? event.payload)
+    backend.addListener(undefined, 'onebot:onmessage', (event: RuntimeRecord, message?: unknown) => {
+        const payload = runtimeString(message) ?? runtimeString(event.payload)
+        if (payload !== undefined) Connector.onmessage(payload)
     })
-    backend.addListener(undefined, 'onebot:onclose', (event, data) => {
-        const info = data ?? event.payload
-        Connector.onclose(info.code, info.reason || info.message, info.address, info.token)
+    backend.addListener(undefined, 'onebot:onclose', (event: RuntimeRecord, data?: RuntimeRecord) => {
+        const info = runtimePayload(event, data)
+        const code = runtimeNumber(info.code)
+        const reason = runtimeString(info.reason) ?? runtimeString(info.message)
+        const address = runtimeString(info.address)
+        const token = runtimeString(info.token)
+        if (code !== undefined) Connector.onclose(code, reason, address ?? login.address, token)
     })
 }
 
@@ -538,26 +571,40 @@ export async function loadMobile() {
     // Capacitor：相关初始化
     if (backend.isMobile()) {
         // 注册回调监听
-        backend.addListener('Onebot', 'onebot:event', (data) => {
-            const msg = JSON.parse(data.data)
-            switch (data.type) {
+        backend.addListener('Onebot', 'onebot:event', (data: RuntimeRecord) => {
+            const rawData = runtimeString(data.data)
+            const eventType = runtimeString(data.type)
+            if (rawData === undefined || eventType === undefined) return
+            let msg: RuntimeRecord
+            try {
+                msg = asRecord(JSON.parse(rawData)) ?? {}
+            } catch {
+                return
+            }
+            switch (eventType) {
                 case 'onopen': {
                     login.creating = false
                     Connector.onopen(login.address, login.token)
                     break
                 }
-                case 'onmessage': Connector.onmessage(data.data); break
+                case 'onmessage': Connector.onmessage(rawData); break
                 case 'onclose': {
                     login.creating = false
-                    Connector.onclose(msg.code, msg.message, login.address, login.token)
+                    const code = runtimeNumber(msg.code) ?? 1006
+                    Connector.onclose(code, runtimeString(msg.message), login.address, login.token)
                     break
                 }
                 case 'onerror': {
                     login.creating = false
-                    popInfo.add(PopType.ERR, $t('连接失败') + ': ' + msg.type, false);
+                    popInfo.add(PopType.ERR, $t('连接失败') + ': ' + (runtimeString(msg.type) ?? 'unknown'), false);
                     break
                 }
-                case 'onServiceFound': setQuickLogin(msg.address, msg.port); break
+                case 'onServiceFound': {
+                    const address = runtimeString(msg.address)
+                    const port = runtimeNumber(msg.port)
+                    if (address !== undefined && port !== undefined) setQuickLogin(address, port)
+                    break
+                }
                 default: break
             }
         })
@@ -592,20 +639,21 @@ export async function loadMobile() {
                 }] as ActionType[]
             })
             // 注册相关事件
-            backend.addListener('LocalNotifications', 'localNotificationActionPerformed', (info) => {
+            backend.addListener('LocalNotifications', 'localNotificationActionPerformed', (info: RuntimeRecord) => {
                 const contactStore = useContactStore()
-                const notification =
-                    info.notification as LocalNotificationSchema
-                if (info.actionId == 'tap') {
+                const notification = asRecord(info.notification) as unknown as LocalNotificationSchema | undefined
+                const actionId = runtimeString(info.actionId)
+                if (notification === undefined || actionId === undefined) return
+                if (actionId == 'tap') {
                     // PS：通知被点击后会自动被关闭，所以这里不需要处理
                     jumpToChat(notification.extra.userId,
                         notification.extra.msgId)
-                } else if (info.actionId == 'REPLY_ACTION') {
+                } else if (actionId == 'REPLY_ACTION') {
                     // 快速回复
                     sendMsgRaw(
                         notification.extra.userId,
                         notification.extra.chatType,
-                        parseMsg(info.inputValue ?? '', [{ type: 'reply', id: String(notification.extra.msgId) }], []),
+                        parseMsg(runtimeString(info.inputValue) ?? '', [{ type: 'reply', id: String(notification.extra.msgId) }], []),
                         true
                     )
                     // 去消息列表内寻找，去除新消息标记

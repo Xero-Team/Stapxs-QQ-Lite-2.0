@@ -130,7 +130,7 @@
                             v-for="(item, index) in chat.info.group_notices ?? []"
                             :key="'bulletins-' + index"
                             :data="item"
-                            :index="index" />
+                            :index="Number(index)" />
                     </div>
                     <div v-if="!chat.info.group_notices || chat.info.group_notices.length === 0"
                         style="text-align: center; padding: 20px; color: var(--color-text-3);">

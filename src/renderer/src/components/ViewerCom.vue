@@ -356,6 +356,10 @@ function resetModify() {
     modify.rotate = 0
     autoFit()
 }
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
+}
 /**
  * 自动匹配大小
  */
@@ -417,12 +421,16 @@ function init() {
         img.crossOrigin = 'anonymous'
 
     if(backend.type === 'capacitor' && backend.function && 'plugins' in backend.function && 'CapacitorHttp' in backend.function.plugins) {
-        const capacitorHttp = backend.function.plugins.CapacitorHttp
-        capacitorHttp.get({
+        backend.call('CapacitorHttp', 'get', true, {
             url: currentImg.value.src,
             responseType: 'blob',
-        }).then((r: any) => {
-            img.src = 'data:image/png;base64,' + r.data
+        }).then((result: unknown) => {
+            const data = asRecord(result)?.data
+            if (typeof data === 'string') {
+                img.src = 'data:image/png;base64,' + data
+            } else {
+                img.src = currentImg.value?.src || ''
+            }
         }).catch(() => {
             img.src = currentImg.value?.src || ''
         })

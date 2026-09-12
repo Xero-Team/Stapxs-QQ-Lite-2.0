@@ -11,9 +11,10 @@ const logger = new Logger()
 const popInfo = new PopInfo()
 
 type UnknownFunction = (...args: unknown[]) => unknown
+type ListenerCallback = (...args: never[]) => unknown
 interface CapacitorPlugin {
-    addListener?: (name: string, callback: UnknownFunction) => void
-    [key: string]: UnknownFunction | ((name: string, callback: UnknownFunction) => void) | undefined
+    addListener?: (name: string, callback: ListenerCallback) => void
+    [key: string]: UnknownFunction | ((name: string, callback: ListenerCallback) => void) | undefined
 }
 type CapacitorPluginRegistry = Record<string, CapacitorPlugin>
 type CapacitorBridge = CapacitorGlobal & Record<string, unknown>
@@ -129,7 +130,7 @@ export const backend = {
                     theme: useSettingsStore().darkMode ? 'dark' : 'light',
                 })
             }
-            this.listener = ((type: string, name: string, callBack: UnknownFunction) => {
+            this.listener = ((type: string, name: string, callBack: ListenerCallback) => {
                 plugins[type]?.addListener?.(name, callBack)
             }) as unknown as UnknownFunction
         }
@@ -288,7 +289,7 @@ export const backend = {
      * @param name 事件名称
      * @param callBack 回调函数
      */
-    addListener(type: string | undefined, name: string, callBack: UnknownFunction) {
+    addListener(type: string | undefined, name: string, callBack: ListenerCallback) {
         if(this.listener) {
             if(this.isDesktop()) {
                 this.listener(name, callBack)
@@ -307,9 +308,10 @@ export const backend = {
      * @param name 事件名称
      * @param callBack 要移除的回调函数
      */
-    removeListener(_type: string | undefined, name: string, callBack: UnknownFunction) {
+    removeListener(_type: string | undefined, name: string, callBack: ListenerCallback) {
         if(this.isDesktop() && this.function && 'removeListener' in this.function) {
-            this.function.removeListener(name, callBack)
+            type RemoveListener = Parameters<typeof this.function.removeListener>[1]
+            this.function.removeListener(name, callBack as unknown as RemoveListener)
             return
         }
         // Capacitor 和 Web 不支持移除监听
