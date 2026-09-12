@@ -74,8 +74,6 @@ jobs:
               run: bash scripts/playwright-xml-card-smoke.sh
             - name: Local storage migration and rollback smoke
               run: bash scripts/playwright-storage-smoke.sh
-            - name: IndexedDB migration and rollback smoke
-              run: bash scripts/playwright-storage-smoke.sh
             - name: Playwright OneBot login smoke
               run: bash scripts/playwright-onebot-smoke.sh
             - name: Rust check

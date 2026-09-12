@@ -7,6 +7,16 @@ on:
                 description: "应用版本"
                 required: true
                 type: string
+            publish:
+                description: "是否推送到镜像仓库；默认只构建本地镜像"
+                required: false
+                default: false
+                type: boolean
+            image_name:
+                description: "Docker Hub 镜像名"
+                required: false
+                default: ""
+                type: string
         secrets:
             DOCKER_PASSWORD:
                 required: true
@@ -36,25 +46,40 @@ jobs:
               uses: docker/setup-buildx-action@1583c0f09d26c58c59d25b0eef29792b7ce99d9a
 
             - name: 登录 Docker Hub
+              if: inputs.publish && secrets.DOCKER_PASSWORD != ''
               uses: docker/login-action@28fdb31ff34708d19615a74d67103ddc2ea9725c
               with:
                   username: ${{ github.repository_owner }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: 登录 GitHub Container Registry
+              if: inputs.publish
               uses: docker/login-action@28fdb31ff34708d19615a74d67103ddc2ea9725c
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: 构建并推送 Docker 镜像到多个仓库
+            - name: 构建 Docker 镜像（默认不推送）
+              if: ${{ !inputs.publish }}
               run: |
-                  # 使用动态用户名构建GHCR镜像标签
+                  docker buildx build \
+                    --platform linux/amd64,linux/arm64 \
+                    -t xero-qq-lite:local \
+                    --output=type=oci,dest=xero-qq-lite.oci.tar \
+                    .
+
+            - name: 构建并推送 Docker 镜像到显式配置的仓库
+              if: inputs.publish
+              run: |
+                  if [ -z "${{ inputs.image_name }}" ]; then
+                    echo "image_name is required when publish=true" >&2
+                    exit 1
+                  fi
                   GHCR_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest" | tr '[:upper:]' '[:lower:]')
 
                   docker buildx build \
                     --platform linux/amd64,linux/arm64 \
-                    -t xeroteam/qq-web:latest \
+                    -t "${{ inputs.image_name }}:${{ inputs.version }}" \
                     -t $GHCR_IMAGE_NAME \
                     --push .
