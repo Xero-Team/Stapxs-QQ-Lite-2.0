@@ -468,7 +468,7 @@ const noticeFunctions = {
         const msgId = msg.message_id
         const emojiList = msg.likes
         // 寻找消息
-        chatStore.messageList.forEach((item, index) => {
+        chatStore.messageList.forEach((item) => {
             if (item.message_id === msgId) {
                 item.emoji_like = emojiList
             }
@@ -689,10 +689,6 @@ const msgFunctions = {
             )
 
             Object.assign(authStore.botInfo, data)
-            if (Option.get('open_ga_bot') !== false) {
-                const appVersion = data.app_version ? ',' + data.app_version : ''
-                const appInfo = data.app_name ? data.app_name + appVersion : '（未知）'
-            }
             if (!login.status) {
                 // 尝试动态载入对应的 pathMap
                 if (data.app_name !== undefined) {
@@ -1446,7 +1442,7 @@ const msgFunctions = {
         const msgId = echoList[1]
         const id = Number(echoList[2])
         // 从消息列表中找到这条消息
-        chatStore.messageList.forEach((item, index) => {
+        chatStore.messageList.forEach((item) => {
             if (item.message_id === msgId) {
                 if (item.emoji_like) {
                     // 寻找有没有 emoji_id 相同的

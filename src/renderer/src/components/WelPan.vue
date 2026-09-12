@@ -409,7 +409,7 @@
     }
 
     function gaLanguage(event: Event) {
-        const sender = event.target as HTMLInputElement
+        void event
         // TODO: 刷新菜单
     }
 
