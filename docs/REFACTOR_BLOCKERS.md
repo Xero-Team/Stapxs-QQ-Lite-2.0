@@ -6,6 +6,7 @@
 - The registry's latest Vue/Vite/TypeScript/ESLint/Pinia/Electron combination is currently incompatible with this dependency graph: Vite 8 conflicts with `@vitejs/plugin-vue` 5, ESLint 10 conflicts with the installed Vue/TypeScript configs, and the TypeScript 7 patch failed during fetch. The attempted upgrade was discarded; upgrades must proceed package by package with matching plugins.
 - Native `sharp@0.32.6` postinstall fails in this environment, so Yarn exits non-zero after linking even though JavaScript dependencies are available.
 - `yarn npm audit --all --recursive` currently exits 1 with 192 advisories (including 3 critical findings in Handlebars, tar, and Vitest); dependency upgrades and an application impact review are required before enabling the audit as a passing release gate.
+- `vue-tsc` is now pinned to the stable 3.3.11 line for the resolved TypeScript 5.9.3 toolchain. The renderer typecheck still reports legacy cross-platform listener callback errors and one strict error inside the `vue3-bcui` package; the build and contract tests pass, but no green typecheck is claimed until those boundaries are migrated or the dependency is replaced.
 
 ## Resolved in the current checkout
 
