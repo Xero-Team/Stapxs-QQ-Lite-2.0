@@ -73,7 +73,7 @@ jobs:
             - name: Build
               run: yarn build
               env:
-                  BUILD_ENV: github-actions
+                  VITE_APP_BASE_PATH: /${{ github.event.repository.name }}/
 
             # 部署 Web 版本
             - name: Deploy

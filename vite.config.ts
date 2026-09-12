@@ -15,6 +15,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
     return ({ mode }) => {
         const env = loadEnv(mode, process.cwd())
         const useLocalFace = env.VITE_LOCAL_FACE == 'true'
+        const basePath = env.VITE_APP_BASE_PATH || './'
 
         const plugins: PluginOption[] = [
             vue(),
@@ -60,7 +61,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
             root: './src/renderer',
             envDir: '../../',
             cacheDir: '../../.vite',
-            base: process.env.BUILD_ENV == 'github-actions' ? '/Stapxs-QQ-Lite-2.0/' : './',
+            base: basePath,
             server: {
                 port: 8080,
                 proxy: {
