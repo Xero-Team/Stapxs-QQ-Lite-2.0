@@ -523,9 +523,9 @@ export async function loadMobile() {
             }
         })
         // initial-scale 缩放固定为 0.9
-        const viewport = document.getElementById('viewport')
+        const viewport = document.getElementById('viewport') as HTMLMetaElement | null
         if (viewport) {
-            (viewport as any).content =
+            viewport.content =
                 'width=device-width, initial-scale=0.9, maximum-scale=5, user-scalable=0'
         }
         // 通知
