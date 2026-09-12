@@ -1366,9 +1366,11 @@ export function useStayEvent<T extends Event, C>(
  * @param event 事件
  * @param callback 回调
  */
+// eslint-disable-next-line no-undef
 export function useEventListener<T extends keyof DocumentEventMap>(
     target: Document,
     event: T,
+    // eslint-disable-next-line no-undef
     callback: (event: DocumentEventMap[T]) => void) {
     // 如果你想的话，
     // 也可以用字符串形式的 CSS 选择器来寻找目标 DOM 元素
