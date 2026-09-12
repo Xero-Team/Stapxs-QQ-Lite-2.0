@@ -1,17 +1,17 @@
 # Dependency audit
 
-The audit was run on 2026-09-12 with:
+The audit was refreshed on 2026-09-13 with:
 
 ```sh
 yarn npm audit --all --recursive
 ```
 
-The current lockfile reports 192 advisories: 3 critical, 98 high, 79 moderate, and 12 low. The command exits with status 1 until these advisories are resolved or explicitly accepted. Most findings are in build and mobile tooling; they still remain release blockers until the dependency graph is upgraded and rebuilt.
-
-Critical findings currently include:
-
-- **handlebars 4.7.8**: JavaScript injection via AST type confusion ([GHSA-2w6w-674q-4c4q](https://github.com/advisories/GHSA-2w6w-674q-4c4q)).
-- **tar 6.2.1 / 7.5.2 / 7.5.13**: decompression and parsing denial of service ([GHSA-23hp-3jrh-7fpw](https://github.com/advisories/GHSA-23hp-3jrh-7fpw)).
-- **vitest 2.1.9**: arbitrary file read and execution when the Vitest UI server is enabled ([GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp)).
+The current lockfile reports 137 advisory entries across 54 packages: 2 critical,
+79 high, 50 moderate, and 6 low. The command exits with status 1 until these
+advisories are resolved or explicitly accepted. Direct upgrades have removed
+the previously reported `jsonpath`, `echarts`, `markdown-it`, `uuid`, and `ws`
+findings; remaining exposure is concentrated in transitive build/mobile tooling
+(`sharp`, `tar`, `postcss`, `nanoid`, Rollup) and the Vitest/Vue I18n toolchain.
+They remain release blockers until the dependency graph is upgraded and rebuilt.
 
 Regenerate this report after dependency changes and update `docs/REFACTOR_BLOCKERS.md` with the remaining release impact.
