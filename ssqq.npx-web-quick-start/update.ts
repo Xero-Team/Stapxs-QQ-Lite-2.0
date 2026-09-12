@@ -38,12 +38,7 @@ export async function checkUpdate(nowVersion: string, endpoint = process.env.XER
                     if (name.endsWith('-web.zip')) {
                         // 删除 dist 文件夹
                         if(fs.existsSync('./dist')) {
-                            fs.rm('./dist', { recursive: true }, err => {
-                                if (err) {
-                                    logger.error(`删除 dist 文件夹失败: ${err}`)
-                                }
-                            }
-                            )
+                            await fs.promises.rm('./dist', { recursive: true, force: true })
                         }
                         const downloadUrl = typeof asset.browser_download_url === 'string' ? asset.browser_download_url : ''
                         if (!downloadUrl) return
