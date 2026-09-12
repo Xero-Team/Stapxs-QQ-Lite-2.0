@@ -95,6 +95,19 @@ storage and network modules and runs as part of `yarn typecheck`.
 The migration must expand to the Web and Node projects before the full strict
 item can be checked off. No compiler flags were disabled to pass these checks.
 
+## Dependency audit refresh (2026-09-13, full recursive graph)
+
+`npx --yes corepack@0.31.0 yarn npm audit --all --recursive` exits 1 after
+reporting 142 advisory entries across 56 packages: 3 critical, 80 high, 53
+moderate, and 6 low. The upgraded direct packages (`jsonpath`, `echarts`,
+`markdown-it`, and `uuid`) no longer appear as direct vulnerable nodes, but
+transitive findings remain in the build and test toolchain. Notable blockers
+include `sharp@0.32.6` (libvips/libheif), `tar` from Capacitor tooling,
+`postcss`/`nanoid` from Vite, `rollup` from the connector workspace, and
+`vitest@2.1.9`. These require compatibility upgrades or replacement before the
+recursive audit can become a passing release gate; this result is retained as
+the current evidence rather than being suppressed.
+
 ## Dependency audit refresh (2026-09-13)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
