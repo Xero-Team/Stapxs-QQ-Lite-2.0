@@ -287,6 +287,7 @@ export class Connector {
                 }
 
                 if (Date.now() - startTime > timeout) {
+                    this.ReMap.delete(echo)
                     reject(new TimeoutError(echo))
                     return
                 }
