@@ -254,6 +254,11 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         from: string
     }
 
+    interface ViewerRef {
+        openBySrc: (images: Img, src: string) => void
+        open: (image: Img) => void
+    }
+
     const $t = i18n.global.t
     const trueLang = getTrueLang()
     const authStore = useAuthStore()
@@ -261,7 +266,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     const uiStore = useUIStore()
     const qzoneStore = useQzoneStore()
     const settingsStore = useSettingsStore()
-    const { viewer: viewerRef } = inject<{ viewer: any }>('viewer', { viewer: null })
+    const { viewer: viewerRef } = inject<{ viewer: { value: ViewerRef | null } | null }>('viewer', { viewer: null })
     const hitokoto = reactive<HitokotoInfo>({
         id: 0,
         hitokoto: '',
@@ -444,7 +449,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             title: $t('权限设置'),
             template: markRaw(QzonePermissionPan),
             templateValue: {
-                sessions: contactStore.userList.filter((item) => item.user_id) as any[],
+                sessions: contactStore.userList.filter((item) =>
+                    typeof item.group_id === 'number'),
                 modelValue: createQzone.permission,
                 'onUpdate:modelValue': (value: typeof createQzone.permission) => {
                     createQzone.permission.mode = value.mode
