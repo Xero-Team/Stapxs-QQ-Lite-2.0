@@ -31,7 +31,7 @@
                     :key="session.user_id"
                     class="qzone-permission-item"
                     @click="toggleSession(session)">
-                    <TinySessionBody :session="session as any" :selected="isSelected(session)" />
+                    <TinySessionBody :session="session" :selected="isSelected(session)" />
                 </div>
             </div>
         </template>

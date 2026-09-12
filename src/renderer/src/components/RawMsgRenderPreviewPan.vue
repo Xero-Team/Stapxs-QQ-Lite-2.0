@@ -36,6 +36,7 @@
     import { normalizeMessagesForPreview } from '@renderer/function/msg'
     import { getMsgRawTxt } from '@renderer/function/utils/msgUtil'
     import { useAuthStore } from '@renderer/state/auth'
+    import type { MsgItemElem } from '@renderer/function/elements/information'
     import { i18n } from '@renderer/main'
 
     defineOptions({ name: 'RawMsgRenderPreviewPan' })
@@ -54,10 +55,10 @@
     const rawRenderPreviewText = ref(data?.text ?? '')
     const rawRenderPreviewLoading = ref(false)
     const rawRenderPreviewError = ref('')
-    const rawRenderPreviewList = ref<any[]>([])
+    const rawRenderPreviewList = ref<MsgItemElem[]>([])
 
-    function buildRawRenderFallbackMessage(msg: any, index: number) {
-        const previewMsg = { ...msg }
+    function buildRawRenderFallbackMessage(msg: Record<string, unknown>, index: number): MsgItemElem {
+        const previewMsg = { ...msg } as MsgItemElem
         const senderId = Number(
             previewMsg.sender?.user_id
             ?? previewMsg.user_id
@@ -94,7 +95,7 @@
         rawRenderPreviewError.value = ''
 
         try {
-            const raw = JSON.parse(rawRenderPreviewText.value)
+            const raw: Record<string, unknown> = JSON.parse(rawRenderPreviewText.value) as Record<string, unknown>
             const list = (await normalizeMessagesForPreview(raw))
                 .map((item, index) => buildRawRenderFallbackMessage(item, index))
                 .filter((item) => Array.isArray(item.message))

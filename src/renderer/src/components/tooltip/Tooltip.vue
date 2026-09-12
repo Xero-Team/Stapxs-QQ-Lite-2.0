@@ -28,7 +28,11 @@ onMounted(async ()=>{
     posInfo.x = pos.x
     posInfo.y = pos.y
     // 高度
-    const el = (body.value as any).$el as HTMLElement
+    const instance = body.value as { $el?: unknown }
+    const el = instance.$el instanceof HTMLElement
+        ? instance.$el
+        : body.value instanceof HTMLElement ? body.value : undefined
+    if (!el) return
     const panHeight = el.clientHeight
     if (pos.y < panHeight + 20) {
         posInfo.y = panHeight + 20

@@ -39,7 +39,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
 import { UserGroupElem, UserFriendElem } from '@renderer/function/elements/information'
 import { getShowName } from '@renderer/function/utils/msgUtil'
 
-type Session = UserGroupElem & UserFriendElem
+type Session = Pick<UserGroupElem, 'user_id' | 'nickname' | 'remark'> &
+    Partial<Pick<UserFriendElem, 'group_id' | 'group_name' | 'raw_msg'>>
 
 const {
     session,
