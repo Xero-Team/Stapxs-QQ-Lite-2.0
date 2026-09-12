@@ -17,6 +17,7 @@ import { Logger } from '@renderer/function/base';
 import { openLink } from '@renderer/function/utils/appUtil'
 import app from '@renderer/main'
 import { useTemplateRef } from 'vue'
+import xss from 'xss'
 
 const { item, id } = defineProps<{
     item: string,
@@ -98,7 +99,16 @@ function buildXML(xml: string, id: string, msgid: string) {
             link = (header.children[0] as HTMLElement).dataset.url
             div.style.cursor = 'pointer'
         }
-        return div.outerHTML
+        return xss(div.outerHTML, {
+            whiteList: {
+                div: ['class', 'data-size', 'data-linespace', 'data-name'],
+                p: ['class'],
+                a: ['class', 'href', 'target', 'rel'],
+                img: ['class', 'src', 'alt'],
+            },
+            stripIgnoreTag: true,
+            stripIgnoreTagBody: ['script', 'style'],
+        })
     } catch (ex) {
         new Logger().error(ex as Error, 'xml 消息解析错误')
         return (
