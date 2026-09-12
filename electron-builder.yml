@@ -1,7 +1,7 @@
 # 基础配置
-appId: cn.stapxs.qqweb
-productName: Stapxs QQ Lite
-copyright: Copyright © 2022-2026 Stapx Steve [林槐]
+appId: team.xero.qqlite
+productName: Xero QQ Lite
+copyright: Copyright © 2026 Xero-Team
 directories:
     buildResources: build,
     output: dist_electron
@@ -25,10 +25,10 @@ asarUnpack:
 win:
     target:
         - { target: portable, arch: x64 }
-    executableName: Stapxs QQ Lite
+    executableName: Xero QQ Lite
     icon: build/icon-client-others.png
-    legalTrademarks: Copyright © 2022-2026 Stapx Steve [林槐]
-    publisherName: stapxs
+    legalTrademarks: Copyright © 2026 Xero-Team
+    publisherName: xero
 
 # macOS 配置
 mac:
@@ -56,18 +56,18 @@ linux:
         - { target: deb, arch: arm64 }
         - { target: tar.gz, arch: x64 }
     maintainer: Stapx Steve [林槐]
-    vendor: Stapxs Steve Team
+    vendor: Xero Steve Team
     synopsis: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
     category: Network
-    mimeTypes: [ application/x-stapxs-qq-lite ]
+    mimeTypes: [ application/x-xero-qq-lite ]
     desktop:
         Type: Application
-        Name: Stapxs QQ Lite
-        GenericName: Stapxs QQ Lite Electron 客户端
+        Name: Xero QQ Lite
+        GenericName: Xero QQ Lite Electron 客户端
         Comment: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
         Terminal: false
         Category: Network
-        Icon: stapxs-qq-lite
+        Icon: xero-qq-lite
 
 # 其他配置
 npmRebuild: false
