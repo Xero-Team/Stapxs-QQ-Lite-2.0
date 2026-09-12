@@ -5,25 +5,37 @@
     :role="card.status === 'ok' && card.link ? 'link' : undefined"
     :tabindex="card.status === 'ok' && card.link ? 0 : undefined"
     @click="openCard"
-    @keydown.enter.prevent="openCard">
+    @keydown.enter.prevent="openCard"
+  >
     <template v-if="card.status === 'ok'">
-      <template v-for="(block, index) in card.blocks" :key="index">
+      <template
+        v-for="(block, index) in card.blocks"
+        :key="index"
+      >
         <p
           v-if="block.kind === 'title'"
-          :style="{ fontSize: `${block.size / 30}rem`, marginBottom: `${block.size / 5}px` }">
+          :style="{ fontSize: `${block.size / 30}rem`, marginBottom: `${block.size / 5}px` }"
+        >
           {{ block.text }}
         </p>
-        <span v-else-if="block.kind === 'summary'" class="msg-xml-summary">{{ block.text }}</span>
+        <span
+          v-else-if="block.kind === 'summary'"
+          class="msg-xml-summary"
+        >{{ block.text }}</span>
         <img
           v-else-if="block.kind === 'picture' && isExternalRequestAllowed(block.url, externalServices)"
           class="msg-xml-img"
           :src="block.url"
           alt=""
           referrerpolicy="no-referrer"
-          @load="auditExternalRequest(block.url, 'xml-card-image')">
+          @load="auditExternalRequest(block.url, 'xml-card-image')"
+        >
       </template>
     </template>
-    <span v-else class="msg-unknown">{{ fallback }}</span>
+    <span
+      v-else
+      class="msg-unknown"
+    >{{ fallback }}</span>
   </div>
 </template>
 

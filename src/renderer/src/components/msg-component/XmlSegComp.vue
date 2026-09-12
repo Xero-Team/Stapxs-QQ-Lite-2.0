@@ -8,7 +8,8 @@
     :fallback="card.status === 'unsupported'
       ? `（${$t('chat_xml_unsupport')}：${card.source}）`
       : `( ${$t('解析消息错误')}: xml )`"
-    @open="openLink" />
+    @open="openLink"
+  />
 </template>
 
 <script setup lang="ts">
