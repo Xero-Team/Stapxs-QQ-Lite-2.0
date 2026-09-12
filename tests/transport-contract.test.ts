@@ -3,10 +3,10 @@ import {
     HttpTransport,
     ReconnectingTransport,
     SseTransport,
-    Transport,
     TransportError,
     WebSocketTransport,
 } from '../src/renderer/src/transport/transport'
+import type { Transport } from '../src/renderer/src/transport/transport'
 
 describe('transport contracts', () => {
     it('posts JSON and dispatches the decoded HTTP response', async () => {
