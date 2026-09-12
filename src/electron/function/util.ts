@@ -6,9 +6,13 @@ import axios from 'axios'
 import { logLevel } from '../index.ts'
 
 const logger = log4js.getLogger('util')
+interface CommandResult {
+    stdout: string
+    stderr: string
+}
 
 export function queryKeys(keyPath: string, value: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<CommandResult>((resolve, reject) => {
         try {
             child_process.exec(
                 `reg query ${keyPath} /v ${value}`,
@@ -23,11 +27,11 @@ export function queryKeys(keyPath: string, value: string) {
         } catch (error) {
             reject(error)
         }
-    }) as Promise<{ stdout: any; stderr: any }>
+    })
 }
 
 export function runCommand(command: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<CommandResult>((resolve, reject) => {
         try {
             child_process.exec(command, (error, stdout, stderr) => {
                 if (error) {
@@ -39,7 +43,7 @@ export function runCommand(command: string) {
         } catch (error) {
             reject(error)
         }
-    }) as Promise<{ stdout: any; stderr: any }>
+    })
 }
 
 async function getFinalRedirectUrl(initialUrl: string) {

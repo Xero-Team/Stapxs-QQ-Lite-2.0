@@ -216,8 +216,8 @@ export class Notify {
             notificationBody,
         )
         notification.onclick = (event: Event) => {
-            const info = event.target as NotificationOptions
-            this.closeJump(info.tag)
+            const notification = event.currentTarget as Notification
+            this.closeJump(notification.tag)
         }
         // 保存通知对象
         Notify.notifyList[info.tag] = notification
