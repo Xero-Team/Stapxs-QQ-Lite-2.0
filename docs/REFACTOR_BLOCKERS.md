@@ -12,6 +12,7 @@
 ## Resolved in the current checkout
 
 - Yarn 4.12.0 is available through the installed Corepack shim; `yarn install --immutable --mode=skip-build` completes with peer-dependency warnings.
+- A repository `.node-version` file now pins the supported Node 22.14.0 runtime used by the CI workflows; Yarn remains pinned through `packageManager` at 4.12.0.
 - The QFace and Border Card UI submodules have been initialized. `yarn build` now succeeds; the previous missing `qq_emoji/_index.json` error no longer reproduces.
 - Playwright CLI smoke passed against the production preview, covering the first screen, OneBot entry point, and the default disabled external-services setting.
 - The smoke script now also switches the browser offline, reloads the production entry point from the local preview/service worker, and verifies the OneBot entry remains available without external resources.
