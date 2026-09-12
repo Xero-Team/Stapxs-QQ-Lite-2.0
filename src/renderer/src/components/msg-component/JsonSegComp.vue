@@ -44,8 +44,8 @@ let id = ''
 
 try {
     json = JSON.parse(data)
-    if (json && typeof (json as any).app === 'string') {
-        id = (json as any).app
+    if (typeof json === 'object' && json !== null && 'app' in json && typeof json.app === 'string') {
+        id = json.app
     }
 } catch {
     json = null

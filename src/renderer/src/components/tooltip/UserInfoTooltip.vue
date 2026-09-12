@@ -80,13 +80,22 @@
 import { avatarUrl } from '@renderer/function/utils/avatar'
 import { getTrueLang } from '@renderer/function/utils/systemUtil';
 
-type IUser = any
+interface UserInfo {
+    user_id: number
+    card?: string
+    nickname: string
+    is_robot?: boolean
+    role?: 'owner' | 'admin' | string
+    level?: number
+    banTime?: number
+    join_time?: number
+}
 
 const { user: userProp } = defineProps<{
-    user: IUser | number | (() => IUser | number)
+    user: UserInfo | number | (() => UserInfo | number)
 }>()
 
-let userInfo: IUser | number
+let userInfo: UserInfo | number
 if (typeof userProp === 'function') {
     userInfo = userProp()
 } else {
@@ -95,9 +104,9 @@ if (typeof userProp === 'function') {
 
 const titleClass = {
     'user-title': true,
-    'robot': userInfo?.is_robot,
-    'owner': userInfo?.role == 'owner',
-    'admin': userInfo?.role == 'admin',
+    'robot': typeof userInfo !== 'number' && userInfo.is_robot,
+    'owner': typeof userInfo !== 'number' && userInfo.role == 'owner',
+    'admin': typeof userInfo !== 'number' && userInfo.role == 'admin',
 }
 </script>
 
