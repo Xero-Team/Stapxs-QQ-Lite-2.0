@@ -2133,7 +2133,7 @@ function revokeMsg(_: string, msg: any) {
     list.splice(msgIndex + 1, 0, msg)
 }
 
-let qed_try_times = 0
+let _qed_try_times = 0
 function newMsg(_: string, data: any) {
     const { $t } = app.config.globalProperties
     const authStore = useAuthStore()
@@ -2237,7 +2237,7 @@ function newMsg(_: string, data: any) {
                 }
                 uiStore.popBoxList.push(popInfo)
             }
-            qed_try_times++
+            _qed_try_times++
         }
 
         // 通知判定预处理 ============================================

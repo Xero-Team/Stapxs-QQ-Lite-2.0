@@ -1277,7 +1277,7 @@ export function sendStatEvent(event: string, data: { [key: string]: any }, saveL
  * UM：上报会话数据
  * @param data 数据
  */
-export function sendIdentifyData(data: { [key: string]: any }) {
+export function sendIdentifyData(_data: { [key: string]: any }) {
     if (!option.get('close_ga') && !import.meta.env.DEV) {
         // Identification data is discarded to preserve privacy.
     }
