@@ -11,8 +11,8 @@
 
 ## 1. 去上游化与品牌
 
-- [ ] 全仓替换上游组织、仓库、Pages、release、issue、npm、作者和赞助链接；保留第三方依赖的真实归属。
-- [ ] 重新设置 `package.json`、Capacitor/Tauri identifier、协议 scheme、应用名、图标、User-Agent 和默认 API 地址。
+- [x] 全仓替换上游组织、仓库、Pages、release、issue、npm、作者和赞助链接；保留第三方依赖的真实归属。
+- [x] 重新设置 `package.json`、Capacitor/Tauri identifier、协议 scheme、应用名、图标、User-Agent 和默认 API 地址。
 - [x] 清理上游专属更新检查、贡献者/赞助者拉取、远程公告和默认外链；改为可配置或完全关闭。
 - [x] 编写独立隐私政策、第三方声明、迁移说明；核对 AGPL 与复制代码（如 DeltaChat user-notify）的许可义务。
 
