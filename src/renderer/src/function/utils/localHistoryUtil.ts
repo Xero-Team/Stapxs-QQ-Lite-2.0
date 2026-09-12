@@ -38,6 +38,25 @@ export interface LocalMsgRecord {
     revoked: boolean
 }
 
+type JsonRecord = Record<string, unknown>
+type RuntimeMessage = JsonRecord & {
+    message?: unknown
+    infoList?: JsonRecord
+    sender?: JsonRecord
+    raw_message?: unknown
+}
+
+function asRuntimeMessage(value: unknown): RuntimeMessage | undefined {
+    return typeof value === 'object' && value !== null
+        ? value as RuntimeMessage
+        : undefined
+}
+
+function numberField(value: unknown): number | undefined {
+    const number = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(number) ? number : undefined
+}
+
 function isTauriHistoryAvailable(): boolean {
     const settingsStore = useSettingsStore()
     return backend.type === 'tauri' && settingsStore.sysConfig.enable_local_history === true
@@ -46,9 +65,9 @@ function isTauriHistoryAvailable(): boolean {
 async function callDbRecordList(
     selfId: string | number,
     command: string,
-    payload: Record<string, any>,
+    payload: JsonRecord,
     errorTag: string,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     if (!isTauriHistoryAvailable()) return []
     try {
         const records: LocalMsgRecord[] = await backend.call(
@@ -57,35 +76,36 @@ async function callDbRecordList(
             true,
             { selfId: String(selfId), ...payload },
         )
-        return (records ?? []).map(deserializeRecord)
+        return (records ?? []).map(deserializeRecord).filter((item): item is RuntimeMessage => item !== undefined)
     } catch (e) {
         logger.error(e as unknown as Error, errorTag)
         return []
     }
 }
 
-async function callDb(
+async function callDb<T>(
     selfId: string | number,
     command: string,
-    payload: Record<string, any>,
-    fallback: any,
+    payload: JsonRecord,
+    fallback: T,
     errorTag: string,
-): Promise<any> {
+): Promise<T> {
     if (!isTauriHistoryAvailable()) return fallback
     try {
-        return await backend.call(
+        const result: unknown = await backend.call(
             undefined,
             command,
             true,
             { selfId: String(selfId), ...payload },
         )
+        return result as T
     } catch (e) {
         logger.error(e as unknown as Error, errorTag)
         return fallback
     }
 }
 
-function serializeMsgSegments(segments: any[] | undefined): string {
+function serializeMsgSegments(segments: unknown): string {
     try {
         return JSON.stringify(segments ?? [])
     } catch {
@@ -93,41 +113,45 @@ function serializeMsgSegments(segments: any[] | undefined): string {
     }
 }
 
-function deserializeMsgSegments(serialized: string): any[] {
+function deserializeMsgSegments(serialized: string): JsonRecord[] {
     try {
-        return JSON.parse(serialized)
+        const value: unknown = JSON.parse(serialized)
+        return Array.isArray(value)
+            ? value.filter((item): item is JsonRecord => typeof item === 'object' && item !== null)
+            : []
     } catch {
         return []
     }
 }
 
-function computeRawMessage(msg: any): string | null {
+function computeRawMessage(msg: RuntimeMessage): string | null {
     try {
-        return getMsgRawTxt(msg) || msg.raw_message || null
+        return getMsgRawTxt(msg) || (typeof msg.raw_message === 'string' ? msg.raw_message : null)
     } catch {
-        return msg.raw_message ?? null
+        return typeof msg.raw_message === 'string' ? msg.raw_message : null
     }
 }
 
-function deriveChatId(selfId: string | number, msgs: any[]): number | undefined {
+function deriveChatId(selfId: string | number, msgs: RuntimeMessage[]): number | undefined {
     const firstMsg = msgs[0]
-    let chatId: number | undefined = firstMsg?.infoList?.group_id ?? firstMsg?.infoList?.target_id
+    let chatId: number | undefined = numberField(firstMsg?.infoList?.group_id ?? firstMsg?.infoList?.target_id)
     if (chatId != null) return Number(chatId)
 
     for (const item of msgs) {
         if (item?.infoList?.sender != null && String(item.infoList.sender) !== String(selfId)) {
-            chatId = Number(item.infoList.sender)
+            chatId = numberField(item.infoList.sender)
             break
         }
     }
     return chatId
 }
 
-export function ensureChatIdOnMsgs(selfId: string | number, msgs: any[]): any[] {
-    const chatId = deriveChatId(selfId, msgs)
-    if (chatId == null) return msgs
+export function ensureChatIdOnMsgs(selfId: string | number, msgs: unknown[]): RuntimeMessage[] {
+    const runtimeMsgs = msgs.map(asRuntimeMessage).filter((item): item is RuntimeMessage => item !== undefined)
+    const chatId = deriveChatId(selfId, runtimeMsgs)
+    if (chatId == null) return runtimeMsgs
 
-    return msgs.map((item: any) => {
+    return runtimeMsgs.map((item) => {
         if (!item?.infoList) return item
         if (item.infoList.group_id != null || item.infoList.target_id != null) {
             return item
@@ -148,20 +172,23 @@ export function ensureChatIdOnMsgs(selfId: string | number, msgs: any[]): any[] 
  * 将已经过 msgPreprocess 处理的消息对象转成可存入 DB 的 LocalMsgRecord。
  * 若必要字段缺失则返回 null，调用方需过滤掉 null。
  */
-export function msgToRecord(msg: any): LocalMsgRecord | null {
+export function msgToRecord(value: unknown): LocalMsgRecord | null {
+    const msg = asRuntimeMessage(value)
+    if (!msg) return null
     const messageId = msg.message_id
     if (!messageId) return null
 
-    const chatId: number = msg.infoList.group_id ?? msg.infoList.target_id
+    const chatId = numberField(msg.infoList?.group_id ?? msg.infoList?.target_id)
     if (chatId == null) return null
 
-    const chatType: string =
-        msg.message_type ?? (msg.group_id != null ? 'group' : 'private')
-    const senderId: number = msg.infoList.sender
+    const chatType = typeof msg.message_type === 'string'
+        ? msg.message_type
+        : (msg.group_id != null ? 'group' : 'private')
+    const senderId = numberField(msg.infoList?.sender)
     if (senderId == null) return null
 
     const senderName: string | null =
-        (msg.sender?.card && msg.sender.card !== '') ? msg.sender.card : (msg.sender?.nickname ?? null)
+        (typeof msg.sender?.card === 'string' && msg.sender.card !== '') ? msg.sender.card : (typeof msg.sender?.nickname === 'string' ? msg.sender.nickname : null)
 
     const rawMessage = computeRawMessage(msg)
     const messageSerialized = serializeMsgSegments(msg.message)
@@ -172,8 +199,8 @@ export function msgToRecord(msg: any): LocalMsgRecord | null {
         chat_type: chatType,
         sender_id: Number(senderId),
         sender_name: senderName,
-        seq: msg.seq_id != null ? Number(msg.seq_id) : null,
-        time: Number(msg.time),
+        seq: numberField(msg.seq_id) ?? null,
+        time: numberField(msg.time) ?? 0,
         message: messageSerialized,
         raw_message: rawMessage,
         revoked: false,
@@ -188,7 +215,7 @@ export function msgToRecord(msg: any): LocalMsgRecord | null {
  * @param selfId  当前登录账号 uin
  * @param msgs    已完成预处理的消息对象数组（来自 chatStore.messageList 或 newMsg）
  */
-export async function dbSaveMessages(selfId: string | number, msgs: any[]): Promise<void> {
+export async function dbSaveMessages(selfId: string | number, msgs: unknown[]): Promise<void> {
     if (!isTauriHistoryAvailable()) return
 
     const persistableMsgs = ensureChatIdOnMsgs(selfId, msgs)
@@ -211,7 +238,7 @@ export async function dbSaveMessages(selfId: string | number, msgs: any[]): Prom
     }
 }
 
-export async function saveMessagesWithSideEffects(selfId: string | number, msgs: any[]): Promise<void> {
+export async function saveMessagesWithSideEffects(selfId: string | number, msgs: unknown[]): Promise<void> {
     const settingsStore = useSettingsStore()
     const persistableMsgs = ensureChatIdOnMsgs(selfId, msgs)
     await dbSaveMessages(selfId, persistableMsgs)
@@ -228,7 +255,7 @@ export async function dbGetLatest(
     selfId: string | number,
     chatId: number,
     n: number,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     return callDbRecordList(selfId, 'db:getLatest', { chatId, n }, '[LocalHistory] dbGetLatest 失败')
 }
 
@@ -242,7 +269,7 @@ export async function dbGetBefore(
     chatId: number,
     messageId: string,
     n: number,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     return callDbRecordList(selfId, 'db:getBefore', { chatId, messageId, n }, '[LocalHistory] dbGetBefore 失败')
 }
 
@@ -254,7 +281,7 @@ export async function dbGetBeforeByTime(
     chatId: number,
     beforeTime: number,
     n: number,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     return callDbRecordList(selfId, 'db:getBeforeByTime', { chatId, beforeTime, n }, '[LocalHistory] dbGetBeforeByTime 失败')
 }
 
@@ -268,7 +295,7 @@ export async function dbGetAfter(
     chatId: number,
     messageId: string,
     n: number,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     return callDbRecordList(selfId, 'db:getAfter', { chatId, messageId, n }, '[LocalHistory] dbGetAfter 失败')
 }
 
@@ -281,7 +308,7 @@ export async function dbRevokeMessage(
     selfId: string | number,
     messageId: string,
 ): Promise<boolean> {
-    return callDb(selfId, 'db:revokeMessage', { messageId }, false, '[LocalHistory] dbRevokeMessage 失败')
+    return callDb<boolean>(selfId, 'db:revokeMessage', { messageId }, false, '[LocalHistory] dbRevokeMessage 失败')
 }
 
 /**
@@ -293,7 +320,7 @@ export async function dbSearchMessages(
     selfId: string | number,
     chatId: number,
     query: string,
-): Promise<any[]> {
+): Promise<RuntimeMessage[]> {
     if (!isTauriHistoryAvailable() || !query) return []
     return callDbRecordList(selfId, 'db:searchMessages', { chatId, query }, '[LocalHistory] dbSearchMessages 失败')
 }
@@ -301,7 +328,7 @@ export async function dbSearchMessages(
 export async function dbGetStats(
     selfId: string | number,
 ): Promise<{ totalMessages: number; imageCount: number; imageCacheBytes: number; dbSizeBytes: number } | null> {
-    return callDb(selfId, 'db:getStats', {}, null, '[LocalHistory] dbGetStats 失败')
+    return callDb<{ totalMessages: number; imageCount: number; imageCacheBytes: number; dbSizeBytes: number } | null>(selfId, 'db:getStats', {}, null, '[LocalHistory] dbGetStats 失败')
 }
 
 /**
@@ -347,7 +374,7 @@ export async function dbGetImage(
     selfId: string | number,
     urlHash: string,
 ): Promise<{ mimeType: string; data: string } | null> {
-    return callDb(selfId, 'db:getImage', { urlHash }, null, '[LocalHistory] dbGetImage 失败')
+    return callDb<{ mimeType: string; data: string } | null>(selfId, 'db:getImage', { urlHash }, null, '[LocalHistory] dbGetImage 失败')
 }
 
 export interface DbClearImagesProgress {
@@ -408,7 +435,7 @@ export async function dbClearImages(
  * 遍历消息列表，将所有图片段下载并缓存到本地数据库。
  * 已缓存的图片（url_hash 命中）不会重复下载。
  */
-async function cacheImagesFromMsgs(selfId: string | number, msgs: any[]): Promise<void> {
+async function cacheImagesFromMsgs(selfId: string | number, msgs: RuntimeMessage[]): Promise<void> {
     if (!isTauriHistoryAvailable()) return
     const urls = extractImageUrlsFromMsgs(msgs)
     for (const url of urls) {
@@ -420,12 +447,14 @@ async function cacheImagesFromMsgs(selfId: string | number, msgs: any[]): Promis
     }
 }
 
-function extractImageUrlsFromMsgs(msgs: any[]): string[] {
+function extractImageUrlsFromMsgs(msgs: RuntimeMessage[]): string[] {
     const urls: string[] = []
     for (const msg of msgs) {
         if (!Array.isArray(msg.message)) continue
-        for (const seg of msg.message) {
-            if (seg.type === 'image' && seg.url && seg.url.startsWith('http')) {
+        for (const rawSeg of msg.message) {
+            if (typeof rawSeg !== 'object' || rawSeg === null) continue
+            const seg = rawSeg as JsonRecord
+            if (seg.type === 'image' && typeof seg.url === 'string' && seg.url.startsWith('http')) {
                 urls.push(seg.url)
             }
         }
@@ -462,7 +491,7 @@ async function cacheSingleImage(selfId: string | number, url: string): Promise<v
 /**
  * 将 DB 返回的 LocalMsgRecord 还原为与 chatStore.messageList 兼容的消息对象。
  */
-function deserializeRecord(record: LocalMsgRecord): any {
+function deserializeRecord(record: LocalMsgRecord): RuntimeMessage {
     const authStore = useAuthStore()
     const message = deserializeMsgSegments(record.message)
 
