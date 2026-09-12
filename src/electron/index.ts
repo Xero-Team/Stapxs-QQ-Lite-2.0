@@ -7,7 +7,7 @@ import windowStateKeeper from 'electron-window-state'
 import packageInfo from '../../package.json' with { type: 'json' }
 
 import { regIpcListener } from './function/ipc.ts'
-import { Menu, session, app, protocol, BrowserWindow, Tray } from 'electron'
+import { Menu, session, app, protocol, BrowserWindow, Tray, type BrowserWindowConstructorOptions } from 'electron'
 import { touchBar } from './function/touchbar.ts'
 import { join } from 'path'
 
@@ -65,11 +65,10 @@ async function createWindow() {
         webPreferences: {
             preload: join(__dirname, '../preload/index.mjs'),
             sandbox: false,
-            webSecurity: false,
         },
         maximizable: false,
         fullscreen: false
-    } as Electron.BrowserWindowConstructorOptions
+    } as BrowserWindowConstructorOptions
     if (process.platform === 'darwin') {
         // macOS
         windowConfig = {
@@ -171,15 +170,10 @@ async function createWindow() {
                     details.responseHeaders['content-disposition'] = ['inline; filename="image.' + typeName + '"']
                 }
             } else if (!ignoreAddress.some((address) =>
-                details.url.startsWith(address))) {
-                // 绕过 CSP 限制，X-Frame-Options 限制
-                details.responseHeaders['content-security-policy'] = ['*']
-                delete details.responseHeaders['x-frame-options']
-                // 修改缓存时间
-                if (details.url.indexOf('qlogo.cn') !== -1) {
-                    // QQ 头像 URL 默认有 2592000（30 天）的缓存时间，这里修改为 3 天
-                    details.responseHeaders['cache-control'] = ['max-age=259200']
-                }
+                details.url.startsWith(address)) && details.url.includes('qlogo.cn')) {
+                // QQ 头像 URL 默认有 2592000（30 天）的缓存时间，这里修改为 3 天。
+                // 保留远程站点提供的 CSP 和 X-Frame-Options。
+                details.responseHeaders['cache-control'] = ['max-age=259200']
             }
         }
         callback({ cancel: false, responseHeaders: details.responseHeaders })
@@ -214,19 +208,27 @@ app.on('ready', async () => {
     }
     // 注册 customFileProtocol 到 app 协议
     protocol.handle('app', async (request) => {
-        const url = request.url.replace('app://', ''); // 移除协议部分
-        // 实际路径在 __dirname 的上一层的 renderer 目录下
-        // PS：为了防止报错堆栈输出过多的路径信息，在这里添加了 renderer 目录
-        const filePath = path.join(__dirname, '..', 'renderer', url);
+        const rendererRoot = path.resolve(__dirname, '..', 'renderer')
+        let filePath: string
+        try {
+            const requestUrl = new URL(request.url)
+            const relativePath = decodeURIComponent(requestUrl.pathname).replace(/^\/+/, '')
+            filePath = path.resolve(rendererRoot, relativePath)
+        } catch {
+            return new Response('Invalid app resource', { status: 400 })
+        }
+        if (filePath !== rendererRoot && !filePath.startsWith(rendererRoot + path.sep)) {
+            return new Response('Forbidden', { status: 403 })
+        }
 
         // 确认文件存在并返回内容
         try {
-            const fileContent = await fs.promises.readFile(filePath) as any;
+            const fileContent = await fs.promises.readFile(filePath)
             return new Response(fileContent, {
                 headers: { 'Content-Type': getMimeType(filePath) },
             });
         } catch (err) {
-            logger.error(`Failed to load file: ${filePath}`, err)
+            logger.error('Failed to load app resource', err)
             return new Response('File not found', { status: 404 });
         }
     })

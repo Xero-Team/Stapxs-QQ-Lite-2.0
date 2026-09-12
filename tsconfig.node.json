@@ -4,8 +4,7 @@
         "electron.vite.config.*",
         "vite.config.*",
         "src/electron/**/*",
-        "src/preload/**/*",
-        "ssqq.napcat-plugin/**/*"
+        "src/preload/**/*"
     ],
     "compilerOptions": {
         "composite": true,

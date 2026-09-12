@@ -37,7 +37,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
                 }
             }
 
-            const targets: any = []
+            const targets: Array<{ src: string; dest: string }> = []
             for (const src of apngList) {
                 targets.push({
                     src: src,
@@ -97,6 +97,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
                                 // 让每个插件都打包成独立的文件
                                 return id.toString().split('node_modules/')[1].split('/')[0].toString()
                             }
+                            return undefined
                         }
                     }
                 }

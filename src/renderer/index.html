@@ -3,6 +3,8 @@
     <head>
 
         <meta charset="utf-8">
+        <!-- Keep renderer scripts same-origin; external connections are opt-in in the app policy. -->
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; media-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; frame-src 'self' http: https:; worker-src 'self' blob:;">
         <meta name="viewport" id="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=5, user-scalable=0">
         <meta name="referrer" content="no-referrer" id="referrer">
         <meta name="color-scheme" content="light dark">

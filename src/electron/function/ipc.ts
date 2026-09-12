@@ -9,7 +9,8 @@ import {
     systemPreferences,
     app,
     Menu,
-    MenuItemConstructorOptions,
+    type MenuItemConstructorOptions,
+    type NotificationConstructorOptions,
     Notification as ELNotification,
     shell,
 } from 'electron'
@@ -23,7 +24,7 @@ import { execSync } from 'child_process'
 let connector = undefined as Connector | undefined
 const store = new Store()
 const logger = log4js.getLogger('ipc')
-let template = [] as any[]
+let template: MenuItemConstructorOptions[] = []
 
 // 消息缓存，key 为 tag
 const noticeList = {} as { [key: string]: ELNotification }
@@ -84,7 +85,7 @@ export function regIpcListener() {
                 headers: { Accept: 'text/html' }
             })
             const contentType = res.headers['content-type']
-            if(contentType && contentType.includes('text/html')) {
+            if(typeof contentType === 'string' && contentType.includes('text/html')) {
                 return res.data
             }
         } catch (error) {
@@ -244,7 +245,7 @@ export function regIpcListener() {
             title: data.title,
             body: data.body,
             icon: data.icon,
-        } as Electron.NotificationConstructorOptions
+        } as NotificationConstructorOptions
         if (process.platform === 'darwin') {
             showData = {
                 ...showData,
@@ -540,8 +541,11 @@ export function regIpcListener() {
                 }
             }
             if (menuIndex > -1) {
-                const item =
-                    itemIndex > -1? template[menuIndex].submenu[itemIndex]: template[menuIndex]
+                const menu = template[menuIndex]
+                if (!menu) return
+                const submenu = Array.isArray(menu.submenu) ? menu.submenu : []
+                const item = itemIndex > -1 ? submenu[itemIndex] : menu
+                if (!item) return
                 switch (action) {
                     case 'label':
                         item.label = value
@@ -554,7 +558,7 @@ export function regIpcListener() {
             Menu.setApplicationMenu(Menu.buildFromTemplate(template))
         }
     })
-    function sendMenuClick(name: string, value = undefined as any) {
+    function sendMenuClick(name: string, value?: unknown) {
         if (win) {
             win.focus()
             if (value) {
