@@ -106,7 +106,7 @@
                     <div v-else-if="msgItem.commandOut">
                         <div
                             v-if="msgItem.html"
-                            v-html="msgItem.html" />
+                            v-html="sanitizeCommandHtml(msgItem.html)" />
                         <span v-else :style="{ 'color': msgItem.color }">
                             {{ msgItem.str }}
                         </span>
@@ -165,6 +165,7 @@
     import packageInfo from '../../../../../package.json'
 
     import { nextTick, ref, watch, onMounted, onUnmounted, markRaw } from 'vue'
+    import xss from 'xss'
     import { Connector } from '@renderer/function/connect'
     import { useSettingsStore } from '@renderer/state/settings'
     import { getTrueLang } from '@renderer/function/utils/systemUtil'
@@ -194,6 +195,21 @@
     const authStore = useAuthStore()
     const contactStore = useContactStore()
     const chatStore = useChatStore()
+
+    /** Sanitize command output before rendering trusted markup in the terminal theme. */
+    function sanitizeCommandHtml(value: unknown): string {
+        return typeof value === 'string' ? xss(value, {
+            whiteList: {
+                br: [],
+                span: ['class', 'style'],
+                strong: [],
+                em: [],
+                code: [],
+            },
+            stripIgnoreTag: true,
+            stripIgnoreTagBody: ['script', 'style'],
+        }) : ''
+    }
     const settingsStore = useSettingsStore()
     const $t = i18n.global.t
     const { URL } = globalThis
