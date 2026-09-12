@@ -317,16 +317,6 @@ body {
     font-size: 0.7rem;
 }
 
-.contributors-card {
-    width: calc(100% - 20px);
-    min-height: 0;
-}
-.contributors-card > div.contributors > div {
-    min-width: calc(20% - 10px);
-    aspect-ratio: 1;
-    margin: 5px;
-}
-
 .buttons > a {
     height: 35px;
     font-size: 0.75rem;

@@ -259,22 +259,6 @@ Xcode 的构建结果将输出在 `src/mobile/ios/build` 目录下，脚本构�
 ## 📜 额外依赖声明
 Xero QQ Lite 的 Tauri 版本使用了来自 [DeltaChat](https://github.com/deltachat/deltachat-desktop) 项目的 user-notify 代码，用于提供跨平台系统通知功能。由于这部分代码没有独立发布，我们将其源码复制到了 `src/tauri/crates/user-notify` 目录下。此部分代码已通过 .gitattributes 文件排除在语言统计之外。
 
-## 🎉 鸣谢
-
-感谢以下小伙伴在开发和文档中提供的支持 ——
-
-<a href="https://github.com/Logic-Accepted"><img src="https://avatars.githubusercontent.com/u/36406453?s=48&v=4"></a>
-<a href="https://github.com/doodlehuang"><img src="https://avatars.githubusercontent.com/u/25525621?s=48&v=4"></a>
-<a href="https://github.com/Chzxxuanzheng"><img src="https://avatars.githubusercontent.com/u/122149478?s=48&v=4"></a>
-
-## ⭐️ Star History
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&theme=dark&legend=top-left" />
-  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
-  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
-</picture>
-
-
 ## 隐私与离线模式
 
 Xero QQ Lite 默认不发送遥测、统计、崩溃报告或远程公告请求；外部服务必须在设置中显式开启。详见 [隐私政策](docs/PRIVACY.md)。

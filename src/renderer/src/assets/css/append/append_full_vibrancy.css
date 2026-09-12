@@ -150,10 +150,6 @@
     background-color: rgba(var(--color-card-2-rgb), 0.5);
 }
 
-.contributors-card {
-    background: unset;
-}
-
 .opt-main > div:last-child {
     background-color: transparent !important;
     box-shadow: unset !important;

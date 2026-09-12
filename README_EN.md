@@ -257,15 +257,6 @@ This project contains some subprojects. The open-source license for each subproj
 ## 📜 Additional Dependency Notice
 The Tauri version of Xero QQ Lite uses user-notify code from the [DeltaChat](https://github.com/deltachat/deltachat-desktop) project for cross-platform system notification functionality. Since this code was not published as a standalone package, the source code has been copied to the `src/tauri/crates/user-notify` directory. This code has been excluded from language statistics via the .gitattributes file.
 
-## 🎉 Acknowledgements
-
-Thanks to the following contributors for their support in development and documentation ——
-
-<a href="https://github.com/Logic-Accepted"><img src="https://avatars.githubusercontent.com/u/36406453?s=48&v=4"></a>
-<a href="https://github.com/doodlehuang"><img src="https://avatars.githubusercontent.com/u/25525621?s=48&v=4"></a>
-<a href="https://github.com/Chzxxuanzheng"><img src="https://avatars.githubusercontent.com/u/122149478?s=48&v=4"></a>
-
-
 ## Privacy and offline mode
 
 Xero QQ Lite sends no telemetry, analytics, crash reports, or remote notices by default. External services must be explicitly enabled in Settings. See [the privacy policy](docs/PRIVACY.md).
