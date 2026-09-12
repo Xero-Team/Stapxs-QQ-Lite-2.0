@@ -10,6 +10,7 @@
   "scripts": {
     "capacitor:copy:before": "capacitor-sync-version",
     "typecheck": "vue-tsc --noEmit -p tsconfig.web.json",
+    "test:contract": "vitest run --config vitest.config.ts",
     "check": "yarn lint && yarn typecheck",
     "lint": "eslint . --fix",
     "lint:tauri": "cargo check --manifest-path src/tauri/Cargo.toml",
@@ -108,6 +109,7 @@
     "vite-plugin-pwa": "^0.21.0",
     "vite-plugin-static-copy": "^3.1.2",
     "vite-plugin-vue-devtools": "^7.6.4",
+    "vitest": "2.1.9",
     "vue": "^3.4.30",
     "vue-clipboard2": "^0.3.3",
     "vue-echarts": "^7.0.3",
