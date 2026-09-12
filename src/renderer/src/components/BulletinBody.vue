@@ -104,13 +104,14 @@
         text = xss(text, { whiteList: { a: ['href', 'target'] } })
         // 匹配链接
         const reg = /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gi
-        text = text.replaceAll(reg, '<a href="" data-link="$&" onclick="return false">$&</a>')
+        text = text.replaceAll(reg, '<a href="#" data-link="$&">$&</a>')
         return text
     }
 
     function textClick(event: Event) {
         const target = event.target as HTMLElement
         if (target.dataset.link) {
+            event.preventDefault()
             // 点击了链接
             const link = target.dataset.link
             openLink(link)

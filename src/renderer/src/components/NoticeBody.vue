@@ -41,8 +41,10 @@
             <div />
         </div>
         <div v-else-if="data.sub_type === 'poke'"
-            class="note-notify note-base"
-            v-html="data.str + '<div class=\'space\'</div>'" />
+            class="note-notify note-base">
+            <span>{{ data.str }}</span>
+            <div class="space" />
+        </div>
         <div v-else-if="data.sub_type === 'time' && data.time != undefined"
             class="note-time note-base">
             <a>{{ Intl.DateTimeFormat(
