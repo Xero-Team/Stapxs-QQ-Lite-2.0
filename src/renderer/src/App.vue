@@ -892,7 +892,7 @@ onMounted(() => {
             loadedConfig.chat_background = migratedBackground
             Option.runAS('chat_background', migratedBackground)
         }
-        settingsStore.sysConfig = loadedConfig
+        settingsStore.sysConfig = loadedConfig as import('@renderer/state/settings').SystemConfig
         if (!migratedBackground) hydrateBackgroundImage(settingsStore.sysConfig.chat_background)
         if(dev) {
             logger.debug('xero-qq-lite: boot complete', true)
@@ -964,8 +964,8 @@ onMounted(() => {
         // 加载连接历史
         loginInfo.connectionHistory = loadConnectionHistory()
         if (
-            settingsStore.sysConfig.save_password !== undefined &&
-            settingsStore.sysConfig.save_password !== true
+            typeof settingsStore.sysConfig.save_password === 'string' &&
+            settingsStore.sysConfig.save_password !== ''
         ) {
             loginInfo.token = decodeStoredToken(settingsStore.sysConfig.save_password) ?? ''
             tags.savePassword = true
