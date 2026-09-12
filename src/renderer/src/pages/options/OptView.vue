@@ -534,16 +534,13 @@ onMounted(() => {
     )
 })
 
-function gaLanguage(event: Event) {
-    const sender = event.target as HTMLInputElement
+function gaLanguage(_event: Event) {
 }
 
-function gaChatView(event: Event) {
-    const sender = event.target as HTMLInputElement
+function gaChatView(_event: Event) {
 }
 
-function gaColor(event: Event) {
-    const sender = event.target as HTMLInputElement
+function gaColor(_event: Event) {
 }
 
 function themeColorChange(event: Event) {
