@@ -35,13 +35,14 @@ async (page) => {
                     [friendAction]: [{ user_id: 20002, nickname: 'Mock Friend', remark: 'Mock Friend' }],
                     get_group_list: [],
                     get_cookies: { cookies: '' },
-                    send_msg: { message_id: 'mock-send-1' },
+                    send_private_msg: { message_id: 'mock-send-1' },
+                    get_msg: { message_id: 'mock-send-1', user_id: 10001, message: [{ type: 'text', data: { text: 'hello from Playwright' } }] },
+                    fetch_custom_face: [],
+                    get_friend_msg_history: { messages: [] },
                     ...(backend === 'NapCat.Onebot' ? { get_recent_contact: [] } : {}),
                 }
-                const initializationActions = Object.keys(responses).filter((action) => action !== 'send_msg')
-                let initialized
+                const initializationActions = Object.keys(responses).filter((action) => !['send_private_msg', 'get_msg', 'fetch_custom_face'].includes(action))
                 let activeSocket
-                const initialization = new Promise((resolve) => { initialized = resolve })
                 // Intercept every socket, so the smoke can never contact a real bot.
                 await smokePage.routeWebSocket('**/*', (socket) => {
                     activeSocket = socket
@@ -54,16 +55,13 @@ async (page) => {
                         const request = JSON.parse(String(message))
                         requests.push(request.action)
                         const known = Object.hasOwn(responses, request.action)
-                        if (!known) unexpectedRequests++
+                        if (!known && request.action) unexpectedRequests++
                         socket.send(JSON.stringify({
                             status: known ? 'ok' : 'failed',
                             retcode: known ? 0 : 1404,
                             data: known ? responses[request.action] : null,
                             echo: request.echo,
                         }))
-                        if (initializationActions.every((action) => requests.includes(action))) {
-                            initialized()
-                        }
                     })
                 })
 
@@ -82,12 +80,17 @@ async (page) => {
                 await smokePage.getByRole('button', { name: '连接', exact: true }).click()
                 await smokePage.waitForFunction(() => document.title === 'Mock Login - Xero QQ Lite')
                 await smokePage.getByText('选择联系人开始聊天', { exact: true }).waitFor()
-                await Promise.race([
-                    initialization,
-                    smokePage.waitForTimeout(10000).then(() => {
-                        throw new Error(`${scenario}: post-login initialization timed out`)
-                    }),
-                ])
+                // The route callback runs in the Playwright driver while the
+                // page continues rendering. Poll the driver-side request log
+                // instead of coupling the assertion to a one-shot resolver;
+                // this also handles a reconnect that opens a second socket.
+                for (let attempt = 0; attempt < 100; attempt++) {
+                    if (initializationActions.every((action) => requests.includes(action))) break
+                    await smokePage.waitForTimeout(100)
+                }
+                if (!initializationActions.every((action) => requests.includes(action))) {
+                    throw new Error(`${scenario}: post-login initialization timed out (${requests.join(',')})`)
+                }
 
                 // Exercise the browser transport with one real UI send and one
                 // server-pushed OneBot message. Keep the login matrix fast by
@@ -98,22 +101,28 @@ async (page) => {
                     const friend = smokePage.locator('#user-20002')
                     await smokePage.locator('#friendTab').waitFor({ state: 'visible' })
                     await friend.waitFor({ state: 'attached' })
-                    await friend.evaluate((element) => {
-                        const candidate = [...document.querySelectorAll('#user-20002')]
-                            .find((node) => {
-                                const rect = node.getBoundingClientRect()
-                                return rect.width > 0 && rect.height > 0
-                            })
-                        ;(candidate ?? element).click()
-                    })
+                    // Contact groups are collapsed by default. Expand the
+                    // containing group before clicking the row so the event
+                    // is delivered through Vue's component listener.
+                    if (!(await friend.isVisible())) {
+                        const headers = smokePage.locator('#friendTab .exp-header')
+                        for (let index = 0; index < await headers.count(); index++) {
+                            const header = headers.nth(index)
+                            if (!(await header.isVisible())) continue
+                            await header.click()
+                            if (await friend.isVisible()) break
+                        }
+                    }
+                    await friend.waitFor({ state: 'visible' })
+                    await friend.click()
                     await smokePage.locator('#bar-msg').click()
-                    const input = smokePage.locator('#main-input')
+                    const input = smokePage.locator('#main-input, #main-input-ex').first()
                     await input.waitFor()
                     await input.fill('hello from Playwright')
                     await input.press('Enter')
                     await smokePage.waitForFunction(() =>
                         document.body.textContent?.includes('hello from Playwright') === true)
-                    messageFlow.sent = requests.includes('send_msg')
+                    messageFlow.sent = requests.includes('send_private_msg')
                     activeSocket?.send(JSON.stringify({
                         post_type: 'message',
                         message_type: 'private',
@@ -145,6 +154,7 @@ async (page) => {
                     externalServicesDisabled: !(await externalServices.isChecked()),
                     externalRequests,
                     unexpectedRequests,
+                    requests,
                     pageErrors,
                     messageFlow,
                 }
