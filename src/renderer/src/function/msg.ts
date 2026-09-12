@@ -98,6 +98,22 @@ type MessageSegmentPayload = MessagePayload & {
     id?: string | number
     content?: MessagePayload[]
 }
+type MessageSenderPayload = MessagePayload & {
+    user_id?: string | number
+    nickname?: string
+    card?: string
+    group_id?: string | number
+}
+type IncomingMessagePayload = MessagePayload & {
+    message: MsgItemElem[]
+    sender: MessageSenderPayload
+    notice_type?: string
+    message_type?: string
+    sub_type?: string
+    raw_message?: string
+    group_id?: string | number
+    user_id?: string | number
+}
 
 function asMessagePayload(value: unknown): MessagePayload | undefined {
     return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
@@ -1565,13 +1581,13 @@ function saveUser(msg: MessagePayload, type: string) {
     const contactStore = useContactStore()
     const settingsStore = useSettingsStore()
     listLoadTimes++
-    let list: any[] | undefined
+    let list: Session[] | undefined
     if (msgPath.user_list)
-        list = getMsgData('user_list', msg, msgPath.user_list)
+        list = getMsgData('user_list', msg, msgPath.user_list) as Session[]
     else {
         switch (type) {
             case 'friend':
-                list = getMsgData('friend_list', msg, msgPath.friend_list)
+                list = getMsgData('friend_list', msg, msgPath.friend_list) as Session[]
                 if (list)
                     // 根据 user_id 去重
                     list = list.filter((item, index, arr) => {
@@ -1583,7 +1599,7 @@ function saveUser(msg: MessagePayload, type: string) {
                     })
                 break
             case 'group':
-                list = getMsgData('group_list', msg, msgPath.group_list)
+                list = getMsgData('group_list', msg, msgPath.group_list) as Session[]
                 if (list)
                     // 根据 group_id 去重
                     list = list.filter((item, index, arr) => {
@@ -1615,7 +1631,7 @@ function saveUser(msg: MessagePayload, type: string) {
                         groupNames[item.class_id] = item.class_name[0]
                     }
                 }
-                delete item.group_name
+                item.group_name = ''
             } else {
                 delete item.class_id
                 delete item.class_name
@@ -2147,12 +2163,13 @@ async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
     return msg
 }
 
-function revokeMsg(_: string, msg: any) {
+function revokeMsg(_: string, msg: MessagePayload) {
     const authStore = useAuthStore()
     const chatStore = useChatStore()
     // 清除通知
-    const chatId = msg.notice_type.includes('group') ? msg.group_id : msg.user_id
-    new Notify().closeAll(chatId)
+    const noticeType = typeof msg.notice_type === 'string' ? msg.notice_type : ''
+    const chatId = noticeType.includes('group') ? msg.group_id : msg.user_id
+    new Notify().closeAll(String(chatId ?? ''))
 
     // 在本地 DB 中标记撤回
     const msgId = msg.message_id
@@ -2182,11 +2199,12 @@ function revokeMsg(_: string, msg: any) {
 
     // 显示撤回提示
     const list = chatStore.messageList
-    list.splice(msgIndex + 1, 0, msg)
+    list.splice(msgIndex + 1, 0, msg as unknown as MsgItemElem)
 }
 
 let _qed_try_times = 0
-function newMsg(_: string, data: any) {
+function newMsg(_: string, rawData: MessagePayload) {
+    let data = rawData as IncomingMessagePayload
     const { $t } = app.config.globalProperties
     const authStore = useAuthStore()
     const uiStore = useUIStore()
@@ -2214,7 +2232,7 @@ function newMsg(_: string, data: any) {
 
         // 预发送消息填充 ============================================
         // 列表内最近的一条 fake_msg（倒序查找）
-        let fakeMsg = null as any
+        let fakeMsg: MsgItemElem | null = null
         for (let i = chatStore.messageList.length - 1; i > 0; i--) {
             const msg = chatStore.messageList[i]
             if (msg.fake_msg != undefined && sender == loginId) {
@@ -2256,7 +2274,7 @@ function newMsg(_: string, data: any) {
         if (list.length > 0) {
             // 保存到本地历史
             saveMessagesWithSideEffects(authStore.loginInfo.uin, list)
-            data = list[0]
+            data = list[0] as IncomingMessagePayload
         }
 
         // 显示消息 ============================================
@@ -2295,7 +2313,7 @@ function newMsg(_: string, data: any) {
         // 通知判定预处理 ============================================
         // 对于其他不在消息里标记 atme、atall 的处理
         if (data.atme == undefined || data.atall == undefined) {
-            data.message.forEach((item: any) => {
+            data.message.forEach((item: MsgItemElem) => {
                 if (item.type == 'at' && item.qq == loginId) {
                     data.atme = true
                 }
@@ -2303,7 +2321,7 @@ function newMsg(_: string, data: any) {
         }
         // 临时会话名字的特殊处理
         if (data.sub_type === 'group') {
-            data.sender.nickname = data.sender.user_id
+            data.sender.nickname = String(data.sender.user_id ?? '')
         }
         // 检查群组有没有开启通知
         let isGroupNotice = false
@@ -2394,7 +2412,7 @@ function newMsg(_: string, data: any) {
             ) {
                 // 准备消息内容
                 let raw = getMsgRawTxt(data)
-                raw = raw === '' ? data.raw_message : raw
+                raw = raw === '' ? (data.raw_message ?? '') : raw
                 logger.add(LogType.INFO, '收到新消息通知', undefined, true)
                 if (data.group_name === undefined) {
                     // 检查消息内是否有群名，去列表里寻找
