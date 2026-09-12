@@ -119,3 +119,11 @@ Vitest's current transitive mocker advisory and deprecated Vue I18n 10. These
 upgrades require compatibility work and remain release blockers. Contract
 tests pass after the dependency refresh; Yarn's optional `sharp` native build
 is still environment-dependent.
+
+## Lint verification (2026-09-13)
+
+ESLint 9.39.5 with `@typescript-eslint` 8.70.0 now runs the repository flat
+config successfully: the command exits 0 with 7,285 warnings and no errors.
+The warnings are legacy formatting and console diagnostics; they remain
+tracked cleanup work, while the previous ESLint 8 runtime API failure is
+resolved.
