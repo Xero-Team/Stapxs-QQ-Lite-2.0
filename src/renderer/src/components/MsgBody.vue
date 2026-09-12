@@ -396,7 +396,6 @@ import { getMsgRawTxt, pokeAnime } from '@renderer/function/utils/msgUtil'
 import {
     isRobot,
     openLink,
-    sendStatEvent,
 	vMenu,
 	vMove,
 	VMoveOptions,
@@ -794,7 +793,6 @@ async function parseText(index: number) {
             } catch (ignore) {
                 // ignore
             }
-            sendStatEvent('link_view', { domain: domain })
 
             let linkData: Record<string, unknown> | null = null
             let finaLink = fistLink

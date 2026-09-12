@@ -37,8 +37,6 @@ import {
     reloadCookies,
     updateMenu,
     loadJsonMap,
-    sendIdentifyData,
-    sendStatEvent,
 } from '@renderer/function/utils/appUtil'
 import { reactive, markRaw, nextTick } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
@@ -694,9 +692,6 @@ const msgFunctions = {
             if (Option.get('open_ga_bot') !== false) {
                 const appVersion = data.app_version ? ',' + data.app_version : ''
                 const appInfo = data.app_name ? data.app_name + appVersion : '（未知）'
-
-                sendStatEvent('connect', { method: data.app_name })
-                sendIdentifyData({ bot_version: appInfo })
             }
             if (!login.status) {
                 // 尝试动态载入对应的 pathMap

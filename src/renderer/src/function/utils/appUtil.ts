@@ -1266,16 +1266,6 @@ export function loadJsonMap(name: string) {
     return normalizeJsonPathMap(msgPath)
 }
 
-/** Compatibility no-op retained for callers migrated from telemetry APIs. */
-export function sendStatEvent(_event: string, _data: Record<string, unknown>, _saveLocal = false): void {
-    // Deliberately empty: usage events are never persisted or transmitted.
-}
-
-/** Compatibility no-op retained for callers migrated from telemetry APIs. */
-export function sendIdentifyData(_data: Record<string, unknown>): void {
-    // Deliberately empty: identifying data is discarded.
-}
-
 /**
 * 切换群组通知状态
 * @param group_id 群组 ID

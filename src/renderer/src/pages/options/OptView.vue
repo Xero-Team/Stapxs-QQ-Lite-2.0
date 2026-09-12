@@ -454,7 +454,6 @@ import { BrowserInfo, detect } from 'detect-browser'
 import { getDeviceType } from '@renderer/function/utils/systemUtil'
 
 import languages from '../../assets/l10n/_l10nconfig.json'
-import { sendIdentifyData } from '@renderer/function/utils/appUtil'
 import { backend } from '@renderer/runtime/backend'
 import {
     rememberLocalImageUrl,
@@ -532,17 +531,14 @@ onMounted(() => {
 
 function gaLanguage(event: Event) {
     const sender = event.target as HTMLInputElement
-    sendIdentifyData({ use_language: sender.value })
 }
 
 function gaChatView(event: Event) {
     const sender = event.target as HTMLInputElement
-    sendIdentifyData({ use_chatview: sender.value })
 }
 
 function gaColor(event: Event) {
     const sender = event.target as HTMLInputElement
-    sendIdentifyData({ use_theme_color: colors[Number(sender.dataset.id)] })
 }
 
 function themeColorChange(event: Event) {
@@ -706,7 +702,6 @@ function blurTip(event: Event) {
                     fun: () => {
                         uiStore.popBoxList.shift()
                         save(event)
-                        sendIdentifyData({ use_transparent: true })
                         setTimeout(() => {
                             restartapp()
                         }, 500)
@@ -734,7 +729,6 @@ function blurTip(event: Event) {
                     fun: () => {
                         uiStore.popBoxList.shift()
                         save(event)
-                        sendIdentifyData({ use_transparent: false })
                         setTimeout(() => {
                             restartapp()
                         }, 500)

@@ -373,7 +373,7 @@
     import { i18n } from '@renderer/main'
     import languages from '@renderer/assets/l10n/_l10nconfig.json'
     import { runAS, runASWEvent as save } from '@renderer/function/option'
-    import { openLink, sendIdentifyData } from '@renderer/function/utils/appUtil'
+    import { openLink } from '@renderer/function/utils/appUtil'
     import { useSettingsStore } from '@renderer/state/settings'
     import { useUIStore } from '@renderer/state/ui'
 
@@ -410,7 +410,6 @@
 
     function gaLanguage(event: Event) {
         const sender = event.target as HTMLInputElement
-        sendIdentifyData({ use_language: sender.value })
         // TODO: 刷新菜单
     }
 

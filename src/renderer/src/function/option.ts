@@ -21,7 +21,6 @@ import { useUIStore } from '@renderer/state/ui'
 import { useChatStore } from '@renderer/state/chat'
 import {
     loadWinColor,
-    sendStatEvent,
     updateWinColor,
 } from '@renderer/function/utils/appUtil'
 import {
@@ -298,7 +297,6 @@ function viewRevolve(value: boolean) {
             save('opt_revolve', false)
         } else {
             baseApp.classList.add('no-touch')
-            sendStatEvent('click_statistics', { name: 'touch_randomly' })
         }
     }
 }
