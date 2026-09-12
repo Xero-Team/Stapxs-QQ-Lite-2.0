@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const sections = ['dependencies', 'devDependencies', 'optionalDependencies']
+// Some vendored packages omit a package.json license even though their source
+// distribution includes a license file. Keep the attribution explicit here so
+// the generated SBOM does not silently lose a license obligation.
+const licenseOverrides = {
+  'vue3-bcui': 'Apache-2.0',
+}
 const entries = []
 
 for (const section of sections) {
@@ -16,11 +22,11 @@ for (const section of sections) {
     } catch {
       metadata = { version: 'uninstalled', license: 'unknown' }
     }
-    const license = typeof metadata.license === 'string'
+    const license = licenseOverrides[name] ?? (typeof metadata.license === 'string'
       ? metadata.license
       : Array.isArray(metadata.licenses)
         ? metadata.licenses.map((item) => item.type ?? item).join(', ')
-        : 'unknown'
+        : 'unknown')
     entries.push({ section, name, requested, version: metadata.version ?? 'unknown', license })
   }
 }

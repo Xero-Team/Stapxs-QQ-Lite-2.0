@@ -567,7 +567,7 @@
     {
       "type": "library",
       "name": "@types/node",
-      "version": "20.19.27",
+      "version": "22.20.2",
       "licenses": [
         {
           "license": {
@@ -575,7 +575,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@types/node@20.19.27",
+      "purl": "pkg:npm/@types/node@22.20.2",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1442,6 +1442,13 @@
       "type": "library",
       "name": "vue3-bcui",
       "version": "0.3.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0"
+          }
+        }
+      ],
       "purl": "pkg:npm/vue3-bcui@0.3.0",
       "properties": [
         {

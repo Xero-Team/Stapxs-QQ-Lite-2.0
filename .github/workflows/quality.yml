@@ -43,6 +43,8 @@ jobs:
               run: yarn sbom
             - name: Web build
               run: yarn build
+            - name: Verify SBOM, licenses and CSP
+              run: yarn verify:release-metadata dist
             - name: Electron renderer build
               run: yarn electron-vite build
               env:
