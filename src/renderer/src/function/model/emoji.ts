@@ -209,16 +209,20 @@ export default class Emoji {
     private getNormalUrl(id: number): string {
         if (import.meta.env.VITE_LOCAL_FACE == 'true')
             return `./img/qface/${id}.png`
-        else
-            return `https://lib.stapxs.cn/download/stapxs-qq-lite/qq_emoji/${id}/apng/${id}.png`
+        else {
+            const cdn = import.meta.env.VITE_APP_EMOJI_CDN
+            return cdn ? `${cdn}/qq_emoji/${id}/apng/${id}.png` : ''
+        }
     }
 
     private getSuperUrl(id: number, suffix?: number): string {
         const name = suffix ? `${id}_${suffix}` : `${id}`
         if (import.meta.env.VITE_LOCAL_FACE == 'true')
             return `./img/qface/${name}.json`
-        else
-            return `https://lib.stapxs.cn/download/stapxs-qq-lite/qq_emoji/${id}/lottie/${name}.json`
+        else {
+            const cdn = import.meta.env.VITE_APP_EMOJI_CDN
+            return cdn ? `${cdn}/qq_emoji/${id}/lottie/${name}.json` : ''
+        }
     }
 }
 

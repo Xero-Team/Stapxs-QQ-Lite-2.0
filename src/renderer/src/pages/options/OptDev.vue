@@ -504,7 +504,6 @@
         info += 'Network Info:\n'
         const testList = [
             ['Github          ', 'https://api.github.com'],
-            ['SSQQ API        ', 'https://api.stapxs.cn'],
         ]
         for (const item of testList) {
             const start = new Date().getTime()
