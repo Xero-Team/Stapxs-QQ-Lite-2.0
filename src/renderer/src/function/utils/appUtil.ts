@@ -652,6 +652,7 @@ import horizontalCss from '@renderer/assets/css/append/mobile/append_mobile_hori
 import verticalCss from '@renderer/assets/css/append/mobile/append_mobile_vertical.css?raw'
 import { ActionType, LocalNotificationSchema } from '@capacitor/local-notifications'
 import { backend } from '@renderer/runtime/backend'
+import { auditExternalRequest, isExternalRequestAllowed } from '@renderer/network/policy'
 import { NoticeBodyV3 } from '../elements/system'
 import { wheelMask } from '../input'
 import { addTooltip, TooltipController } from '../tooltip'
@@ -782,6 +783,8 @@ export function checkUpdate() {
     // 获取最新的 release 信息
     const packageUrl =
         `https://api.github.com/repos/${repoName}/releases/latest`
+    if (!isExternalRequestAllowed(packageUrl, option.get('enable_external_services'))) return
+    auditExternalRequest(packageUrl, 'release-check')
     fetch(packageUrl).then((response) => {
         if (response.ok) {
             response.json().then((data) => {
@@ -1059,6 +1062,8 @@ export function checkNotice() {
     if (import.meta.env.DEV) {
         url = 'notice_local.json'
     }
+    if (!isExternalRequestAllowed(url, option.get('enable_external_services'))) return
+    auditExternalRequest(url, 'notice-fetch')
     const version = 3
     const fetchData = {
         time: new Date().getTime().toString(),
