@@ -38,3 +38,4 @@
 - All GitHub Actions dependency-install steps now use `yarn install --immutable --mode=skip-build`, matching the reproducible install path that avoids the environment's native `sharp` postinstall failure; the quality workflow remains red until legacy lint and audit findings are resolved.
 - The `lint` script is now a non-mutating check for CI; the previous auto-fixing behavior is available explicitly as `lint:fix`, so failed gates cannot rewrite a checkout during validation.
 - README contributor avatars and the remote Star History widget were removed, along with their unused contributor-card CSS, so project documentation no longer fetches upstream identity or analytics-style external widgets.
+- Removing the obsolete Umami style override also exposed a stray CSS declaration in the full-vibrancy stylesheet; it is now removed and the production Vite build completes without CSS syntax warnings.

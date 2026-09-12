@@ -193,8 +193,6 @@
     background: rgba(var(--color-card-rgb), 0.3) !important;
 }
 
-    background: transparent !important;
-}
 .view-pan {
     background: rgba(var(--color-card-rgb), 0);
 }
