@@ -66,6 +66,10 @@
     import { canGroupNotice } from '@renderer/function/utils/msgUtil'
     import { i18n } from '@renderer/main'
 
+    interface ChatReference {
+        show: { id: number }
+    }
+
     defineOptions({ name: 'ViewOptInfo' })
 
     const authStore = useAuthStore()
@@ -76,11 +80,11 @@
 
     const props = defineProps<{
         type: string
-        chat: any
+        chat: ChatReference
     }>()
 
     const emit = defineEmits<{
-        'update_mumber_card': [event: Event, info: any]
+        'update_mumber_card': [event: Event, info: Record<string, unknown>]
     }>()
 
     /**
