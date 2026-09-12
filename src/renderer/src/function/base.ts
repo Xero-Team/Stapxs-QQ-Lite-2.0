@@ -9,6 +9,7 @@
 import Option from './option'
 import { reactive } from 'vue'
 import { PopInfoElem } from './elements/system'
+import { redactLogValue } from './logging'
 
 // =============== 日志 ===============
 
@@ -21,17 +22,7 @@ export enum LogType {
     SYSTEM
 }
 
-const SENSITIVE_KEYS = /token|access_token|authorization|cookie|password|message|user_id|uin|path|url/i
-
-function redactLogValue(value: unknown): unknown {
-    if (Array.isArray(value)) return value.map(redactLogValue)
-    if (typeof value !== 'object' || value === null) return value
-    const result: Record<string, unknown> = {}
-    for (const [key, nested] of Object.entries(value)) {
-        result[key] = SENSITIVE_KEYS.test(key) ? '[redacted]' : redactLogValue(nested)
-    }
-    return result
-}
+export { redactLogValue } from './logging'
 
 function field(data: unknown, key: string): string | undefined {
     if (typeof data !== 'object' || data === null) return undefined
