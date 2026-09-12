@@ -15,3 +15,4 @@
 - The QFace and Border Card UI submodules have been initialized. `yarn build` now succeeds; the previous missing `qq_emoji/_index.json` error no longer reproduces.
 - Playwright CLI smoke passed against the production preview, covering the first screen, OneBot entry point, and the default disabled external-services setting.
 - Full repository ESLint still reports legacy errors and warnings. Targeted protocol, transport, storage, network-policy, and smoke files pass their checks.
+- `yarn check` was re-run after the Electron hardening work; the typecheck portion passes, while repository lint still reports 335 legacy errors (mostly `any` boundaries, generated bcui JavaScript, and legacy component naming). The failing files remain outside the migrated protocol/transport/storage gates.
