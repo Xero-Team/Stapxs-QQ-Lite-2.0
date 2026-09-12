@@ -28,7 +28,7 @@
 
 - [ ] 评估并升级 Vue、Vite、TypeScript、ESLint、Pinia、Electron、Tauri、Capacitor、Node 类型和所有插件到当时最新稳定版。
 - [ ] 每次大版本升级单独提交，记录阻塞项（例如 TypeScript 与 vue-tsc/Vue 兼容性）和替代方案。
-- [ ] 用维护中的库替换弃用或自研实现：Zod 做运行时校验，Dexie/idb 做 IndexedDB，标准 Web Crypto/系统 keychain 做密钥，成熟 Markdown/XSS 库做内容处理。
+- [x] 用维护中的库替换弃用或自研实现：Zod 做运行时校验，Dexie/idb 做 IndexedDB，标准 Web Crypto/系统 keychain 做密钥，成熟 Markdown/XSS 库做内容处理。
 - [ ] 移除重复跨端实现，统一平台适配接口；明确主桌面运行时，其他运行时保持兼容。
 - [ ] 升级 `ssqq.capacitor-onebot-connector` 和 npx 工具，消除 workspace 内部版本漂移和已知过时依赖（如 request）。
 
@@ -44,12 +44,12 @@
 
 - [x] 建立 OneBot schema 包：事件/API 请求响应使用 Zod；必要时评估 protobuf 仅用于明确的高吞吐内部通道，不改变 OneBot 公共 JSON 协议。
 - [ ] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。
-- [ ] 用 Dexie/idb 迁移聊天历史、缓存和设置；设计版本化 schema、迁移、导出/清除和容量策略。
+- [x] 用 Dexie/idb 迁移聊天历史、缓存和设置；设计版本化 schema、迁移、导出/清除和容量策略。
 - [ ] 消息解析、CQ 码、媒体 URL、转发消息全部使用纯函数和兼容性测试。
 
 ## 6. 验证与发布
 
-- [ ] 为连接、鉴权、消息解析、历史迁移编写单元/契约测试。
+- [x] 为连接、鉴权、消息解析、历史迁移编写单元/契约测试。
 - [ ] Playwright 覆盖连接、收发消息、图片/文件、撤回/回复、设置迁移、离线和隐私开关。
 - [ ] 在 Linux、Windows、macOS 至少验证 Web、主桌面端和一个移动端构建；记录体积、启动时间和内存回归。
 - [ ] 完成 SBOM、许可证、依赖漏洞、CSP、签名和发布产物校验。
