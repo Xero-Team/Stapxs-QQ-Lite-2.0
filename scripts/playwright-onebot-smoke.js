@@ -35,13 +35,17 @@ async (page) => {
                     [friendAction]: [{ user_id: 20002, nickname: 'Mock Friend', remark: 'Mock Friend' }],
                     get_group_list: [],
                     get_cookies: { cookies: '' },
+                    get_friend_msg_history: [],
+                    get_group_msg_history: [],
                     send_private_msg: { message_id: 'mock-send-1' },
                     get_msg: { message_id: 'mock-send-1', user_id: 10001, message: [{ type: 'text', data: { text: 'hello from Playwright' } }] },
                     fetch_custom_face: [],
-                    get_friend_msg_history: { messages: [] },
                     ...(backend === 'NapCat.Onebot' ? { get_recent_contact: [] } : {}),
                 }
-                const initializationActions = Object.keys(responses).filter((action) => !['send_private_msg', 'get_msg', 'fetch_custom_face'].includes(action))
+                const initializationActions = Object.keys(responses).filter((action) => ![
+                    'send_private_msg', 'get_msg', 'fetch_custom_face',
+                    'get_friend_msg_history', 'get_group_msg_history',
+                ].includes(action))
                 let activeSocket
                 // Intercept every socket, so the smoke can never contact a real bot.
                 await smokePage.routeWebSocket('**/*', (socket) => {
