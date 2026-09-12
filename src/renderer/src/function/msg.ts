@@ -96,14 +96,14 @@ const META_EVENT_WATCHDOG = {
     timeoutMultiplier: 2,
     graceSeconds: 5,
 }
-let loginWaveTimer: any = null
+let loginWaveTimer: ReturnType<typeof setInterval> | number | null = null
 
-export function setLoginWaveTimer(timer: any) {
+export function setLoginWaveTimer(timer: ReturnType<typeof setInterval> | number) {
     loginWaveTimer = timer
 }
 
 export function clearLoginWaveTimer() {
-    if (loginWaveTimer !== null) {
+    if (loginWaveTimer !== null && loginWaveTimer !== -1) {
         clearInterval(loginWaveTimer)
         loginWaveTimer = null
     }
