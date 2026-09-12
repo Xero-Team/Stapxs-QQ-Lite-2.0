@@ -407,8 +407,8 @@ export function sendMsgRaw(
     // 将消息构建为完整消息体先显示出去
     const msgUUID = uuid()
     if (preShow) {
-        const preShowMsg = JSON.parse(JSON.stringify(msg));
-        preShowMsg.forEach((item: any) => {
+        const preShowMsg = JSON.parse(JSON.stringify(msg)) as JsonRecord[]
+        preShowMsg.forEach((item) => {
             // 对 base64 图片做特殊处理
             if (item.type == 'image') {
                 item.url = resolveMediaUrl(item.file)
