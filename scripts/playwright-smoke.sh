@@ -12,4 +12,5 @@ grep -q "连接到 OneBot\|Connect to OneBot" <<<"$snapshot"
 "${cli[@]}" eval "() => document.querySelector('meta[http-equiv=Content-Security-Policy]')?.content.includes(\"script-src 'self'\") === true" | grep -q "true"
 "${cli[@]}" eval "() => { const item = [...document.querySelectorAll('li')].find((el) => el.textContent?.includes('设置') || el.textContent?.includes('Options')); item?.click(); return Boolean(item); }" | grep -q "true"
 "${cli[@]}" eval "() => document.querySelector('input[name=enable_external_services]')?.checked === false" | grep -q "true"
+"${cli[@]}" eval "() => [...document.querySelectorAll('button')].some((button) => /导出|Export/.test(button.textContent ?? ''))" | grep -q "true"
 "${cli[@]}" close
