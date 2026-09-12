@@ -7,6 +7,7 @@
 - Native `sharp@0.32.6` postinstall fails in this environment, so Yarn exits non-zero after linking even though JavaScript dependencies are available.
 - `yarn npm audit --all --recursive` currently exits 1 with 192 advisories (including 3 critical findings in Handlebars, tar, and Vitest); dependency upgrades and an application impact review are required before enabling the audit as a passing release gate.
 - A fresh `yarn npm audit --all` on 2026-09-13 still exits 1; it reports high/critical issues in `jsonpath`, `rollup`, and `vitest`, plus moderate findings in `echarts`, `markdown-it`, `uuid`, and `ws`. No upgrade is applied yet because each requires compatibility review.
+- The Electron renderer/main/preload build was re-run locally with `yarn electron-vite build` and completed successfully; Windows/macOS signing and packaged installer validation remain outstanding.
 - `vue-tsc` is now pinned to the stable 3.3.11 line for the resolved TypeScript 5.9.3 toolchain. The renderer typecheck still reports legacy cross-platform listener callback errors and one strict error inside the `vue3-bcui` package; the build and contract tests pass, but no green typecheck is claimed until those boundaries are migrated or the dependency is replaced.
 
 ## Resolved in the current checkout
