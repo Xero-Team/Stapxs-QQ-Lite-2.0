@@ -109,7 +109,7 @@ export interface SQCodeElem {
 }
 
 export interface MsgItemElem {
-    type: string
+    type?: string
     // Legacy extension fields are validated by the OneBot schema before use.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any
