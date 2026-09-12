@@ -7,7 +7,6 @@ import appInfo from '../../../../../package.json'
 import AboutPan from '@renderer/components/AboutPan.vue'
 import UpdatePan from '@renderer/components/UpdatePan.vue'
 import WelPan from '@renderer/components/WelPan.vue'
-import MealHungryPan from '@renderer/components/notice-component/MealHungryPan.vue'
 
 import { KeyboardInfo } from '@capacitor/keyboard'
 import { LogType, Logger, PopInfo, PopType } from '@renderer/function/base'
@@ -965,78 +964,11 @@ export function showReleaseHistory() {
 }
 
 /**
-* 显示使用次数弹窗
-*/
+ * Show the first-run guide without tracking launch counts or linking to
+ * project sponsors and upstream pages.
+ */
 export function checkOpenTimes() {
     const uiStore = useUIStore()
-    if (import.meta.env.DEV) return     // 开发环境不显示
-    const { $t } = app.config.globalProperties
-    const repoName = import.meta.env.VITE_APP_REPO_NAME
-    const times = localStorage.getItem('times')
-    if (times != null) {
-        const getTimes = Number(times) + 1
-        localStorage.setItem('times', getTimes.toString())
-        if (getTimes % 20 == 0) {
-            // 构建 HTML
-            let html =
-                '<div style="display:flex;flex-direction:column;padding:10px 5%;align-items:center;">'
-            html +=
-                '<svg style="height:2rem;fill:var(--color-font);margin-bottom:20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M16 0H144c5.3 0 10.3 2.7 13.3 7.1l81.1 121.6c-49.5 4.1-94 25.6-127.6 58.3L2.7 24.9C-.6 20-.9 13.7 1.9 8.5S10.1 0 16 0zM509.3 24.9L401.2 187.1c-33.5-32.7-78.1-54.2-127.6-58.3L354.7 7.1c3-4.5 8-7.1 13.3-7.1H496c5.9 0 11.3 3.2 14.1 8.5s2.5 11.5-.8 16.4zM432 336c0 97.2-78.8 176-176 176s-176-78.8-176-176s78.8-176 176-176s176 78.8 176 176zM264.4 241.1c-3.4-7-13.3-7-16.8 0l-22.4 45.4c-1.4 2.8-4 4.7-7 5.1L168 298.9c-7.7 1.1-10.7 10.5-5.2 16l36.3 35.4c2.2 2.2 3.2 5.2 2.7 8.3l-8.6 49.9c-1.3 7.6 6.7 13.5 13.6 9.9l44.8-23.6c2.7-1.4 6-1.4 8.7 0l44.8 23.6c6.9 3.6 14.9-2.2 13.6-9.9l-8.6-49.9c-.5-3 .5-6.1 2.7-8.3l36.3-35.4c5.6-5.4 2.5-14.8-5.2-16l-50.1-7.3c-3-.4-5.7-2.4-7-5.1l-22.4-45.4z"/></svg>'
-            html += `<span>${$t('好耶！Xero QQ Lite 已经被打开 {times} 次了！', { times: getTimes })}</span>`
-            html += `<span>${$t('真的不去点个 star 吗 ……')}</span>`
-            html += '</div>'
-            const popInfo = {
-                title: $t('好耶'),
-                svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>',
-                html: html,
-                button: [
-                    {
-                        text: $t('不要'),
-                        fun: () => {
-                            uiStore.popBoxList.shift()
-                        },
-                    },
-                    {
-                        text: $t('好喔'),
-                        master: true,
-                        fun: () => {
-                            openLink(
-                                `https://github.com/${repoName}`,
-                            )
-                            uiStore.popBoxList.shift()
-                        },
-                    },
-                ],
-            }
-            uiStore.popBoxList.push(popInfo)
-        }
-        if (getTimes % 50 == 0 && import.meta.env.VITE_APP_SPONSORS_URL) {
-            const popInfo = {
-                title: '',
-                template: markRaw(MealHungryPan),
-                templateValue: { times: getTimes },
-                button: [
-                    {
-                        text: $t('打开…'),
-                        fun: () => {
-                            openLink(import.meta.env.VITE_APP_SPONSORS_URL)
-                            uiStore.popBoxList.shift()
-                        },
-                    },
-                    {
-                        text: $t('好耶'),
-                        master: true,
-                        fun: () => {
-                            uiStore.popBoxList.shift()
-                        },
-                    },
-                ],
-            }
-            uiStore.popBoxList.push(popInfo)
-        }
-    } else {
-        localStorage.setItem('times', '1')
-    }
     // 使用引导
     const guide = localStorage.getItem('guide')
     const guideVersion = 1
