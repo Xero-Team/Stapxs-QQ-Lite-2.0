@@ -296,9 +296,10 @@
             });
         }
         // 如果是网易云音乐，异步获取歌词
-        if (currentMusic.value?.type === 'music163' && currentMusic.value.data && typeof currentMusic.value.data === 'string') {
+        const musicApi = import.meta.env.VITE_APP_163_MUSIC_API
+        if (settingsStore.sysConfig.enable_external_services === true && musicApi && currentMusic.value?.type === 'music163' && currentMusic.value.data && typeof currentMusic.value.data === 'string') {
             const musicRef = currentMusic.value
-            fetch(import.meta.env.VITE_APP_163_MUSIC_API + '/lyric?id=' + currentMusic.value.data)
+            fetch(musicApi + '/lyric?id=' + currentMusic.value.data)
                 .then(res => res.json())
                 .then(data => {
                     const originalLyric = parseLyric(data.lrc?.lyric || '')

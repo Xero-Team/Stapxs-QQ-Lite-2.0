@@ -192,6 +192,7 @@
     import { useContactStore } from '@renderer/state/contact'
     import { useUIStore } from '@renderer/state/ui'
     import { useQzoneStore } from '@renderer/state/qzone'
+    import { useSettingsStore } from '@renderer/state/settings'
     import { getTrueLang, getViewTime } from '@renderer/function/utils/systemUtil'
     import { i18n } from '@renderer/main'
 
@@ -258,6 +259,7 @@
     const contactStore = useContactStore()
     const uiStore = useUIStore()
     const qzoneStore = useQzoneStore()
+    const settingsStore = useSettingsStore()
     const { viewer: viewerRef } = inject<{ viewer: any }>('viewer', { viewer: null })
     const hitokoto = reactive<HitokotoInfo>({
         id: 0,
@@ -281,7 +283,7 @@
     })
 
     onMounted(() => {
-        fetchHitokoto()
+        if (settingsStore.sysConfig.enable_external_services === true) fetchHitokoto()
     })
 
     async function fetchHitokoto() {

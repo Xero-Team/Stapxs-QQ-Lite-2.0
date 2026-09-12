@@ -764,6 +764,7 @@ async function parseText(index: number) {
     if (linkList !== null && !gotLink.value && !isDebugMsg) {
         queueMicrotask(async() => {
             gotLink.value = true
+            if (settingsStore.sysConfig.enable_external_services !== true) return
             const fistLink = linkList[0]
             let protocol = ''
             let domain = ''
@@ -807,7 +808,9 @@ async function parseText(index: number) {
                         linkData = ogTags
                     }
                 } else {
-                    const response = await fetch(`${import.meta.env.VITE_APP_LINK_VIEW}/${encodeURIComponent(fistLink)}`)
+                    const previewApi = import.meta.env.VITE_APP_LINK_VIEW
+                    if (!previewApi) return
+                    const response = await fetch(`${previewApi}/${encodeURIComponent(fistLink)}`)
                     if(response.ok) {
                         const res = await response.json()
                         if (res.status === undefined && Object.keys(res).length > 0) {
