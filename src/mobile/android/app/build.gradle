@@ -4,10 +4,10 @@ def appProperties = new Properties();
 file("app.properties").withInputStream { appProperties.load(it) }
 
 android {
-    namespace = "cn.stapxs.webqq"
+    namespace = "team.xero.qqlite"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "cn.stapxs.webqq"
+        applicationId "team.xero.qqlite"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appProperties.getProperty("versionCode").toInteger()

@@ -745,7 +745,7 @@ export async function loadAppendStyle() {
                 if (
                     info['enable-all'] == 'true' ||
                     (info['whitelist'] != undefined &&
-                        info['whitelist'].indexOf('stapxs-qq-lite')) > 0
+                        info['whitelist'].indexOf('xero-qq-lite')) > 0
                 ) {
                     import(
                         '@renderer/assets/css/append/append_vibrancy.css'

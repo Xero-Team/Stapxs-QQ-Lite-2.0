@@ -74,7 +74,7 @@ Xero QQ Lite 也可以作为 Napcat 的插件运行，点击下面的快速安�
 
 ### > 自行部署网页
 
-Xero QQ Lite 在版本发布时会构建 Web 文件，你可以在 [📦️ 这里](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases) 找到它，通常命名为 `Stapxs.QQ.Lite-<版本>-web.zip`，下载后解压并放置到你的网页服务器中即可。
+Xero QQ Lite 在版本发布时会构建 Web 文件，你可以在 [📦️ 这里](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases) 找到它，通常命名为 `Xero.QQ.Lite-<版本>-web.zip`，下载后解压并放置到你的网页服务器中即可。
 
 不会部署网页服务器？Xero QQ Lite 网页版已经发布到了 [npm](https://www.npmjs.com/package/ssqq-web)！你可以使用 npx 工具快速启动：
 

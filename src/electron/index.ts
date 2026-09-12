@@ -195,7 +195,7 @@ app.on('second-instance', (_, cmd, workingDirectory) => {
 
 app.on('window-all-closed', () => {
     if (process.platform === 'win32') {
-        app.removeAsDefaultProtocolClient('stapx-qq-lite')   // 取消默认协议
+        app.removeAsDefaultProtocolClient('xero-qq-lite')   // 取消默认协议
     }
     if (process.platform !== 'darwin') {
         app.quit()
@@ -209,8 +209,8 @@ app.on('ready', async () => {
         return
     }
     if (process.platform === 'win32') {
-        app.setAppUserModelId('Stapx QQ Lite')              // 设置应用 ID
-        app.setAsDefaultProtocolClient('stapx-qq-lite')     // 设置为默认协议
+        app.setAppUserModelId('team.xero.qqlite')           // 设置应用 ID
+        app.setAsDefaultProtocolClient('xero-qq-lite')      // 设置为默认协议
     }
     // 注册 customFileProtocol 到 app 协议
     protocol.handle('app', async (request) => {

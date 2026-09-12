@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if #available(iOS 13.0, *) {
             // 注册后台处理任务 - 用于保持 WebSocket 连接
             BGTaskScheduler.shared.register(
-                forTaskWithIdentifier: "cn.stapxs.webqq.refresh",
+                forTaskWithIdentifier: "team.xero.qqlite.refresh",
                 using: nil
             ) { task in
                 self.handleAppRefresh(task: task as! BGAppRefreshTask)
@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             // 注册后台处理任务 - 用于处理长时间运行的任务
             BGTaskScheduler.shared.register(
-                forTaskWithIdentifier: "cn.stapxs.webqq.processing",
+                forTaskWithIdentifier: "team.xero.qqlite.processing",
                 using: nil
             ) { task in
                 self.handleProcessingTask(task: task as! BGProcessingTask)
@@ -83,7 +83,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS 13.0, *)
     private func scheduleAppRefresh() {
-        let request = BGAppRefreshTaskRequest(identifier: "cn.stapxs.webqq.refresh")
+    let request = BGAppRefreshTaskRequest(identifier: "team.xero.qqlite.refresh")
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60) // 15分钟后
 
         do {
@@ -95,7 +95,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS 13.0, *)
     private func scheduleProcessingTask() {
-        let request = BGProcessingTaskRequest(identifier: "cn.stapxs.webqq.processing")
+    let request = BGProcessingTaskRequest(identifier: "team.xero.qqlite.processing")
         request.requiresNetworkConnectivity = true
         request.requiresExternalPower = false
         request.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60) // 30分钟后

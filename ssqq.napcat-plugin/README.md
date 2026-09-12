@@ -1,6 +1,6 @@
 # napcat-plugin-ssqq
 
-这是 Stapxs QQ Lite 项目的 NapCat 插件封装（`napcat-plugin-ssqq`），用于将主应用的 Web UI 打包为 NapCat 插件可部署的静态资源包，并提供插件打包（zip）脚本与 NapCat 特殊构建流程。
+这是 Xero QQ Lite 项目的 NapCat 插件封装（`napcat-plugin-ssqq`），用于将主应用的 Web UI 打包为 NapCat 插件可部署的静态资源包，并提供插件打包（zip）脚本与 NapCat 特殊构建流程。
 
 ## 构建
 

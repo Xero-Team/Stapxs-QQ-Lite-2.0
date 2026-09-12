@@ -458,15 +458,15 @@
                     if (backend.release.toLowerCase().indexOf('arch') > 0) {
                         let pacmanInfo =
                             await backend.call(undefined, 'sys:runCommand', true,
-                                'pacman -Q stapxs-qq-lite-bin',
+                                'pacman -Q xero-qq-lite-bin',
                             )
                         if (pacmanInfo.success) {
                             info += '    Install Type      -> aur\n'
                         } else if(backend.function && 'invoke' in backend.function) {
-                            // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
+                            // 也有可能是 xero-qq-lite，这是我自己打的原生包
                             pacmanInfo = await backend.function.invoke(
                                     'sys:runCommand',
-                                    'pacman -Q stapxs-qq-lite',
+                                    'pacman -Q xero-qq-lite',
                                 )
                             if (pacmanInfo.success) {
                                 info += '    Install Type      -> pacman\n'

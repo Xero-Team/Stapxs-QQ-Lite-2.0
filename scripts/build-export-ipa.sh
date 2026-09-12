@@ -1,7 +1,7 @@
 rm -rf dist_capacitor
 
 VERSION=$(node -p "require('./package.json').version")
-IPA_NAME="Stapxs.QQ.Lite-$VERSION.ipa"
+IPA_NAME="Xero.QQ.Lite-$VERSION.ipa"
 EXPORT_PATH="dist_capacitor/$IPA_NAME"
 
 xcodebuild clean build \

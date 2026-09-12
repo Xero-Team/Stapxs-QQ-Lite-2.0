@@ -862,10 +862,10 @@ onMounted(() => {
 
         if(import.meta.env.DEV) {
             // eslint-disable-next-line
-            console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to sar-dos on stapxs-qq-lite.su ]')
+            console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to Xero QQ Lite ]')
         } else {
             // eslint-disable-next-line
-            console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to ssqq on stapxs-qq-lite.user ]')
+            console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to Xero QQ Lite ]')
         }
         // 初始化波浪动画
         setLoginWaveTimer(waveAnimation(
@@ -896,10 +896,10 @@ onMounted(() => {
         settingsStore.sysConfig = loadedConfig
         if (!migratedBackground) hydrateBackgroundImage(settingsStore.sysConfig.chat_background)
         if(dev) {
-            logger.debug('stapxs-qq-lite.su:$/mnt/boot/dawnHunt/bin/core --pour /mnt/app/bin/main', true)
+            logger.debug('xero-qq-lite: boot complete', true)
             logger.system('[ dawnHuntCore Version: 1.0 Beta, dawnHuntDB: 2025-04-24 ]')
         } else {
-            logger.debug('stapxs-qq-lite.user:$/mnt/app/bin/main', true)
+            logger.debug('xero-qq-lite: renderer ready', true)
         }
         logger.add(LogType.DEBUG, '系统配置', settingsStore.sysConfig)
         // PS：重新再应用部分需要加载完成后才能应用的设置

@@ -71,7 +71,7 @@ Xero QQ Lite can also run as a Napcat plugin. Click the quick install button bel
 
 ### > Self-Host the Web Page
 
-Xero QQ Lite builds Web files with each release. You can find them at [📦️ here](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases), usually named `Stapxs.QQ.Lite-<version>-web.zip`. Download and extract it, then place it on your web server.
+Xero QQ Lite builds Web files with each release. You can find them at [📦️ here](https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0/releases), usually named `Xero.QQ.Lite-<version>-web.zip`. Download and extract it, then place it on your web server.
 
 Not sure how to set up a web server? Xero QQ Lite web version has been published to [npm](https://www.npmjs.com/package/ssqq-web)! You can use the npx tool to start it quickly:
 

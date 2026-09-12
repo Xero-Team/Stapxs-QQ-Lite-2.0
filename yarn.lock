@@ -11295,9 +11295,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stapxs-qq-lite@workspace:.":
+"xero-qq-lite@workspace:.":
   version: 0.0.0-use.local
-  resolution: "stapxs-qq-lite@workspace:."
+  resolution: "xero-qq-lite@workspace:."
   dependencies:
     "@ai-sdk/openai-compatible": "npm:^2.0.38"
     "@capacitor/android": "npm:^8.0.0"

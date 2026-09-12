@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Stapxs QQ Lite
-Exec=stapxs-qq-lite %U
-Icon=stapxs-qq-lite
+Name=Xero QQ Lite
+Exec=xero-qq-lite %U
+Icon=xero-qq-lite
 Type=Application
 Categories=Utility;
-MimeType=x-scheme-handler/stapxs-qq-lite
+MimeType=x-scheme-handler/xero-qq-lite

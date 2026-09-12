@@ -90,7 +90,7 @@ pub fn run() {
             // 初始化全局通知管理器 ============
             let app_id = app.config().identifier.clone();
             let manager =
-                get_notification_manager(app_id, Some("stapxs-qq-lite".to_owned()));
+                get_notification_manager(app_id, Some("xero-qq-lite".to_owned()));
             let categories = vec![NotificationCategory {
                 identifier: "cn.stapxs.qqweb.reply".to_string(),
                 actions: vec![NotificationCategoryAction::TextInputAction {

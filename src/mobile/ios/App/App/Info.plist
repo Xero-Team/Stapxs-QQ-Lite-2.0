@@ -6,8 +6,8 @@
     <true/>
     <key>BGTaskSchedulerPermittedIdentifiers</key>
     <array>
-      <string>cn.stapxs.webqq.refresh</string>
-      <string>cn.stapxs.webqq.processing</string>
+      <string>team.xero.qqlite.refresh</string>
+      <string>team.xero.qqlite.processing</string>
     </array>
     <key>CFBundleDevelopmentRegion</key>
     <string>zh</string>

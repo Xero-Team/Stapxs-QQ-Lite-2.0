@@ -52,7 +52,7 @@ impl WebSocketClient {
             .header("Connection", "Upgrade")
             .header("Upgrade", "websocket")
             .header("Host", host_header)
-            .header("User-Agent", "stapxs-qq-lite")
+            .header("User-Agent", "xero-qq-lite")
             .body(())?;
 
         let connect_result = timeout(timeout_duration, connect_async(req)).await;

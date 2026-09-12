@@ -261,7 +261,7 @@ export function regIpcListener() {
         if (process.platform === 'win32') {
             showData = {
                 toastXml: `
-                <toast launch="stapx-qq-lite:action=click" activationType="protocol">
+                <toast launch="xero-qq-lite:action=click" activationType="protocol">
                     <visual>
                         <binding template="ToastGeneric">
                             <image placement="appLogoOverride" hint-crop="circle" src="${(data.icon as string).replaceAll('&', '&amp;')}"/>
@@ -274,7 +274,7 @@ export function regIpcListener() {
                         <action
                             content="▶"
                             hint-inputId="quick"
-                            arguments="stapx-qq-lite:action=reply&amp;data=%quick%"
+                            arguments="xero-qq-lite:action=reply&amp;data=%quick%"
                             activationType="protocol"/>
                     </actions>
                 </toast>`,

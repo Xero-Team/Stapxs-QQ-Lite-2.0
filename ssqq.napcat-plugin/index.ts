@@ -8,10 +8,10 @@ export const plugin_init: PluginModule['plugin_init'] = (ctx: NapCatPluginContex
 
     ctx.router.page({
         path: 'dashboard',
-        title: 'Stapxs QQ Lite',
+        title: 'Xero QQ Lite',
         icon: '📱',
         htmlFile: 'webui/dist/index.html',
-        description: 'Stapxs QQ Lite',
+        description: 'Xero QQ Lite',
     })
 };
 

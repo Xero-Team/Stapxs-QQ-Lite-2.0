@@ -1,4 +1,4 @@
-package cn.stapxs.webqq;
+package team.xero.qqlite;
 
 import android.os.Bundle;
 import android.webkit.WebView;
