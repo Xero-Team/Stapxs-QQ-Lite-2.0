@@ -743,25 +743,30 @@ const msgFunctions = {
      * 补充登录信息
      * @deprecated 此功能在 OICQ 后的 bot 中没有再实现，暂时保留
      */
-    getMoreLoginInfo: (_: string, msg: { [key: string]: any }) => {
+    getMoreLoginInfo: (_: string, msg: MessagePayload) => {
         const authStore = useAuthStore()
-        authStore.loginInfo.info = msg.data.data.result.buddy.info_list[0]
+        const data = asMessagePayload(msg.data)
+        const result = asMessagePayload(data?.data)
+        const buddy = asMessagePayload(result?.result)
+        const info = asMessagePayload(buddy?.buddy)
+        const infoList = Array.isArray(info?.info_list) ? info.info_list : []
+        if (infoList.length > 0) authStore.loginInfo.info = infoList[0]
     },
 
     /**
      * 保存好友列表
      */
-    getGroupList: (_: string, msg: { [key: string]: any }) => {
+    getGroupList: (_: string, msg: MessagePayload) => {
         saveUser(msg, 'group')
     },
-    getFriendList: (_: string, msg: { [key: string]: any }) => {
+    getFriendList: (_: string, msg: MessagePayload) => {
         saveUser(msg, 'friend')
     },
 
     /**
      * 保存分组信息（独立保存）
      */
-    getFriendCategory: (_: string, msg: { [key: string]: any }) => {
+    getFriendCategory: (_: string, msg: MessagePayload) => {
         const contactStore = useContactStore()
         const list = getMsgData(
             'friend_category',
@@ -792,7 +797,7 @@ const msgFunctions = {
     /**
      * 获取群成员信息
      */
-    getUserInfoInGroup: (_: string, msg: { [key: string]: any }) => {
+    getUserInfoInGroup: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const data = getMsgData(
             'group_member_info',
@@ -812,7 +817,7 @@ const msgFunctions = {
     /**
      * 保存群成员列表
      */
-    getGroupMemberList: (_: string, msg: { [key: string]: any }) => {
+    getGroupMemberList: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const data = msg.data as GroupMemberInfoElem[]
         const sortAndSaveMembers = () => {
