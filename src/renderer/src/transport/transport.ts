@@ -125,7 +125,7 @@ export class WebSocketTransport implements Transport {
                                 : new TransportError('WebSocket authentication failed', 'protocol'))
                         }
                     }
-                })()
+                })().catch(() => undefined)
             }
             socket.onmessage = (event) => this.handlers.forEach((handler) => handler(event.data))
             socket.onerror = () => {

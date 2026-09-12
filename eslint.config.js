@@ -39,4 +39,26 @@ export default [
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
         },
     },
+    {
+        files: [
+            'src/renderer/src/protocol/**/*.ts',
+            'src/renderer/src/transport/**/*.ts',
+            'src/renderer/src/storage/**/*.ts',
+            'src/renderer/src/network/**/*.ts',
+            'tests/**/*.ts',
+        ],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: {
+                ecmaVersion: 'latest',
+                sourceType: 'module',
+                project: './tsconfig.eslint.json',
+            },
+        },
+        plugins: { '@typescript-eslint': tseslint },
+        rules: {
+            '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+            '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: false }],
+        },
+    },
 ]
