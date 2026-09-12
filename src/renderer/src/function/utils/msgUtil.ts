@@ -161,17 +161,18 @@ export function buildMsgList(msgList: JsonRecord | JsonRecord[]): JsonRecord {
 }
 
 export function parseMsgList(
-    list: any,
+    list: unknown,
     map: string,
     valueMap: Record<string, Record<string, string>>,
-): any[] {
+): JsonRecord[] {
     const uiStore = useUIStore()
     const authStore = useAuthStore()
-    if (!Array.isArray(list) || list.length === 0 || !list[0]) {
+    const records = Array.isArray(list) ? list.map(asJsonRecord) : []
+    if (records.length === 0 || !records[0]) {
         return []
     }
     // 判断消息类型
-    if (typeof list[0].message == 'string') {
+    if (typeof records[0].message == 'string') {
         uiStore.msgType = BotMsgType.CQCode
     } else {
         uiStore.msgType = BotMsgType.Array
@@ -180,17 +181,17 @@ export function parseMsgList(
     switch (uiStore.msgType) {
         case BotMsgType.CQCode: {
             // 这儿会默认处理成 oicq2 的格式，所以 CQCode 消息请使用 oicq2 配置文件修改
-            for (let i = 0; i < list.length; i++) {
-                list[i] = parseCQ(list[i])
+            for (let i = 0; i < records.length; i++) {
+                records[i] = parseCQ(records[i])
             }
             break
         }
         case BotMsgType.Array: {
             // 非扁平化消息体，这儿会取 _type 后半段的 JSON Path 将结果并入 message
-            for (let i = 0; i < list.length; i++) {
-                let msgList = list[i].message
+            for (let i = 0; i < records.length; i++) {
+                let msgList = records[i].message
                 if (msgList == undefined) {
-                    msgList = list[i].content
+                    msgList = records[i].content
                 }
                 if (!Array.isArray(msgList)) {
                     continue
@@ -215,12 +216,12 @@ export function parseMsgList(
     }
     // 消息字段的标准化特殊处理
     if (valueMap != undefined) {
-        for (let i = 0; i < list.length; i++) {
+            for (let i = 0; i < records.length; i++) {
             Object.entries(valueMap).forEach(([type, values]) => {
                 Object.entries(values).forEach(([key, value]) => {
-                    let content = list[i].message
+                    let content = records[i].message
                     if (content == undefined) {
-                        content = list[i].content
+                        content = records[i].content
                     }
                     if (!Array.isArray(content)) {
                         return
@@ -236,26 +237,26 @@ export function parseMsgList(
                         }
                     })
                     // 其他处理
-                    if (list[i].content != undefined) {
+                    if (records[i].content != undefined) {
                         // 把 content 改成 message
-                        list[i].message = content
-                        delete list[i].content
+                        records[i].message = content
+                        delete records[i].content
                         // 添加一个 sender.user_id 为 user_id
-                        list[i].sender = {
-                            user_id: list[i].user_id,
-                            nickname: list[i].nickname,
+                        records[i].sender = {
+                            user_id: records[i].user_id,
+                            nickname: records[i].nickname,
                         }
                     }
                 })
             })
             // 补充 infoList
-            const infoList = getMsgData('message_info', list[i], authStore.jsonMap.message_info)
+            const infoList = getMsgData('message_info', records[i], authStore.jsonMap.message_info)
             if (infoList != undefined) {
-                list[i].infoList = infoList[0]
+                records[i].infoList = infoList[0]
             }
         }
     }
-    return list
+    return records
 }
 
 /**
