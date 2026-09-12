@@ -49,8 +49,8 @@ export function getMsgData(
     name: string,
     msg: JsonRecord,
     map: string | MessagePathMap,
-) {
-    let back = undefined as any
+): ReturnType<typeof jp.query> {
+    let back: ReturnType<typeof jp.query> = []
     // 解析数据
     if (map != undefined) {
         if (typeof map == 'string' || typeof map.source === 'string') {
@@ -58,17 +58,18 @@ export function getMsgData(
                 back = jp.query(
                     msg,
                     replaceJPValue(typeof map == 'string' ? map : map.source!),
-                )
+                ) as unknown[]
                 const listMap = typeof map == 'string' ? undefined : map.list
                 if (back && listMap != undefined) {
                     const backList: JsonRecord[] = []
                     back.forEach((item) => {
+                        const itemRecord = asJsonRecord(item)
                         const itemObj: JsonRecord = {}
                         Object.keys(listMap).forEach((key: string) => {
                             if (listMap[key] && listMap[key] != '') {
                                 if (listMap[key].startsWith('/'))
                                     itemObj[key] =
-                                        item[listMap[key].substring(1)]
+                                        itemRecord[listMap[key].substring(1)]
                                 else {
                                     let nameKey = listMap[key]
                                     let regexKey: string | null = null
@@ -78,7 +79,7 @@ export function getMsgData(
                                         regexKey = key
                                     }
                                     itemObj[key] = jp.query(
-                                        item,
+                                        itemRecord,
                                         replaceJPValue(nameKey),
                                     )
                                     if (regexKey != null) {
@@ -113,7 +114,7 @@ export function getMsgData(
                     try {
                         const path = map[key]
                         if (typeof path === 'string') {
-                            data[key] = jp.query(msg, replaceJPValue(path))[0]
+                            data[key] = jp.query(msg, replaceJPValue(path))[0] as unknown
                         }
                     } catch (ex) {
                         logger.error(

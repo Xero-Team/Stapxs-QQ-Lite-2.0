@@ -31,3 +31,4 @@
 - `parseMsgList` now validates unknown input into JSON records and returns typed records; the remaining `msgUtil.ts` `any` is the polymorphic JSONPath result retained for legacy map compatibility.
 - Sticker cache and contact-class state now expose concrete string and class-record types; dynamic settings and chat-history stores still carry compatibility records pending the larger store migration.
 - Developer diagnostics no longer dump complete settings, authentication, or UI store state to the console, preventing tokens, chat data, and local configuration from entering logs.
+- JSONPath message mapping now uses an explicit query-result type and normalizes mapped list items through unknown-safe records; the legacy `jsonpath` declaration remains the compatibility boundary for later replacement.
