@@ -58,9 +58,29 @@ limits, unsupported cards, and offline text rendering. Exactly one mock image
 request is expected, with no referrer; its local audit contains only the origin.
 This is a component regression, not evidence of a live bot or native WebView run.
 
+## Local storage migration regression
+
+With the same browser harness running, execute `bash scripts/playwright-storage-smoke.sh`.
+It exercises concurrent upserts, repeated newest-wins imports, compound-key isolation,
+invalid replacement rollback, export/clear/restore, legacy `localStorage` migration,
+database reopen, and namespace-scoped clearing. The source `localStorage` entries are
+asserted to remain available for rollback. The smoke reports nine scenarios and uses a
+fresh browser context for every run.
+
 `yarn typecheck:core` enforces `strict`, `noUncheckedIndexedAccess`, and
 `exactOptionalPropertyTypes` for protocol, transport, storage and network modules;
 `yarn typecheck:browser` applies the same settings to the harness and its imports.
 The Web project's effective config currently only enables `strict`; the remaining
 full-project migration is tracked in `REFACTOR_BLOCKERS.md`. Root project
 references do not propagate compiler options to the referenced projects.
+
+## Native IndexedDB browser contracts
+
+With the same isolated harness running on port 4174, execute
+`bash scripts/playwright-storage-smoke.sh`. Eleven scenarios exercise the production
+Dexie adapter: concurrent upsert, repeated import, newest-value merge, compound
+key separation, invalid replacement rejection, write-failure rollback, export and
+restore, migration-failure rollback, legacy localStorage migration, database reopen
+and namespace clear, and recovery of older duplicate rows. Every run uses a new
+browser context and synthetic values; real user storage is never opened. This
+covers the storage adapter, not the settings UI or native SQLite migration.

@@ -50,7 +50,7 @@
 ## 6. 验证与发布
 
 - [x] 为连接、鉴权、消息解析、历史迁移编写单元/契约测试。
-- [ ] Playwright 覆盖连接、收发消息、图片/文件、撤回/回复、设置迁移、离线和隐私开关。已有 OneBot 登录 smoke、首次启动/离线 smoke，以及 XML 卡片的 9 场景隐私/XSS smoke（`scripts/playwright-xml-card-smoke.sh`）；收发消息、媒体、撤回/回复和设置迁移仍待覆盖。运行方式见 `docs/TESTING.md`。
+- [ ] Playwright 覆盖连接、收发消息、图片/文件、撤回/回复、设置迁移、离线和隐私开关。已有 OneBot 登录 smoke、首次启动/离线 smoke、XML 卡片的 9 场景隐私/XSS smoke，以及本地存储迁移/回滚的 9 场景 smoke（`scripts/playwright-storage-smoke.sh`）；收发消息、媒体、撤回/回复仍待覆盖。运行方式见 `docs/TESTING.md`。
 - [ ] 在 Linux、Windows、macOS 至少验证 Web、主桌面端和一个移动端构建；记录体积、启动时间和内存回归。
 - [ ] 完成 SBOM、许可证、依赖漏洞、CSP、签名和发布产物校验。
 - [x] 发布迁移工具和回滚说明；`scripts/migrate-local-data.mjs` 只写入新输出文件、保留源文件并拒绝未经 `--force` 的覆盖，回滚步骤见 `docs/DATA_MIGRATION.md`。所有清单项完成后再删除旧实现。
