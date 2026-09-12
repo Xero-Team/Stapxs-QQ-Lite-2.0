@@ -74,6 +74,15 @@ function parseRelease(value: unknown): ReleaseInfo | undefined {
     }
 }
 
+function parseNotice(value: unknown): NoticeBodyV3 | undefined {
+    if (typeof value !== 'object' || value === null) return undefined
+    const candidate = value as Partial<NoticeBodyV3>
+    if (candidate.version !== 3 || typeof candidate.client !== 'string'
+        || typeof candidate.id !== 'number' || !Array.isArray(candidate.show_date)
+        || !Array.isArray(candidate.pops) || typeof candidate.is_important !== 'boolean') return undefined
+    return candidate as NoticeBodyV3
+}
+
 /**
  * 滚动到目标消息（不自动加载）
  * @param seqName DOM 名（chat-xx）
@@ -1035,7 +1044,8 @@ export function checkNotice() {
     } as Record<string, string>
     fetch(url + '?' + new URLSearchParams(fetchData).toString())
         .then((response) => response.json())
-        .then((data) => {
+        .then((data: unknown) => {
+            if (!Array.isArray(data)) return
             // 获取已显示过的公告 ID
             let noticeShow = [] as number[]
             const showId = localStorage.getItem('notice_show')
@@ -1043,9 +1053,9 @@ export function checkNotice() {
                 noticeShow = showId.split(',').map((id: string) => parseInt(id))
             }
             // 解析公告列表
-            data.forEach((notice: any) => {
-                if (notice.version == version && (notice.client == import.meta.env.VITE_APP_CLIENT_TAG || notice.client == 'all')) {
-                    const noticeBody = notice as NoticeBodyV3
+            data.forEach((rawNotice: unknown) => {
+                const noticeBody = parseNotice(rawNotice)
+                if (noticeBody && noticeBody.version == version && (noticeBody.client == import.meta.env.VITE_APP_CLIENT_TAG || noticeBody.client == 'all')) {
                     // 当前时间戳（毫秒）
                     const now = new Date().getTime()
                     noticeBody.show_date.forEach((dateInterval: number[]) => {
@@ -1061,7 +1071,14 @@ export function checkNotice() {
                         for (let i = 0; i < noticeBody.pops.length; i++) {
                             // 添加弹窗
                             const info = noticeBody.pops[i]
-                            let popInfo = null as any
+                            type NoticeButton = { text: string, master?: boolean, fun: () => void }
+                            let popInfo: {
+                                title: string
+                                html?: string
+                                template?: unknown
+                                templateValue?: Record<string, unknown>
+                                button: NoticeButton[]
+                            } | undefined
                             const button = [
                                 {
                                     text:
@@ -1098,13 +1115,13 @@ export function checkNotice() {
                             }
                             if (info.html) {
                                 popInfo = {
-                                    title: info.title,
+                                    title: info.title ?? '',
                                     html: info.html,
                                     button: button
                                 }
                             } else if (info.template) {
                                 popInfo = {
-                                    title: info.title,
+                                    title: info.title ?? '',
                                     template: markRaw(defineAsyncComponent(
                                         () => import(`@renderer/components/notice-component/${info.template}.vue`),
                                     )),

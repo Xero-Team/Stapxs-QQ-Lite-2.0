@@ -79,7 +79,7 @@ export interface NoticeBodyV3 {
         title?: string
         html: string
         template: string        // 内嵌模板和 html 二选一
-        template_data?: { [key: string]: any }
+        template_data?: Record<string, unknown>
         link_url?: string       // 链接地址，如果有这个参数将显示一个打开按钮
         button_text?: string    // 关闭按钮文字，默认“确定”
     }[]
