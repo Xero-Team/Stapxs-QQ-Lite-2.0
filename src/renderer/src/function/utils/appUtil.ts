@@ -44,6 +44,7 @@ import { sendMsgRaw } from './msgUtil'
 import { dbGetLatest } from './localHistoryUtil'
 import { parseMsg } from '../sender'
 import { Notify } from '../notify'
+import { normalizeJsonPathMap } from '@renderer/protocol/json-map'
 
 const popInfo = new PopInfo()
 const logger = new Logger()
@@ -1231,6 +1232,7 @@ export function loadJsonMap(name: string) {
             }
             if (msgPath) {
                 const mapName = typeof msgPath.name === 'string' ? msgPath.name : name
+                msgPath = { ...msgPath, name: mapName }
                 logger.system('开发者，请稍等一下（翻找），正在为阁下加载 ' + mapName + ' 的服务映射表。')
                 const redirect = typeof msgPath.redirect === 'string' ? msgPath.redirect : undefined
                 if (redirect) {
@@ -1256,12 +1258,12 @@ export function loadJsonMap(name: string) {
                 logger.system('开发者，没有找到你需要的映射表……')
             }
             const authStore = useAuthStore()
-            authStore.jsonMap = msgPath
+            authStore.jsonMap = normalizeJsonPathMap(msgPath)
         } catch (ex) {
             logger.system('很抱歉开发者，映射表加载失败 ……' + ex)
         }
     }
-    return msgPath
+    return normalizeJsonPathMap(msgPath)
 }
 
 /** Compatibility no-op retained for callers migrated from telemetry APIs. */
