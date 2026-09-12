@@ -10,11 +10,23 @@ import { Readable } from 'stream'
 const logger = Logger.getLogger('update')
 logger.level = 'info'
 
+function parseHttpUrl(value: string): URL | undefined {
+    try {
+        const url = new URL(value)
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url : undefined
+    } catch {
+        return undefined
+    }
+}
 
 /** Check an explicitly configured release endpoint. No endpoint means offline mode. */
 export async function checkUpdate(nowVersion: string, endpoint = process.env.XERO_QQ_LITE_UPDATE_ENDPOINT) {
     if (!endpoint) {
         logger.info('未配置更新地址，跳过远程更新检查')
+        return
+    }
+    if (!parseHttpUrl(endpoint)) {
+        logger.error('更新地址协议无效，仅支持 HTTP(S)')
         return
     }
     try {
@@ -29,7 +41,6 @@ export async function checkUpdate(nowVersion: string, endpoint = process.env.XER
         if (semver.lt(nowVersion, version)) {
                 // 本地版本小于线上版本, 需要更新
                 logger.info('发现新版本, 正在更新...')
-                logger.info(`运行路径: ${process.cwd()}`)
                 // 下载新版本
                 const assetList = json.assets as Array<{ name?: unknown; browser_download_url?: unknown }>
                 for (const asset of assetList) {
@@ -41,7 +52,10 @@ export async function checkUpdate(nowVersion: string, endpoint = process.env.XER
                             await fs.promises.rm('./dist', { recursive: true, force: true })
                         }
                         const downloadUrl = typeof asset.browser_download_url === 'string' ? asset.browser_download_url : ''
-                        if (!downloadUrl) return
+                        if (!downloadUrl || !parseHttpUrl(downloadUrl)) {
+                            logger.error('更新包地址协议无效，仅支持 HTTP(S)')
+                            return
+                        }
                         logger.info('开始下载 Web 更新包')
                         // 下载文件并解压
                         const downloadResponse = await fetch(downloadUrl)
