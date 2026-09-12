@@ -38,6 +38,27 @@ export function backoffDelay(attempt: number, baseMs = 250, maxMs = 30_000): num
     return Math.floor(exponential * (0.8 + Math.random() * 0.4))
 }
 
+export async function retryWithBackoff<T>(
+    operation: (attempt: number) => Promise<T>,
+    options: { attempts?: number; baseMs?: number; maxMs?: number; signal?: AbortSignal } = {},
+): Promise<T> {
+    const attempts = options.attempts ?? 5
+    let lastError: unknown
+    for (let attempt = 0; attempt < attempts; attempt++) {
+        if (options.signal?.aborted) throw new TransportError('Retry aborted', 'aborted')
+        try { return await operation(attempt) }
+        catch (error: unknown) {
+            lastError = error
+            if (attempt + 1 >= attempts) break
+            await new Promise<void>((resolve, reject) => {
+                const timer = setTimeout(resolve, backoffDelay(attempt, options.baseMs, options.maxMs))
+                options.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new TransportError('Retry aborted', 'aborted')) }, { once: true })
+            })
+        }
+    }
+    throw lastError
+}
+
 export interface WebSocketLike {
     binaryType: string
     readyState: number
