@@ -1221,69 +1221,14 @@ export function loadJsonMap(name: string) {
     return msgPath
 }
 
-/**
-* UM：上报事件
-* @param event 事件名
-* @param data 数据
-* @param saveLocal 是否额外保存到前端 localStorage
-*/
-export interface LocalStatEventRecord {
-    event: string
-    data: { [key: string]: any }
-    time: number
+/** Compatibility no-op retained for callers migrated from telemetry APIs. */
+export function sendStatEvent(_event: string, _data: Record<string, unknown>, _saveLocal = false): void {
+    // Deliberately empty: usage events are never persisted or transmitted.
 }
 
-export const LOCAL_STAT_EVENT_STORAGE_KEY = 'local_usage_events'
-const LOCAL_STAT_EVENT_MAX_COUNT = 500
-
-function getBrowserLocalStatEvents(): LocalStatEventRecord[] {
-    try {
-        const storage = globalThis.localStorage
-        const raw = storage.getItem(LOCAL_STAT_EVENT_STORAGE_KEY)
-        if (!raw) return []
-        const parsed = JSON.parse(raw)
-        return Array.isArray(parsed) ? parsed : []
-    } catch {
-        return []
-    }
-}
-
-function saveBrowserLocalStatEvent(record: LocalStatEventRecord): void {
-    try {
-        const storage = globalThis.localStorage
-        const list = getBrowserLocalStatEvents()
-        list.push(record)
-        if (list.length > LOCAL_STAT_EVENT_MAX_COUNT) {
-            list.splice(0, list.length - LOCAL_STAT_EVENT_MAX_COUNT)
-        }
-        storage.setItem(LOCAL_STAT_EVENT_STORAGE_KEY, JSON.stringify(list))
-    } catch {
-        // ignore local cache failures
-    }
-}
-
-export function sendStatEvent(event: string, data: { [key: string]: any }, saveLocal = false) {
-    if (saveLocal) {
-        saveBrowserLocalStatEvent({
-            event,
-            data,
-            time: Date.now(),
-        })
-    }
-
-    if (!option.get('close_ga') && !import.meta.env.DEV) {
-        // Statistics are intentionally local-only; no external telemetry is sent.
-    }
-}
-
-/**
- * UM：上报会话数据
- * @param data 数据
- */
-export function sendIdentifyData(_data: { [key: string]: any }) {
-    if (!option.get('close_ga') && !import.meta.env.DEV) {
-        // Identification data is discarded to preserve privacy.
-    }
+/** Compatibility no-op retained for callers migrated from telemetry APIs. */
+export function sendIdentifyData(_data: Record<string, unknown>): void {
+    // Deliberately empty: identifying data is discarded.
 }
 
 /**
