@@ -31,7 +31,7 @@
                                     day: 'numeric',
                                     hour: 'numeric',
                                     minute: 'numeric',
-                                }).format(new Date(notice.time * 1000))
+                                }).format(new Date(Number(notice.time ?? 0) * 1000))
                             }}</a>
                             <a>{{ $t('留言：') + notice.comment }}</a>
                         </div>
@@ -61,7 +61,7 @@
                                     day: 'numeric',
                                     hour: 'numeric',
                                     minute: 'numeric',
-                                }).format(new Date(notice.time * 1000))
+                                }).format(new Date(Number(notice.time ?? 0) * 1000))
                             }}</a>
                             <a>{{ $t('留言：') + notice.comment }}</a>
                         </div>
@@ -80,7 +80,7 @@
                                     day: 'numeric',
                                     hour: 'numeric',
                                     minute: 'numeric',
-                                }).format(new Date(notice.time * 1000))
+                                }).format(new Date(Number(notice.time ?? 0) * 1000))
                             }}</a>
                             <a>{{ $t('留言：') + notice.comment }}</a>
                         </div>
@@ -117,7 +117,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     import { backend } from '@renderer/runtime/backend'
     import { i18n } from '@renderer/main'
     import { useUIStore } from '@renderer/state/ui'
-    import { useContactStore } from '@renderer/state/contact'
+    import { useContactStore, type SystemNotice } from '@renderer/state/contact'
 
     defineOptions({ name: 'ChatSystemNotice' })
 
@@ -133,7 +133,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         emit('userClick', { id: 0 })
     }
 
-    function dealFriend(notice: { flag: string }, deal: boolean) {
+    function dealFriend(notice: SystemNotice, deal: boolean) {
+        if (typeof notice.flag !== 'string') return
         Connector.send(
             'set_friend_add_request',
             {
@@ -145,9 +146,10 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     }
 
     function dealGroupAdd(
-        notice: { flag: string; sub_type: string },
+        notice: SystemNotice,
         deal: boolean,
     ) {
+        if (typeof notice.flag !== 'string' || typeof notice.sub_type !== 'string') return
         Connector.send(
             'set_group_add_request',
             {
@@ -159,7 +161,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         )
     }
 
-    function getName(id: number) {
+    function getName(id: string | number | undefined) {
+        if (id === undefined) return null
         const knowUser = contactStore.userList.filter(
             (item) => item.user_id == id || item.group_id == id,
         )

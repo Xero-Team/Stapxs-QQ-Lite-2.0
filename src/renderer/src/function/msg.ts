@@ -61,7 +61,7 @@ import { refreshFavicon } from './favicon'
 import { Img } from './model/img'
 import { ensurePinyinLoaded, getPinyin, isPinyinReady } from './utils/pinyin'
 import { useAuthStore } from '@renderer/state/auth'
-import { useContactStore } from '@renderer/state/contact'
+import { useContactStore, type SystemNotice } from '@renderer/state/contact'
 import { useChatStore } from '@renderer/state/chat'
 import { useConnectionStore } from '@renderer/state/connection'
 import { useStickerStore } from '@renderer/state/sticker'
@@ -2420,10 +2420,10 @@ function updateSysInfo(
     const flag = echoList[1]
     // 从系统通知列表里删除这条消息
     if (flag !== undefined) {
-        const index = contactStore.systemNoticesList?.findIndex((item: any) => {
+        const index = contactStore.systemNoticesList?.findIndex((item: SystemNotice) => {
             return item.flag == flag
         })
-        if (index !== -1) {
+        if (index !== undefined && index !== -1) {
             contactStore.systemNoticesList?.splice(index, 1)
         }
     }
