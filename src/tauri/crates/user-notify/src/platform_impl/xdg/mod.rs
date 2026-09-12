@@ -233,7 +233,7 @@ impl NotificationManager for NotificationManagerXdg {
             let notification_id = id.clone();
             let cloned_user_info = user_info.clone();
             // on_close and wait_for_action both consume notification_handle so we need to rely on this deprecated feature
-            handle_action(notification_handle.id(), move |action| {
+            let _ = handle_action(notification_handle.id(), move |action| {
                 let user_info = cloned_user_info.clone();
                 if let ActionResponse::Closed(reason) = action {
                     match reason {
