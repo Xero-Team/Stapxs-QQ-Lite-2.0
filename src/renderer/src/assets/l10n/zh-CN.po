@@ -279,7 +279,7 @@ msgstr ""
 msgid "在连接后上传所使用的 bot 的类型分析"
 msgstr ""
 
-msgid "我们使用 Umami 对应用的使用情况进行分析，它将不会上传精确到用户的信息；你也可以在这儿控制分析功能的开关和额外分析项。"
+msgid "Xero QQ Lite 默认不收集使用统计；外部服务必须显式开启。"
 msgstr ""
 
 msgid "关闭分析"
@@ -1206,7 +1206,7 @@ msgstr "[SQ:0] 你看看这个 {'@'}林"
 msgid "统计选项"
 msgstr ""
 
-msgid "Stapxs QQ Lite 会将部分使用数据上传到自建的 umami 服务器中用于了解用户使用情况以及制作一些有趣的统计信息。"
+msgid "Xero QQ Lite 不会将使用数据上传到统计服务器。"
 msgstr ""
 
 msgid "如果你并不希望上传这些数据，可以选择关闭它。"

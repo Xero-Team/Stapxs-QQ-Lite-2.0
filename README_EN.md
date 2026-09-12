@@ -1,7 +1,7 @@
 **[中文](README.md) | English**
 
 > <strong>// Quick Ad //</strong><br />
-> Want to connect to Napcat in the terminal? Check out [Stapxs QQ Shell](https://github.com/Stapxs/Stapxs-QQ-Shell)!<br />
+> To connect to NapCat in a terminal, use an OneBot 11 tool you trust.<br />
 ---
 
 <p align="center">
