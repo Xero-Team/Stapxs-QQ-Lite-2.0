@@ -891,10 +891,11 @@ function showReleaseLog(data: any, isUpdated: boolean) {
  * 获取并展示最近5条更新记录
  */
 export function showReleaseHistory() {
+    if (option.get('enable_external_services') !== true) return
     const uiStore = useUIStore()
     const { $t } = app.config.globalProperties
-    const repoName = import.meta.env.VITE_APP_REPO_NAME
-    const packageUrl = `https://api.github.com/repos/${repoName}/releases?per_page=5`
+    const packageUrl = import.meta.env.VITE_APP_RELEASES_URL
+    if (!packageUrl) return
 
     fetch(packageUrl).then((response) => {
         if (response.ok) {
