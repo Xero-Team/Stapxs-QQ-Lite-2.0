@@ -22,7 +22,7 @@ import { backend } from '@renderer/runtime/backend'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
-import { HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
+import { backoffDelay, HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -319,19 +319,21 @@ export class Connector {
             case 1006: {
                 // 非正常关闭，尝试重连
                 popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('连接异常关闭'), false)
-                if (login.status) {
-                    this.create(address, token, undefined)
-                } else {
-                    // PS：由于创建连接失败也会触发此事件，所以需要判断是否已经登录
-                    // 尝试使用 ws 连接
-                    this.create(address, token, false)
+                // Use the fallback ws mode for retries so the attempt counter
+                // advances and reconnects do not form a tight recursive loop.
+                const attempt = retry
+                if (attempt < 5) {
+                    window.setTimeout(() => this.create(address, token, false), backoffDelay(attempt))
                 }
                 break
             }
             case 1015: {
                 // TLS 错误，尝试使用 ws 连接
                 popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('TLS错误'), false)
-                this.create(address, token, false)
+                const attempt = retry
+                if (attempt < 5) {
+                    window.setTimeout(() => this.create(address, token, false), backoffDelay(attempt))
+                }
                 break
             }
             default: {
