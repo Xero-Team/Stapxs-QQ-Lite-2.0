@@ -24,3 +24,4 @@
 - DOM directive lifecycle state in `appUtil.ts` now uses `WeakMap` registries instead of custom `any` properties. The file no longer contains explicit `any`; message utilities and store boundaries still require migration.
 - Release and release-history responses are now checked at the external boundary before rendering update dialogs, removing several untyped response callbacks.
 - Optional notice responses now require a validated array/object boundary before rendering; notice template data uses `Record<string, unknown>`.
+- Message path maps and list-builder inputs now use explicit JSON record types; the remaining untyped message payload APIs are isolated for later staged migration.
