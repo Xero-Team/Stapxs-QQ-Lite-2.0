@@ -13,8 +13,8 @@
 - The QFace and Border Card UI submodules have been initialized. `yarn build` now succeeds; the previous missing `qq_emoji/_index.json` error no longer reproduces.
 - Playwright CLI smoke passed against the production preview, covering the first screen, OneBot entry point, and the default disabled external-services setting.
 - The smoke script now also switches the browser offline, reloads the production entry point from the local preview/service worker, and verifies the OneBot entry remains available without external resources.
-- Full repository ESLint still reports legacy errors and warnings. Targeted protocol, transport, storage, network-policy, and smoke files pass their checks.
-- `yarn check` was re-run after the Electron hardening work; the typecheck portion passes, while repository lint still reports 335 legacy errors (mostly `any` boundaries, generated bcui JavaScript, and legacy component naming). The failing files remain outside the migrated protocol/transport/storage gates.
+- Full repository ESLint still reports legacy errors and warnings (latest local run: 1,607 errors and 7,352 warnings, including generated/subproject code). Targeted protocol, transport, storage, network-policy, and smoke files pass their checks.
+- `yarn check` was re-run after the Electron hardening work; the typecheck portion passes, while repository lint remains red because legacy and generated code are outside the migrated protocol/transport/storage gates.
 - The Capacitor OneBot connector now targets Capacitor 8 and TypeScript 5.5, and its web adapter builds successfully. The npx quick-start package no longer depends on the deprecated `request` module and keeps remote updates opt-in.
 - Dexie exports now have a validated `importLocalData` restore path with transactional replacement and duplicate-key resolution; a standalone migration CLI and cross-platform release verification are still outstanding.
 - Transport adapters now expose common lifecycle hooks; HTTP cancellation/error transitions and malformed SSE payloads are covered by contract tests. Automatic reconnect and real server integration coverage remain outstanding.
