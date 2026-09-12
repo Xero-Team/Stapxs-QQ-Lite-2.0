@@ -15,14 +15,14 @@ export const useUIStore = defineStore('ui', () => {
         svg?: string
         title?: string
         html?: string
-        template?: any
-        templateValue?: any
-        data?: any
+        template?: unknown
+        templateValue?: Record<string, unknown>
+        data?: unknown
         full?: boolean
         onClose?: () => void
         button?: {
             master?: boolean
-            fun?: (value: any) => void
+            fun?: (value: unknown) => void
             text: string
         }[]
         allowQuickClose?: boolean
