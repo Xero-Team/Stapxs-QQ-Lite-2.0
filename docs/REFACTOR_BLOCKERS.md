@@ -25,3 +25,4 @@
 - Release and release-history responses are now checked at the external boundary before rendering update dialogs, removing several untyped response callbacks.
 - Optional notice responses now require a validated array/object boundary before rendering; notice template data uses `Record<string, unknown>`.
 - Message path maps and list-builder inputs now use explicit JSON record types; the remaining untyped message payload APIs are isolated for later staged migration.
+- Lagrange forward-message conversion now validates node and segment records before building the OneBot payload, removing an untyped forwarding boundary.
