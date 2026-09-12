@@ -1,6 +1,7 @@
 # Web regression checks
 
-Use the Node and Yarn versions declared in `package.json`. Install dependencies with
+Use the Node version pinned in `.node-version` (and declared in `package.json`) and
+the Yarn version declared in `package.json`. Install dependencies with
 `yarn install --immutable --mode=skip-build` and initialize the asset submodules
 before building. The smoke scripts also require `npx` and Bash.
 
