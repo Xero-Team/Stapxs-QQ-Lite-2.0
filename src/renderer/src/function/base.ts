@@ -21,6 +21,24 @@ export enum LogType {
     SYSTEM
 }
 
+const SENSITIVE_KEYS = /token|access_token|authorization|cookie|password|message|user_id|uin|path|url/i
+
+function redactLogValue(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(redactLogValue)
+    if (typeof value !== 'object' || value === null) return value
+    const result: Record<string, unknown> = {}
+    for (const [key, nested] of Object.entries(value)) {
+        result[key] = SENSITIVE_KEYS.test(key) ? '[redacted]' : redactLogValue(nested)
+    }
+    return result
+}
+
+function field(data: unknown, key: string): string | undefined {
+    if (typeof data !== 'object' || data === null) return undefined
+    const value = (data as Record<string, unknown>)[key]
+    return typeof value === 'string' ? value : undefined
+}
+
 export class Logger {
     private logTypeInfo: [string, string][]
 
@@ -41,7 +59,7 @@ export class Logger {
      * @param mode 日志类型
      * @param args 日志内容
      */
-    add(type: LogType, args: string, data = '' as any, hidden = false) {
+    add(type: LogType, args: string, data: unknown = '', hidden = false) {
         const logLevel = Option.get('log_level')
         // PS：WS, UI, ERR, INFO, DEBUG
         // all 将会输出以上全部类型，debug 将会输出 DEBUG、UI，info 将会输出 INFO，err 将会输出 ERR
@@ -82,7 +100,7 @@ export class Logger {
      * @param type 日志类型
      * @param args 日志内容
      */
-    private print(type: LogType, args: string, data: any, hidden: boolean) {
+    private print(type: LogType, args: string, data: unknown, hidden: boolean) {
         const error = new Error()
         // 浏览器类型，用于判断是不是 webkit
         let isWebkit = /webkit/i.test(navigator.userAgent)
@@ -120,19 +138,23 @@ export class Logger {
             if (args.startsWith('GET')) {
                 args = args.substring(4)
                 typeStr = '◀'
-                if(data.echo) {
-                    typeStr += ` ${data.echo.replace('send_', '')}`
-                } else if(data.post_type) {
-                    typeStr += ` ${data.post_type}`
+                const echo = field(data, 'echo')
+                const postType = field(data, 'post_type')
+                if(echo) {
+                    typeStr += ` ${echo.replace('send_', '')}`
+                } else if(postType) {
+                    typeStr += ` ${postType}`
                 }
             } else if (args.startsWith('PUT')) {
                 args = args.substring(4)
                 typeStr = '▶'
-                if(data.action) {
-                    typeStr += ` ${data.action}`
+                const action = field(data, 'action')
+                const echo = field(data, 'echo')
+                if(action) {
+                    typeStr += ` ${action}`
                 }
-                if(data.echo) {
-                    typeStr += ` -> ${data.echo.replace('send_', '')}`
+                if(echo) {
+                    typeStr += ` -> ${echo.replace('send_', '')}`
                 }
             }
         }
@@ -141,10 +163,10 @@ export class Logger {
         // 因为在 capturer 下 from 是无意义的，所以也不显示
         if (document.getElementById('__vconsole')) {
             const { message } = this.buildLogParams(typeStr, args, hidden, type)
-            this.logOutput(message.replaceAll('%c', ' | '), [], data, false)
+            this.logOutput(message.replaceAll('%c', ' | '), [], redactLogValue(data), false)
         } else {
             const { message, styles } = this.buildLogParams(typeStr, args, hidden, type, from)
-            this.logOutput(message, styles, data)
+            this.logOutput(message, styles, redactLogValue(data))
         }
     }
 
@@ -177,7 +199,7 @@ export class Logger {
         }
     }
 
-    private logOutput(message: string, styles: string[], data: any, useStyles = true) {
+    private logOutput(message: string, styles: string[], data: unknown, useStyles = true) {
         if (useStyles) {
             // eslint-disable-next-line no-console
             console.log(message, ...styles, data)
