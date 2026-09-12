@@ -138,9 +138,7 @@ function replaceJPValue(jpStr: string) {
  * @param map
  * @returns
  */
-export function buildMsgList(msgList: { [key: string]: any }): {
-    [key: string]: any
-} {
+export function buildMsgList(msgList: JsonRecord | JsonRecord[]): JsonRecord {
     const authStore = useAuthStore()
     const path = jp.parse(authStore.jsonMap.message_list.source)
     const keys = [] as string[]
