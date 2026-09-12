@@ -95,10 +95,14 @@ async (page) => {
                 let messageFlow = { sent: false, received: false }
                 if (backend === 'Lagrange.OneBot' && accountId === 10001) {
                     await smokePage.locator('#bar-friends').click()
-                    const friend = smokePage.locator('#user-20002:visible')
+                    const friend = smokePage.locator('#user-20002')
                     await smokePage.locator('#friendTab').waitFor({ state: 'visible' })
                     await friend.waitFor({ state: 'attached' })
-                    await friend.click({ force: true })
+                    await friend.evaluate((element) => {
+                        const visible = [...document.querySelectorAll('#user-20002')]
+                            .find((candidate) => (candidate instanceof HTMLElement) && candidate.offsetParent !== null)
+                        ;(visible ?? element).dispatchEvent(new MouseEvent('click', { bubbles: true }))
+                    })
                     const input = smokePage.locator('#main-input')
                     await input.waitFor()
                     await input.fill('hello from Playwright')
