@@ -198,6 +198,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     import {
         UserFriendElem,
         UserGroupElem,
+        BaseChatInfoElem,
     } from '@renderer/function/elements/information'
     import { getRaw as getOpt, run as runOpt } from '@renderer/function/option'
     import { changeGroupNotice, loadHistoryMessage } from '@renderer/function/utils/appUtil'
@@ -232,10 +233,12 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     const contactStore = useContactStore()
     const chatStore = useChatStore()
     const settingsStore = useSettingsStore()
-    const props = defineProps<{ chat: any }>()
+    type MessageContact = UserFriendElem & UserGroupElem
+    type ChatSelection = { group_name?: string, show: { id: number }, info: unknown }
+    const props = defineProps<{ chat: ChatSelection }>()
     const emit = defineEmits<{
-        userClick: [data: any]
-        loadHistory: [data: any]
+        userClick: [data: BaseChatInfoElem]
+        loadHistory: [data: BaseChatInfoElem]
     }>()
 
     const trRead = ref(false)
@@ -269,7 +272,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                 name: getShowName(data.group_name || data.nickname, data.remark),
                 avatar: data.user_id? avatarUrl(data.user_id): avatarUrl(data.group_id, 'group'),
             }
-            if (props.chat.id != back.id) {
+            if (props.chat.show.id != back.id) {
                 // 更新聊天框
                 emit('userClick', back)
                 // 获取历史消息
@@ -344,6 +347,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             type: 'user',
             id: -10000,
             name: '系统消息',
+            avatar: '',
         }
         emit('userClick', back)
         settingsStore.sysConfig.chatview_name = 'SystemNotice'
@@ -471,7 +475,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
      * @param item 菜单选中项
      * @param value 是否置顶
      */
-    function saveTop(item: any, value: boolean) {
+    function saveTop(item: MessageContact, value: boolean) {
         const id = authStore.loginInfo.uin
         const upId = item.user_id ? item.user_id : item.group_id
         // 完整的设置 JSON
