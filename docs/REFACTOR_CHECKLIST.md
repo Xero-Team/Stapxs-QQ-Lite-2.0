@@ -7,7 +7,7 @@
 - [x] 建立 `refactor` 分支、变更日志和 ADR 目录；记录当前 Web/Electron/Tauri/Capacitor 构建基线。
 - [x] 安装 Node 22+、Corepack/Yarn，锁定包管理器和 CI 版本；生成依赖清单与许可证清单。
 - [x] 为 OneBot 11 消息、事件、API 建立兼容性样例集；覆盖常见 Bot（NapCat、Lagrange 等）。
-- [ ] 增加 CI 门禁：格式、ESLint、TypeScript、依赖审计、Web 构建、Rust check、Playwright smoke。
+- [x] 增加 CI 门禁：格式、ESLint、TypeScript、依赖审计、Web 构建、Rust check、Playwright smoke。`.github/workflows/quality.yml` 已配置独立依赖审计、SBOM、Web/Electron 构建、Rust check 与两组 Playwright smoke；审计仍会因 `REFACTOR_BLOCKERS.md` 中的现有 advisories 失败。
 
 ## 1. 去上游化与品牌
 
