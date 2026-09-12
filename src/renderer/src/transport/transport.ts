@@ -9,10 +9,16 @@ export interface Transport {
     readonly state: TransportState
     connect(options?: TransportRequest): Promise<void>
     send(payload: unknown, options?: TransportRequest): Promise<void>
-    close(): Promise<void>
+    close(code?: number, reason?: string): Promise<void>
     onMessage(handler: (payload: unknown) => void): () => void
     onClose(handler: (event: { code: number; reason: string }) => void): () => void
     onError(handler: () => void): () => void
+}
+
+export interface ReconnectingTransportOptions {
+    attempts?: number
+    baseMs?: number
+    maxMs?: number
 }
 
 export class TransportError extends Error {
@@ -60,6 +66,125 @@ export async function retryWithBackoff<T>(
         }
     }
     throw lastError
+}
+
+/**
+ * Shared reconnect state machine for transports with a long-lived connection.
+ * The factory creates a fresh underlying transport after a failed or closed
+ * connection, while message and lifecycle handlers remain attached to this
+ * stable wrapper.
+ */
+export class ReconnectingTransport implements Transport {
+    private inner: Transport | undefined
+    private currentState: TransportState = 'idle'
+    private reconnectTask: Promise<void> | undefined
+    private reconnectController: AbortController | undefined
+    private explicitlyClosed = false
+    private readonly handlers = new Set<(payload: unknown) => void>()
+    private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
+    private readonly errorHandlers = new Set<() => void>()
+
+    constructor(
+        private readonly factory: () => Transport,
+        private readonly options: ReconnectingTransportOptions = {},
+    ) {}
+
+    get state(): TransportState { return this.currentState }
+
+    async connect(request: TransportRequest = {}): Promise<void> {
+        if (this.currentState === 'authenticated') return
+        this.explicitlyClosed = false
+        if (this.reconnectTask) return this.reconnectTask
+
+        const controller = new AbortController()
+        this.reconnectController = controller
+        if (request.signal) {
+            if (request.signal.aborted) controller.abort()
+            else request.signal.addEventListener('abort', () => controller.abort(), { once: true })
+        }
+
+        this.currentState = 'connecting'
+        this.reconnectTask = retryWithBackoff(
+            async () => {
+                if (controller.signal.aborted) {
+                    throw new TransportError('Reconnect aborted', 'aborted')
+                }
+                await this.openInner({ ...request, signal: controller.signal })
+            },
+            { ...this.options, signal: controller.signal },
+        ).then(() => {
+            this.currentState = 'authenticated'
+        }).catch((error: unknown) => {
+            this.currentState = controller.signal.aborted ? 'closed' : 'error'
+            if (!controller.signal.aborted && !this.explicitlyClosed) {
+                this.closeHandlers.forEach((handler) => handler({ code: 1006, reason: 'reconnect attempts exhausted' }))
+            }
+            throw error
+        }).finally(() => {
+            this.reconnectTask = undefined
+            this.reconnectController = undefined
+        })
+        return this.reconnectTask
+    }
+
+    async send(payload: unknown, request: TransportRequest = {}): Promise<void> {
+        if (!this.inner || this.currentState !== 'authenticated') {
+            throw new TransportError('Reconnecting transport is not connected', 'network')
+        }
+        return this.inner.send(payload, request)
+    }
+
+    async close(code?: number, reason?: string): Promise<void> {
+        this.explicitlyClosed = true
+        this.reconnectController?.abort()
+        const inner = this.inner
+        this.inner = undefined
+        this.currentState = 'closed'
+        if (inner) await inner.close(code, reason)
+        this.closeHandlers.forEach((handler) => handler({ code: code ?? 1000, reason: reason ?? 'closed' }))
+    }
+
+    onMessage(handler: (payload: unknown) => void): () => void {
+        this.handlers.add(handler)
+        return () => this.handlers.delete(handler)
+    }
+
+    onClose(handler: (event: { code: number; reason: string }) => void): () => void {
+        this.closeHandlers.add(handler)
+        return () => this.closeHandlers.delete(handler)
+    }
+
+    onError(handler: () => void): () => void {
+        this.errorHandlers.add(handler)
+        return () => this.errorHandlers.delete(handler)
+    }
+
+    private async openInner(request: TransportRequest): Promise<void> {
+        const inner = this.factory()
+        this.inner = inner
+        inner.onMessage((payload) => this.handlers.forEach((handler) => handler(payload)))
+        inner.onError(() => this.errorHandlers.forEach((handler) => handler()))
+        inner.onClose((event) => this.handleInnerClose(inner, event))
+        try {
+            await inner.connect(request)
+        } catch (error: unknown) {
+            if (this.inner === inner) this.inner = undefined
+            await inner.close().catch(() => undefined)
+            throw error
+        }
+    }
+
+    private handleInnerClose(inner: Transport, event: { code: number; reason: string }): void {
+        if (this.inner !== inner) return
+        this.inner = undefined
+        this.closeHandlers.forEach((handler) => handler(event))
+        if (this.explicitlyClosed) {
+            this.currentState = 'closed'
+            return
+        }
+        this.currentState = 'error'
+        void this.connect().catch(() => undefined)
+    }
 }
 
 export interface WebSocketLike {

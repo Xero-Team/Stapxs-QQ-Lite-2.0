@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
     HttpTransport,
+    ReconnectingTransport,
     SseTransport,
+    Transport,
+    TransportError,
     WebSocketTransport,
 } from '../src/renderer/src/transport/transport'
 
@@ -168,5 +171,53 @@ describe('transport contracts', () => {
         expect(transport.state).toBe('error')
         expect(errors).toHaveBeenCalledOnce()
         await transport.close()
+    })
+
+    it('retries failed connections and reconnects after an established link closes', async () => {
+        vi.useFakeTimers()
+        class FlakyTransport implements Transport {
+            state: 'idle' | 'connecting' | 'authenticated' | 'closed' | 'error' = 'idle'
+            private readonly messageHandlers = new Set<(payload: unknown) => void>()
+            private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
+            private readonly errorHandlers = new Set<() => void>()
+            constructor(private readonly shouldFail: boolean) {}
+            async connect(): Promise<void> {
+                this.state = 'connecting'
+                if (this.shouldFail) {
+                    this.state = 'error'
+                    throw new TransportError('synthetic failure', 'network')
+                }
+                this.state = 'authenticated'
+            }
+            async send(): Promise<void> {}
+            async close(): Promise<void> { this.state = 'closed' }
+            onMessage(handler: (payload: unknown) => void): () => void { this.messageHandlers.add(handler); return () => this.messageHandlers.delete(handler) }
+            onClose(handler: (event: { code: number; reason: string }) => void): () => void { this.closeHandlers.add(handler); return () => this.closeHandlers.delete(handler) }
+            onError(handler: () => void): () => void { this.errorHandlers.add(handler); return () => this.errorHandlers.delete(handler) }
+            drop(): void {
+                this.state = 'closed'
+                this.closeHandlers.forEach((handler) => handler({ code: 1006, reason: 'dropped' }))
+            }
+        }
+
+        const created: FlakyTransport[] = []
+        const transport = new ReconnectingTransport(() => {
+            const instance = new FlakyTransport(created.length === 0)
+            created.push(instance)
+            return instance
+        }, { attempts: 3, baseMs: 1, maxMs: 1 })
+
+        const connecting = transport.connect({ timeoutMs: 100 })
+        await vi.advanceTimersByTimeAsync(1)
+        await connecting
+        expect(created).toHaveLength(2)
+        expect(transport.state).toBe('authenticated')
+
+        created[1].drop()
+        await vi.advanceTimersByTimeAsync(1)
+        await vi.waitFor(() => expect(created).toHaveLength(3))
+        expect(transport.state).toBe('authenticated')
+        await transport.close()
+        vi.useRealTimers()
     })
 })

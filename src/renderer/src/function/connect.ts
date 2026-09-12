@@ -22,7 +22,7 @@ import { backend } from '@renderer/runtime/backend'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
-import { backoffDelay, HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
+import { HttpTransport, ReconnectingTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
 import { getJsonPathEntry } from '@renderer/protocol/json-map'
 import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
 
@@ -39,7 +39,7 @@ let retry = 0
 let forceCloseReason: string | undefined = undefined
 
 export let websocket: WebSocket | undefined = undefined
-let webSocketTransport: WebSocketTransport | undefined
+let webSocketTransport: ReconnectingTransport | undefined
 let sseTransport: SseTransport | undefined
 const WS_PROTOCOL = 'ws' + '://'
 const WSS_PROTOCOL = 'wss' + '://'
@@ -198,19 +198,18 @@ export class Connector {
             }
 
             if (webSocketTransport?.state === 'authenticated' || webSocketTransport?.state === 'connecting') return
-            webSocketTransport = new WebSocketTransport(url, undefined, {
+            webSocketTransport = new ReconnectingTransport(() => new WebSocketTransport(url, undefined, {
                 // OneBot WebSocket servers commonly close idle clients; use a
                 // harmless status request as a protocol-level keepalive.
                 heartbeatIntervalMs: 30_000,
                 heartbeatPayload: { action: 'get_status', params: {}, echo: 'xero-heartbeat' },
-            })
+            }), { attempts: 5, baseMs: 250, maxMs: 30_000 })
             const transport = webSocketTransport
             transport.onMessage((payload) => this.onmessage(typeof payload === 'string' ? payload : JSON.stringify(payload)))
             transport.onClose((event) => {
                 login.creating = false
                 const reason = forceCloseReason ?? event.reason
                 forceCloseReason = undefined
-                if (webSocketTransport === transport) webSocketTransport = undefined
                 this.onclose(event.code, reason, address, token)
             })
             transport.onError(() => {
@@ -338,7 +337,6 @@ export class Connector {
         }
         connectionStore.metaEventTimeoutTriggered = false
         websocket = undefined
-        webSocketTransport = undefined
         sseTransport = undefined
         updateMenu({ parent: 'account', id: 'logout', action: 'visible', value: 'false' })
         updateMenu({ parent: 'account', id: 'userName', action: 'label', value: $t('连接') })
@@ -350,21 +348,11 @@ export class Connector {
             case 1006: {
                 // 非正常关闭，尝试重连
                 popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('连接异常关闭'), false)
-                // Use the fallback ws mode for retries so the attempt counter
-                // advances and reconnects do not form a tight recursive loop.
-                const attempt = retry
-                if (attempt < 5) {
-                    window.setTimeout(() => this.create(address, token, false), backoffDelay(attempt))
-                }
                 break
             }
             case 1015: {
                 // TLS 错误，尝试使用 ws 连接
                 popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('TLS错误'), false)
-                const attempt = retry
-                if (attempt < 5) {
-                    window.setTimeout(() => this.create(address, token, false), backoffDelay(attempt))
-                }
                 break
             }
             default: {
