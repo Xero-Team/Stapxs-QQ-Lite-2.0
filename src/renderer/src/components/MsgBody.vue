@@ -256,7 +256,7 @@
                                 <font-awesome-icon v-if="getMsgInfo(item.id) != ''" :icon="['fas', 'turn-up']" />
                             </div>
                             <MsgBody v-if="getMsg(item.id)"
-                                :data="getMsg(item.id, true)"
+                                :data="getMsg(item.id, true)!"
                                 :type="'body'"
                                 :global-me="isMe ? 'Y' : ''" />
                             <a v-else class="msg-unknown">
