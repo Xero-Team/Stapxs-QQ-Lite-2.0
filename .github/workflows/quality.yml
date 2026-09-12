@@ -36,7 +36,7 @@ jobs:
             - name: OneBot contract tests
               run: yarn test:contract
             - name: Lint protocol and platform primitives
-              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-onebot-smoke.js
+              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js
             - name: Generate dependency inventory and SBOM
               run: yarn sbom
             - name: Web build
@@ -58,6 +58,18 @@ jobs:
                   exit 1
             - name: Playwright smoke
               run: bash scripts/playwright-smoke.sh
+            - name: Start XML card browser harness
+              run: |
+                  ./node_modules/.bin/vite --config tests/browser/vite.config.ts > /tmp/xero-xml-harness.log 2>&1 &
+                  echo $! > "$RUNNER_TEMP/xero-xml-harness.pid"
+                  for attempt in $(seq 1 30); do
+                    curl --fail --silent http://127.0.0.1:4174/ >/dev/null && exit 0
+                    sleep 1
+                  done
+                  cat /tmp/xero-xml-harness.log
+                  exit 1
+            - name: XML card privacy and injection smoke
+              run: bash scripts/playwright-xml-card-smoke.sh
             - name: Playwright OneBot login smoke
               run: bash scripts/playwright-onebot-smoke.sh
             - name: Rust check
