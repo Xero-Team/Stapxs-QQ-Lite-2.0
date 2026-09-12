@@ -440,7 +440,7 @@ const noticeFunctions = {
     /**
      * 表情回应
      */
-    group_msg_emoji_like: (_: string, msg: { [key: string]: any }) => {
+    group_msg_emoji_like: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const msgId = msg.message_id
         const emojiList = msg.likes
@@ -455,13 +455,13 @@ const noticeFunctions = {
     /**
      * 群禁言
      */
-    group_ban: (_: string, msg: { [key: string]: any }) => {
+    group_ban: (_: string, msg: MessagePayload) => {
         const authStore = useAuthStore()
         const chatStore = useChatStore()
-        const groupId = msg.group_id
-        const userId = msg.user_id
-        const status = msg.sub_type === 'ban' ? true : false
-        const duration = msg.duration ?? 0 // 秒
+        const groupId = Number(msg.group_id)
+        const userId = String(msg.user_id ?? '')
+        const status = stringField(msg, 'sub_type') === 'ban'
+        const duration = Number(msg.duration ?? 0) // 秒
 
         // 如果是自己，更新禁言时间
         if (
@@ -482,7 +482,7 @@ const noticeFunctions = {
     /**
      * 踢人
      */
-    kick: (_: string, msg: { [key: string]: any }) => {
+    kick: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const groupId = msg.group_id
         if (groupId == chatStore.chatInfo.show.id) {
@@ -596,14 +596,15 @@ const noticeFunctions = {
         }
     },
 
-    input_status: (_: string, msg: { [key: string]: any }) => {
+    input_status: (_: string, msg: MessagePayload) => {
         const { $t } = app.config.globalProperties
         const chatStore = useChatStore()
         const sender = msg.user_id
         if (chatStore.chatInfo.show.id == sender) {
             // 使用客户端返回的具体状态文本
-            if (msg.status_text) {
-                chatStore.chatInfo.show.appendInfo = $t(msg.status_text)
+            const statusText = stringField(msg, 'status_text')
+            if (statusText) {
+                chatStore.chatInfo.show.appendInfo = $t(statusText)
                 setTimeout(() => {
                     chatStore.chatInfo.show.appendInfo = undefined
                 }, 10000)

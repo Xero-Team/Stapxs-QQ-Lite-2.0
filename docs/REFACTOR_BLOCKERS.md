@@ -47,3 +47,4 @@
 - Message dispatch and notification logging no longer embeds raw JSON, parsed segments, handler payloads, or message text in log strings; message content remains available only to the notification UI.
 - URI handling and voice-record failure logs now emit generic messages instead of serializing URI or API response values, closing two remaining sensitive string logging paths.
 - Heartbeat and request notification handlers now accept the shared `MessagePayload` record type; heartbeat timestamps are numerically validated before updating the watchdog state.
+- Emoji-like, group-ban, kick, and input-status notice handlers now share the typed payload boundary; group IDs, durations, and localized status text are normalized before use.
