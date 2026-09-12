@@ -5,6 +5,7 @@ import {
     SseTransport,
     TransportError,
     WebSocketTransport,
+    withTimeout,
 } from '../src/renderer/src/transport/transport'
 import type { Transport } from '../src/renderer/src/transport/transport'
 
@@ -75,6 +76,15 @@ describe('transport contracts', () => {
         vi.stubGlobal('WebSocket', HangingSocket)
         const transport = new WebSocketTransport('ws://hanging')
         await expect(transport.connect({ timeoutMs: 1 })).rejects.toMatchObject({ code: 'timeout' })
+    })
+
+    it('propagates caller cancellation through the shared timeout wrapper', async () => {
+        const controller = new AbortController()
+        const operation = withTimeout(async (signal) => new Promise<void>((_, reject) => {
+            signal.addEventListener('abort', () => reject(new Error('cancelled')), { once: true })
+        }), { signal: controller.signal })
+        controller.abort()
+        await expect(operation).rejects.toMatchObject({ code: 'aborted' })
     })
 
     it('sends configured heartbeats and stops them on close', async () => {
