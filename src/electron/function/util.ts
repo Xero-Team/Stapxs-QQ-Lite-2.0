@@ -72,7 +72,6 @@ export const linkView = {
         if(!url.includes('bilibili.com')) {
             // 获取最终重定向地址并处理
             const finalUrl = await getFinalRedirectUrl(url)
-            logger.info(`[linkView] 获取到 bilibili 链接：${finalUrl}`)
             if(finalUrl && !retry) {
                 return await linkView.bilibili(finalUrl, true)
             }
@@ -87,7 +86,7 @@ export const linkView = {
                 const response = await axios.get(previewAPI + bvid)
                 const { data } = response
                 if (data.code === 0) {
-                    logger.info(`[linkView] 预览 bilibili 链接成功：${data.data.title}`)
+                    logger.info('[linkView] 预览 bilibili 链接成功')
                     return {
                         type: 'bilibili',
                         sub_type: 'video',
@@ -101,8 +100,8 @@ export const linkView = {
                         }
                     }
                 }
-            } catch (error) {
-                logger.error('[linkView] 预览 bilibili 链接失败：', error)
+            } catch {
+                logger.error('[linkView] 预览 bilibili 链接失败')
             }
         }
         return null
@@ -116,7 +115,6 @@ export const linkView = {
         const id = params.get('id')
         if (id == null) {
             const finalUrl = await getFinalRedirectUrl(url)
-            logger.info(`[linkView] 获取到网易云音乐链接：${finalUrl}`)
             if(finalUrl && !retry) {
                 return await linkView.music163(finalUrl, true)
             }
@@ -150,8 +148,8 @@ export const linkView = {
                 }
                 logger.info('[linkView] 预览网易云音乐成功')
                 return finalData
-            } catch (error) {
-                logger.error('[linkView] 预览网易云音乐失败：', error)
+            } catch {
+                logger.error('[linkView] 预览网易云音乐失败')
             }
         }
         return null

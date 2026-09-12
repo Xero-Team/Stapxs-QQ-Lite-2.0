@@ -7,7 +7,7 @@ export const linkView = {
     async bilibili(url: string) {
         const logger = new Logger()
 
-        const combinedQuantity = (numObj: any) => {
+        const combinedQuantity = (numObj: unknown): string => {
             try {
                 const num = Number(numObj)
                 // 如果数量大于一万，返回为 xx 万
@@ -19,7 +19,7 @@ export const linkView = {
                     return num.toString()
                 }
             } catch (_) {
-                return numObj
+                return String(numObj)
             }
         }
 
@@ -30,7 +30,7 @@ export const linkView = {
             logger.info(`[linkView] 获取到 bilibili 链接：${bvid}`)
             const data = await getApi(previewAPI + bvid)
             if (data && data.code === 0) {
-                logger.info(`[linkView] 预览 bilibili 链接成功：${data.data.title}`)
+                logger.info('[linkView] 预览 bilibili 链接成功')
                 const stat = data.data.stat
                 Object.keys(stat).forEach((key) => {
                     stat[key] = combinedQuantity(stat[key])
@@ -92,8 +92,8 @@ export const linkView = {
                 }
                 logger.info('[linkView] 预览网易云音乐成功')
                 return finalData
-            } catch (error) {
-                logger.error(error as Error, '[linkView] 预览网易云音乐失败')
+            } catch {
+                logger.error(new Error('external link preview failed'), '[linkView] 预览网易云音乐失败')
             }
         }
         return null
