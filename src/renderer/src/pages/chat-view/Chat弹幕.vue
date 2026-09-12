@@ -358,20 +358,27 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     const chatStore = useChatStore()
     const $t = i18n.global.t
 
+    interface DanmakuController {
+        resize: () => void
+        pause: () => void
+        play: () => void
+        push: (item: { text: string, id: number }) => void
+    }
+
     const props = defineProps<{
-        chat: any
-        list: any
-        mumberInfo: any
+        chat: { show: { id: number, type: string, temp?: number } }
+        list: MsgItemElem[]
+        mumberInfo: Record<string, unknown>
     }>()
 
-    const danmakuRef = useTemplateRef<any>('danmakuRef')
+    const danmakuRef = useTemplateRef<DanmakuController>('danmakuRef')
 
     const opt = ref({
         speeds: 140,
         loop: true,
     })
     const trueLang = getTrueLang()
-    const danmus = ref<any[]>([])
+    const danmus = ref<{ text: string, id: number }[]>([])
     const imgCache = ref<string[]>([])
     const sendCache = ref<MsgItemElem[]>([])
     const msg = ref('')
@@ -431,7 +438,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                     parsedMsg,
                 )
             } else {
-                sendMsgRaw(props.chat.show.id, props.chat.show.type, parsedMsg)
+                sendMsgRaw(String(props.chat.show.id), props.chat.show.type, parsedMsg)
             }
             // 发送后处理
             sendCache.value = []
@@ -532,7 +539,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                     'getChatHistory',
                 )
             }
-            const list = props.list.map((data: any) => {
+            const list = props.list.map((data: MsgItemElem) => {
                 return {
                     text: getMsgRawTxt(data),
                     id: data.sender.user_id,
