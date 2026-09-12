@@ -38,7 +38,7 @@ jobs:
             - name: 登录 Docker Hub
               uses: docker/login-action@28fdb31ff34708d19615a74d67103ddc2ea9725c
               with:
-                  username: stapxs
+                  username: ${{ github.repository_owner }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: 登录 GitHub Container Registry
