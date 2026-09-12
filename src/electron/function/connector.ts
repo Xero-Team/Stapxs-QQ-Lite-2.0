@@ -20,6 +20,17 @@ export function buildWebSocketUrl(address: string, token?: string) {
     return parsedUrl
 }
 
+function redactUrl(address: string): string {
+    try {
+        const parsed = new URL(address)
+        parsed.search = ''
+        parsed.hash = ''
+        return parsed.toString()
+    } catch {
+        return '[invalid-url]'
+    }
+}
+
 export class Connector {
     private logger = log4js.getLogger('connector')
 
@@ -50,8 +61,7 @@ export class Connector {
             this.win.webContents.send('onebot:onclose', {
                 code: 1000,
                 message: 'Invalid WebSocket URL',
-                address: url,
-                token: token,
+                address: redactUrl(url),
             })
             return
         }
@@ -63,7 +73,7 @@ export class Connector {
         url = parsedUrl.toString()
 
         if (!this.websocket) {
-            this.logger.info('正在连接到：', url)
+            this.logger.info('正在连接到：', redactUrl(url))
             this.websocket = new WebSocket(connectionUrl)
         } else {
             // 如果前端发起了连接请求，说明前端在未连接状态；断开已有连接，重新连接
@@ -74,10 +84,9 @@ export class Connector {
 
         this.websocket.onopen = () => {
             this.reconnectTimes = 0
-            this.logger.info('已成功连接到', url)
+            this.logger.info('已成功连接到', redactUrl(url))
             this.win.webContents.send('onebot:onopen', {
-                address: url,
-                token: token,
+                address: redactUrl(url),
             })
         }
         this.websocket.onmessage = (e) => {
@@ -92,15 +101,13 @@ export class Connector {
                 this.win.webContents.send('onebot:onclose', {
                     code: e.code,
                     message: e.reason,
-                    address: url,
-                    token: token,
+                    address: redactUrl(url),
                 })
             } else {
                 this.win.webContents.send('onebot:onclose', {
                     code: -1,
                     message: e.reason,
-                    address: url,
-                    token: token,
+                    address: redactUrl(url),
                 })
             }
             if (this.reconnectTimes < 4) {
@@ -119,9 +126,9 @@ export class Connector {
                 }, 1500)
             }
         }
-        this.websocket.onerror = (e) => {
+        this.websocket.onerror = () => {
             this.websocket = undefined
-            this.logger.error('连接错误：', e)
+            this.logger.error('连接错误')
         }
     }
 }
