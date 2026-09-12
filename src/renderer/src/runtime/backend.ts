@@ -10,7 +10,17 @@ import { useSettingsStore } from '@renderer/state/settings'
 const logger = new Logger()
 const popInfo = new PopInfo()
 
-type CapacitorPluginRegistry = Record<string, Record<string, (...args: any[]) => any>>
+type UnknownFunction = (...args: unknown[]) => unknown
+interface CapacitorPlugin {
+    addListener?: (name: string, callback: UnknownFunction) => void
+    [key: string]: UnknownFunction | ((name: string, callback: UnknownFunction) => void) | undefined
+}
+type CapacitorPluginRegistry = Record<string, CapacitorPlugin>
+type CapacitorBridge = CapacitorGlobal & Record<string, unknown>
+
+function asUnknownFunction(value: unknown): UnknownFunction | undefined {
+    return typeof value === 'function' ? value as UnknownFunction : undefined
+}
 
 export const backend = {
     type: 'web' as 'electron' | 'tauri' | 'capacitor' | 'web',
@@ -23,11 +33,11 @@ export const backend = {
     {
         invoke: <T>(cmd: string, args?: InvokeArgs, options?: InvokeOptions) => Promise<T>
     } | {
-        capacitor: CapacitorGlobal & Record<string, any>,
+        capacitor: CapacitorBridge,
         plugins: CapacitorPluginRegistry,
         vConsole: VConsole
     } | undefined,
-    listener: undefined as ((event: string, ...args: any[]) => void) | undefined,
+    listener: undefined as ((event: string, ...args: unknown[]) => void) | undefined,
 
     isDesktop() {
         return this.type == 'electron' || this.type == 'tauri'
@@ -97,16 +107,16 @@ export const backend = {
         if (window.electron != undefined) {
             this.type = 'electron';
             this.function = window.electron.ipcRenderer;
-            this.listener = window.electron.ipcRenderer.on;
+            this.listener = window.electron.ipcRenderer.on as unknown as (event: string, ...args: unknown[]) => void;
         } else if (window.__TAURI_INTERNALS__ != undefined) {
             this.type = 'tauri';
             this.function = {
                 invoke: (await import('@tauri-apps/api/core')).invoke
             }
-            this.listener = (await import('@tauri-apps/api/event')).listen;
+            this.listener = (await import('@tauri-apps/api/event')).listen as unknown as (event: string, ...args: unknown[]) => void;
         } else if (window.Capacitor != undefined && window.Capacitor.isNativePlatform()) {
             this.type = 'capacitor';
-            const capacitor = window.Capacitor as CapacitorGlobal & Record<string, any>
+            const capacitor = window.Capacitor as unknown as CapacitorBridge
             const plugins = (capacitor.Plugins ?? {}) as CapacitorPluginRegistry
             this.function = {
                 capacitor,
@@ -115,7 +125,7 @@ export const backend = {
                     theme: useSettingsStore().darkMode ? 'dark' : 'light',
                 })
             }
-            this.listener = (type: string, name: string, callBack: (...args: any[]) => void) => {
+            this.listener = (type: string, name: string, callBack: (...args: unknown[]) => void) => {
                 plugins[type]?.addListener?.(name, callBack)
             }
         }
@@ -135,11 +145,17 @@ export const backend = {
             let version = ''
 
             // 优先使用 navigator.userAgentData（Chrome / Edge / Android）
-            if ((navigator as any).userAgentData) {
-                os = (navigator as any).userAgentData.platform || os
+            const userAgentData = (navigator as Navigator & {
+                userAgentData?: {
+                    platform?: unknown
+                    getHighEntropyValues?: (hints: string[]) => Promise<Record<string, unknown>>
+                }
+            }).userAgentData
+            if (userAgentData) {
+                os = typeof userAgentData.platform === 'string' ? userAgentData.platform : os
                 try {
-                    const highEntropy = await (navigator as any).userAgentData.getHighEntropyValues(['platformVersion'])
-                    version = highEntropy.platformVersion || version
+                    const highEntropy = await userAgentData.getHighEntropyValues?.(['platformVersion'])
+                    version = typeof highEntropy?.platformVersion === 'string' ? highEntropy.platformVersion : version
                 } catch (e) {
                     // 如果获取失败，保持 Unknown
                 }
@@ -195,7 +211,7 @@ export const backend = {
      * @param args 参数列表
      * @returns 返回值
      */
-    async call(type: string | undefined, name: string, needBack: boolean, ...args: any[]) {
+    async call(type: string | undefined, name: string, needBack: boolean, ...args: unknown[]) {
         if (this.function) {
             // 处理名称
             if (this.type == 'tauri') {
@@ -224,10 +240,13 @@ export const backend = {
                     if (args.length == 0 || Object.prototype.toString.call(args[0]) !== '[object Object]') {
                         args = [{ data: args[0] }]
                     }
-                    let functionGet = this.function.capacitor[name]
+                    const capacitorFunctions = this.function.capacitor as Record<string, unknown>
+                    let functionGet = asUnknownFunction(capacitorFunctions[name])
                     if (type != undefined && functionGet == undefined) {
-                        functionGet = this.function.plugins[type][name] ?? this.function.capacitor[type][name]
+                        functionGet = asUnknownFunction(this.function.plugins[type]?.[name])
+                            ?? asUnknownFunction(capacitorFunctions[type])
                     }
+                    if (!functionGet) throw new Error('Capacitor method is unavailable')
                     const back = await functionGet(args[0])
                     if (Object.prototype.toString.call(back) === '[object Object]' && Object.keys(back).length == 1) {
                         return back[Object.keys(back)[0]]
@@ -249,7 +268,7 @@ export const backend = {
      *
      * @param name 方法名称
      */
-    callSync(name: string, ...args: any[]) {
+    callSync(name: string, ...args: unknown[]) {
         if (this.type == 'electron' && this.function && 'sendSync' in this.function) {
             return this.function.sendSync(name, ...args)
         } else {
@@ -264,7 +283,7 @@ export const backend = {
      * @param name 事件名称
      * @param callBack 回调函数
      */
-    addListener(type: string | undefined, name: string, callBack: (...args: any[]) => void) {
+    addListener(type: string | undefined, name: string, callBack: UnknownFunction) {
         if(this.listener) {
             if(this.isDesktop()) {
                 this.listener(name, callBack)
@@ -283,7 +302,7 @@ export const backend = {
      * @param name 事件名称
      * @param callBack 要移除的回调函数
      */
-    removeListener(_type: string | undefined, name: string, callBack: (...args: any[]) => void) {
+    removeListener(_type: string | undefined, name: string, callBack: UnknownFunction) {
         if(this.isDesktop() && this.function && 'removeListener' in this.function) {
             this.function.removeListener(name, callBack)
             return
