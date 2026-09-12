@@ -12,6 +12,10 @@ import { Connector } from '@renderer/function/connect'
 
 const logger = new Logger()
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
+}
+
 /** 语音消息原始数据（来自 OneBot record 消息段） */
 export interface RecordMsgData {
     file?: string
@@ -101,7 +105,7 @@ export async function loadRecord(data: RecordMsgData, msgId?: string): Promise<R
     if (!raw) throw new Error('get_record API 返回空')
 
     // result 兼容数组和单个对象
-    const result: any = Array.isArray(raw) ? raw[0] : raw
+    const result = asRecord(Array.isArray(raw) ? raw[0] : raw)
 
     if (!result?.base64 || typeof result.base64 !== 'string') {
         logger.debug('get_record 响应中没有 base64: ' + JSON.stringify(result).substring(0, 200))

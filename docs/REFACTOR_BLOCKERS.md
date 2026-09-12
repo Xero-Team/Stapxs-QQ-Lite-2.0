@@ -43,3 +43,4 @@
 - Connector request timeouts now remove their pending echo entry before rejecting, preventing timed-out API calls from accumulating in the response map.
 - Connector inbound messages now reject invalid JSON, non-object payloads, and malformed OneBot events/API responses before dispatch; valid payloads continue through the existing echo and event handlers.
 - Connector API and send helpers now accept JSON records, parse `sendRawJson` defensively, and expose unknown-safe response storage; callers explicitly handle absent API results when merging forward messages or awaiting delete calls.
+- Voice-record loading now validates the `get_record` result as an object before reading base64 data, removing another explicit `any` boundary while preserving OneBot response compatibility.
