@@ -1,0 +1,40 @@
+name: Quality gates
+
+on:
+    pull_request:
+    push:
+        branches: [next]
+
+permissions:
+    contents: read
+
+jobs:
+    quality:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout with compatibility assets
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+                  persist-credentials: false
+            - name: Setup Node 22 and Yarn 4
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: yarn
+            - name: Enable Corepack
+              run: corepack enable
+            - name: Install dependencies
+              run: yarn install --immutable
+            - name: TypeScript strict check
+              run: yarn typecheck
+            - name: OneBot contract tests
+              run: yarn test:contract
+            - name: Lint protocol and platform primitives
+              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage
+            - name: Dependency audit
+              run: yarn npm audit --all --recursive
+            - name: Web build
+              run: yarn build
+            - name: Rust check
+              run: yarn lint:tauri
