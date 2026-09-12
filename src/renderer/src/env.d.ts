@@ -4,13 +4,12 @@
 declare module 'vue3-danmaku'
 declare module '*.vue' {
     import type { DefineComponent } from 'vue'
-    // eslint-disable-next-line
-    const component: DefineComponent<{}, {}, any>
+    const component: DefineComponent
     export default component
 }
 
 declare interface Window {
-    moYu: any
+    moYu: () => string
     _AMapSecurityConfig: string | undefined
     pinyin?: {
         pinyin: (
@@ -26,7 +25,7 @@ declare interface Window {
         lat: number,
         lng: number
     }) => void
-    __TAURI_INTERNALS__: any
+    __TAURI_INTERNALS__: Record<string, unknown>
 }
 
 // po 文件，按字符串处理
@@ -36,12 +35,12 @@ declare module '*.po' {
 }
 
 declare module '*.yaml' {
-    const content: any
+    const content: Record<string, unknown>
     export default content
 }
 
 declare module '*.yml' {
-    const content: any
+    const content: Record<string, unknown>
     export default content
 }
 
