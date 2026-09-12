@@ -527,7 +527,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         listMenuShowRun(info, item)
     }
 
-    function listMenuShowRun(info: any, item: UserFriendElem & UserGroupElem) {
+    function listMenuShowRun(info: MenuStatue, item: UserFriendElem & UserGroupElem) {
         // PS：这是触屏触发的标志，如果优先触发了 contextmenu 就不用触发触屏了
         showMenu.value = false
         info.list = ['top', 'remove']
