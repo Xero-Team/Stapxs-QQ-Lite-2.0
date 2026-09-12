@@ -332,6 +332,7 @@ import {
     migrateInlineBackgroundImage,
     toBackgroundImageStyle,
 } from '@renderer/function/utils/backgroundUtil'
+import { migrateLegacyLocalStorage } from '@renderer/storage'
 
 import Options from '@renderer/pages/Options.vue'
 import Friends from '@renderer/pages/Friends.vue'
@@ -876,6 +877,7 @@ onMounted(() => {
         // 初始化功能
         App.createMenu() // Electron：创建菜单
         App.createIpc() // Electron：创建 IPC 通信
+        await migrateLegacyLocalStorage()
         // 加载开发者相关功能
         if (dev) {
             document.title = 'Xero QQ Lite (Dev)'

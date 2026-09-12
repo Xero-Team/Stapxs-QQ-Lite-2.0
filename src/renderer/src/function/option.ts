@@ -31,6 +31,7 @@ import {
 import { updateBaseOnMsgList } from './utils/msgUtil'
 import { backend } from '@renderer/runtime/backend'
 import { refreshFavicon } from './favicon'
+import { getLocalValue, setLocalValue } from '@renderer/storage'
 
 let cacheConfigs: { [key: string]: any }
 
@@ -569,7 +570,8 @@ export async function load(): Promise<{ [key: string]: any }> {
             }
         })
     } else {
-        const str = localStorage.getItem('options')
+        // Prefer the browser store, with the one-time Dexie migration as a rollback-safe fallback.
+        const str = localStorage.getItem('options') ?? await getLocalValue<string>('legacy-localstorage', 'options')
         if (str != null) {
             const list = str.split('&')
             for (let i = 0; i <= list.length; i++) {
@@ -739,6 +741,7 @@ export function saveAll(config = {} as { [key: string]: any }) {
     })
     str = str.substring(0, str.length - 1)
     localStorage.setItem('options', str)
+    void setLocalValue('settings', 'options', str)
 
     // electron：将配置保存
     if (backend.isDesktop()) {
