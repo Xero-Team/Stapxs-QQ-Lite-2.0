@@ -45,3 +45,4 @@
 - Connector API and send helpers now accept JSON records, parse `sendRawJson` defensively, and expose unknown-safe response storage; callers explicitly handle absent API results when merging forward messages or awaiting delete calls.
 - Voice-record loading now validates the `get_record` result as an object before reading base64 data, removing another explicit `any` boundary while preserving OneBot response compatibility.
 - Message dispatch and notification logging no longer embeds raw JSON, parsed segments, handler payloads, or message text in log strings; message content remains available only to the notification UI.
+- URI handling and voice-record failure logs now emit generic messages instead of serializing URI or API response values, closing two remaining sensitive string logging paths.

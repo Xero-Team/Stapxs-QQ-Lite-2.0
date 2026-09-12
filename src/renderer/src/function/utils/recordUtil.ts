@@ -108,7 +108,7 @@ export async function loadRecord(data: RecordMsgData, msgId?: string): Promise<R
     const result = asRecord(Array.isArray(raw) ? raw[0] : raw)
 
     if (!result?.base64 || typeof result.base64 !== 'string') {
-        logger.debug('get_record 响应中没有 base64: ' + JSON.stringify(result).substring(0, 200))
+        logger.debug('get_record 响应中没有可用音频数据')
         throw new Error('OneBot 端不支持语音格式转换')
     }
 

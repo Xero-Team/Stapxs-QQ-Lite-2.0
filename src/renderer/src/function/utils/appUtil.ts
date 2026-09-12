@@ -498,8 +498,8 @@ export function createIpc() {
         }
         uiStore.popBoxList.push(popInfo)
     })
-    backend.addListener(undefined, 'sys:handleUri', (event, data) => {
-        logger.info(JSON.stringify(data ?? event.payload))
+    backend.addListener(undefined, 'sys:handleUri', () => {
+        logger.info('收到 URI 处理请求')
     })
     backend.addListener(undefined, 'app:changeTab', (event, name) => {
         window.focus()
