@@ -60,14 +60,6 @@ linux:
     synopsis: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
     category: Network
     mimeTypes: [ application/x-xero-qq-lite ]
-    desktop:
-        Type: Application
-        Name: Xero QQ Lite
-        GenericName: Xero QQ Lite Electron 客户端
-        Comment: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
-        Terminal: false
-        Category: Network
-        Icon: xero-qq-lite
 
 # 其他配置
 npmRebuild: false
