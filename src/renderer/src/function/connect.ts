@@ -22,6 +22,7 @@ import { backend } from '@renderer/runtime/backend'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
+import { HttpTransport } from '@renderer/transport/transport'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -461,25 +462,15 @@ export class Connector {
         args: { [key: string]: any },
         echo: string = name,
     ) {
-        fetch(`${import.meta.env.VITE_APP_SSE_HTTP_ADDRESS}/${name}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': login.token,
-            },
-            body: JSON.stringify(args),
-        }).then(async (response) => {
-            if (response.ok) {
-                try {
-                    const data = await response.json()
-                    data.echo = echo
-                    this.onmessage(JSON.stringify(data))
-                } catch (e) {
-                    logger.error(null, `API ${name} 返回非 JSON 数据`)
-                }
-            }
-        }).catch((error) => {
-            logger.error(error, ` 请求 API ${name} 失败`)
+        const transport = new HttpTransport(`${import.meta.env.VITE_APP_SSE_HTTP_ADDRESS}/${name}`, {
+            Authorization: login.token,
+        })
+        transport.send(args, { timeoutMs: 15_000 }).catch((error: unknown) => {
+            logger.error(error instanceof Error ? error : new Error('HTTP transport failed'), `请求 API ${name} 失败`)
+        })
+        transport.onMessage((data) => {
+            if (typeof data !== 'object' || data === null) return
+            this.onmessage(JSON.stringify({ ...data, echo }))
         })
     }
     /**
