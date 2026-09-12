@@ -506,10 +506,6 @@
                         <div><font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" /></div>
                         <a>{{ $t('跳转到消息') }}</a>
                     </div>
-                    <div v-show="isDev" @click="consoleLogMsg">
-                        <div><font-awesome-icon :icon="['fas', 'screwdriver-wrench']" /></div>
-                        <a>{{ $t('调试信息') }}</a>
-                    </div>
                 </div>
             </div>
         </Teleport>
@@ -725,7 +721,6 @@ const searchRequestId = ref(0)
 const forwardList = ref(contactStore.userList)
 const chatImg = ref<any>(undefined)
 const trueLang = getTrueLang()
-const isDev = import.meta.env.DEV
 
 //#region == 窗口移动相关 ==================================================
 const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
@@ -1634,13 +1629,6 @@ function cancelReply() {
         return item.type !== 'reply'
     })
     tags.value.isReply = false
-}
-
-function consoleLogMsg() {
-    if (!selectedMsg.value) return
-    // eslint-disable-next-line no-console
-    console.log(selectedMsg.value)
-    closeMsgMenu()
 }
 
 function cancelForward() {

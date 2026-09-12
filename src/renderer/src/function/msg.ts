@@ -404,16 +404,6 @@ const noticeFunctions = {
                 break
             }
             case 'decrease': {
-                // 输出日志（显示为红色字体）
-                // eslint-disable-next-line no-console
-                console.log(
-                    '%c消失了一个好友：' +
-                    msg.nickname +
-                    '（' +
-                    msg.user_id +
-                    '）',
-                    'color:red;',
-                )
                 break
             }
         }
