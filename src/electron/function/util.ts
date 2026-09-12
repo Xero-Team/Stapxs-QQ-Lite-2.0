@@ -4,6 +4,7 @@ import jp from 'jsonpath'
 import axios from 'axios'
 
 import { logLevel } from '../index.ts'
+import { parseExternalUrl } from './urlPolicy.ts'
 
 const logger = log4js.getLogger('util')
 interface CommandResult {
@@ -48,20 +49,15 @@ export function runCommand(command: string) {
 
 async function getFinalRedirectUrl(initialUrl: string) {
     try {
-        const url = new URL(initialUrl);
-        if (!['http:', 'https:'].includes(url.protocol)) {
-            return null;
-        }
-        if (initialUrl.length > 2000) {
-            return null;
-        }
+        const url = parseExternalUrl(initialUrl)
+        if (!url) return null
         const MAX_REDIRECTS = 10;
         const response = await axios.get(url.toString(), {
             maxRedirects: MAX_REDIRECTS,
             validateStatus: (status) => status < 400
         })
-        return response.request.res.responseUrl
-    } catch (error) {
+        return parseExternalUrl(response.request?.res?.responseUrl)?.toString() ?? url.toString()
+    } catch {
         return null
     }
 }
