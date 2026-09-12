@@ -43,10 +43,24 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
 import { formatSessionTime } from '@renderer/function/utils/systemUtil'
 import { getShowName } from '@renderer/function/utils/msgUtil'
 
+interface FriendPreview {
+    user_id?: number
+    group_id?: number
+    nickname: string
+    group_name?: string
+    remark: string
+    new_msg?: boolean
+    time?: number
+    highlight?: string
+    raw_msg?: string
+    longNick?: string
+    always_top?: boolean
+}
+
 defineOptions({ name: 'FriendBody' })
 
 defineProps<{
-    data: any
+    data: FriendPreview
     select?: boolean
     menu?: boolean
     from?: string

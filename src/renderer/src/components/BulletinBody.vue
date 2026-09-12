@@ -60,7 +60,26 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     import { getTrueLang } from '@renderer/function/utils/systemUtil'
     import { i18n } from '@renderer/main'
     import { Img } from '@renderer/function/model/img'
-    import { useChatStore } from '@renderer/state/chat'
+import { useChatStore } from '@renderer/state/chat'
+
+interface BulletinImage {
+    src: string
+}
+
+interface BulletinData {
+    time: number
+    content: string[]
+    img?: BulletinImage
+    sender: number
+    is_read?: boolean
+    read_num?: number
+}
+
+interface ViewerRef {
+    value?: {
+        open: (image: Img) => void
+    }
+}
 
     defineOptions({ name: 'BulletinBody' })
 
@@ -68,11 +87,11 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     const chatStore = useChatStore()
 
     const props = defineProps<{
-        data: any
+        data: BulletinData
         index: number
     }>()
 
-    const { viewer: viewerRef } = inject<{ viewer: any }>('viewer', { viewer: null })
+    const { viewer: viewerRef } = inject<{ viewer: ViewerRef | null }>('viewer', { viewer: null })
 
     const trueLang = getTrueLang()
     const showAll = ref(false)
@@ -123,9 +142,9 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
      * 图片点击
      * @param img
      */
-    function imgClick(img: Img) {
+    function imgClick(img: BulletinImage) {
         if (viewerRef?.value) {
-            viewerRef.value.open(img)
+            viewerRef.value.open(new Img(img.src))
         }
     }
 </script>
