@@ -73,3 +73,18 @@
 - Authentication state now has explicit login history, quick-login, profile, Web API cache, bot metadata, and JSONPath map types; runtime reset and login response assignment restore the complete login shape. The map uses a typed known-key surface plus a guarded dynamic entry accessor.
 - JSONPath maps now pass through a dedicated Zod loader (`protocol/json-map.ts`) that requires a non-empty name and preserves protocol-specific extension keys. Loader and redirect paths are covered by seven contract assertions; legacy map values are adapted at the small number of dynamic parser call sites.
 - Settings state now exposes an explicit `SystemConfig` contract for the persisted defaults and validates saved-token values before decoding; loaded developer configuration crosses the boundary through a typed assertion. The remaining dynamic option registry and JSONPath map are tracked for adapter migration.
+
+## Effective TypeScript configuration audit (2026-09-13)
+
+`vue-tsc --showConfig -p tsconfig.web.json` reports `strict: true` but omits
+`noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`. Setting these flags
+on the root reference project did not enable them in its children. Running the
+Web typecheck with both flags explicitly produced 359 errors (40 in `msg.ts`,
+33 in `appUtil.ts`, 32 in `Chat.vue`, among other modules). The checklist's
+previous completed flag was therefore incorrect and has been reopened.
+
+`tsconfig.core.json` now enforces all requested flags for protocol, transport,
+storage and network modules and runs as part of `yarn typecheck`.
+`tests/browser/tsconfig.json` enforces the same flags for the XML harness.
+The migration must expand to the Web and Node projects before the full strict
+item can be checked off. No compiler flags were disabled to pass these checks.

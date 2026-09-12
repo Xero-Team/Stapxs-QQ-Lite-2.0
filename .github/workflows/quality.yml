@@ -31,6 +31,8 @@ jobs:
               run: git diff --check
             - name: TypeScript strict check
               run: yarn typecheck
+            - name: Browser harness strict check
+              run: yarn typecheck:browser
             - name: Electron TypeScript check
               run: npx tsc --noEmit -p tsconfig.node.json
             - name: OneBot contract tests

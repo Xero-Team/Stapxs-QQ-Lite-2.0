@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.web.json",
+  "include": [
+    "src/renderer/src/protocol/**/*.ts",
+    "src/renderer/src/transport/**/*.ts",
+    "src/renderer/src/storage/**/*.ts",
+    "src/renderer/src/network/**/*.ts"
+  ],
+  "compilerOptions": {
+    "composite": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "noEmit": true
+  }
+}

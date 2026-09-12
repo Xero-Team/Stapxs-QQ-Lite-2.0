@@ -34,7 +34,7 @@
 
 ## 4. 规范化与类型安全
 
-- [x] 迁移 ESLint flat config，启用 TypeScript strict、noUncheckedIndexedAccess、exactOptionalPropertyTypes、useUnknownInCatchVariables。
+- [ ] 迁移 ESLint flat config，启用 TypeScript strict、noUncheckedIndexedAccess、exactOptionalPropertyTypes、useUnknownInCatchVariables。核对 `vue-tsc --showConfig` 后发现根配置的后两项未被 Web/Node 子项目继承；现已通过 `tsconfig.core.json` 和 `tests/browser/tsconfig.json` 为协议、传输、存储、网络与浏览器测试启用真实严格门禁。全渲染层启用后仍有 359 项错误，不能视为全仓完成。
 - [ ] 将 `any` 降为零（第三方边界使用 `unknown` + Zod）；开启 no-explicit-any、no-floating-promises、consistent-type-imports 等规则。`runtime/backend.ts` 的跨端插件、监听和 User-Agent 边界已完成 unknown 化；Store、消息兼容 API 和平台 IPC 仍含遗留 `any`。
 - [ ] 拆分 `Chat.vue`、`App.vue`、`msg.ts`、`msgUtil.ts`、`appUtil.ts`；UI、状态、协议、传输、平台能力各自独立。
 - [ ] 为 Pinia store 定义输入输出类型和状态迁移；统一错误模型、日志接口、异步取消和重试策略。

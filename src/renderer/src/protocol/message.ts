@@ -30,7 +30,7 @@ const CQ_UNESCAPES: Record<string, string> = {
 }
 
 function escapeCq(value: string): string {
-    return value.replace(/[&,\u005B\u005D]/g, (character) => CQ_ESCAPES[character])
+    return value.replace(/[&,\u005B\u005D]/g, (character) => CQ_ESCAPES[character] ?? character)
 }
 
 function unescapeCq(value: string): string {
@@ -70,8 +70,13 @@ export function parseCqText(raw: string): ParsedCqMessage {
             segments.push({ type: 'text', data: { text: raw.slice(cursor, match.index).replaceAll('\\n', '\n') } })
         }
         const type = match[1]
+        if (type === undefined) continue
         const data = parseFields(match[2] ?? '')
-        if (type === 'reply') reply = { user_id: data.user_id, seq: data.seq, message: data.message }
+        if (type === 'reply') reply = {
+            ...(data.user_id === undefined ? {} : { user_id: data.user_id }),
+            ...(data.seq === undefined ? {} : { seq: data.seq }),
+            ...(data.message === undefined ? {} : { message: data.message }),
+        }
         else if (type === 'text') segments.push({ type, data: { ...data, text: unescapeCq(data.text ?? '') } })
         else segments.push({ type, data })
         cursor = pattern.lastIndex

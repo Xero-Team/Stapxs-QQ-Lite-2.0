@@ -21,7 +21,10 @@ export const localStoreDb = new LocalStoreDatabase()
 
 export async function setLocalValue(namespace: string, key: string, value: unknown): Promise<void> {
     const existing = await localStoreDb.records.where('[namespace+key]').equals([namespace, key]).first()
-    const record: LocalStoreRecord = { id: existing?.id, namespace, key, value, updatedAt: Date.now() }
+    const record: LocalStoreRecord = {
+        ...(existing?.id === undefined ? {} : { id: existing.id }),
+        namespace, key, value, updatedAt: Date.now(),
+    }
     await localStoreDb.records.put(record)
 }
 

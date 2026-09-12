@@ -13,7 +13,9 @@
   "type": "module",
   "scripts": {
     "capacitor:copy:before": "capacitor-sync-version",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.web.json",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.web.json && yarn typecheck:core",
+    "typecheck:core": "tsc --noEmit -p tsconfig.core.json",
+    "typecheck:browser": "vue-tsc --noEmit -p tests/browser/tsconfig.json",
     "test:contract": "vitest run --config vitest.config.ts",
     "check": "yarn lint && yarn typecheck",
     "lint": "eslint .",

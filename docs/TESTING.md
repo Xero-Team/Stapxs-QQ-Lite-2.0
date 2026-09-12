@@ -43,3 +43,24 @@ message sending/receiving, media, revoke/reply, settings migration, or native
 platforms. Those checks remain open in `REFACTOR_CHECKLIST.md`. Repository-wide
 ESLint and dependency-audit failures are tracked in `REFACTOR_BLOCKERS.md`;
 passing these focused regressions does not imply a passing release gate.
+
+## XML card security regression
+
+The XML parser and presentation component are tested in a separate Vue harness,
+using Chromium's native XML parser and IndexedDB/localStorage environment. Start
+it with `yarn vite --config tests/browser/vite.config.ts`, then run
+`bash scripts/playwright-xml-card-smoke.sh`. The script pins the same Playwright
+CLI as the OneBot smoke and intercepts every third-party request.
+
+Nine scenarios verify normal text/link/size preservation, explicit image opt-in,
+opt-out, HTML/CDATA injection, malformed XML, entity declarations, payload size
+limits, unsupported cards, and offline text rendering. Exactly one mock image
+request is expected, with no referrer; its local audit contains only the origin.
+This is a component regression, not evidence of a live bot or native WebView run.
+
+`yarn typecheck:core` enforces `strict`, `noUncheckedIndexedAccess`, and
+`exactOptionalPropertyTypes` for protocol, transport, storage and network modules;
+`yarn typecheck:browser` applies the same settings to the harness and its imports.
+The Web project's effective config currently only enables `strict`; the remaining
+full-project migration is tracked in `REFACTOR_BLOCKERS.md`. Root project
+references do not propagate compiler options to the referenced projects.
