@@ -36,6 +36,8 @@ jobs:
               run: yarn test:contract
             - name: Lint protocol and platform primitives
               run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests
+            - name: Generate dependency inventory and SBOM
+              run: yarn sbom
             - name: Dependency audit
               run: yarn npm audit --all --recursive
             - name: Web build
