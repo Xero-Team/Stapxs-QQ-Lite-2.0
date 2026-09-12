@@ -59,6 +59,7 @@ import {
 } from '@renderer/function/option'
 
 import Chat from '../Chat.vue'
+import type { MsgItemElem } from '@renderer/function/elements/information'
 
 defineOptions({ name: 'ChatGlagame' })
 
@@ -66,9 +67,9 @@ const authStore = useAuthStore()
 const chatStore = useChatStore()
 
 const props = defineProps<{
-    chat: any
-    list: any[]
-    imgView: any
+    chat: unknown
+    list: MsgItemElem[]
+    imgView: unknown
 }>()
 
 const debug = import.meta.env.DEV
@@ -128,7 +129,7 @@ async function initChat() {
             // 获取 20 条历史消息
             const historyMessages = props.list.slice(-20)
             let msgStrs = ''
-            historyMessages.forEach((msg: any) => {
+            historyMessages.forEach((msg: MsgItemElem) => {
                 msgStrs += getMessageDetail(msg) + '\n'
             })
             getCurrentMessages().push({
