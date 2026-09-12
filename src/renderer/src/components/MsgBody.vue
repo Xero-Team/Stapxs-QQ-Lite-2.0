@@ -796,7 +796,7 @@ async function parseText(index: number) {
             }
             sendStatEvent('link_view', { domain: domain })
 
-            let linkData = null as any
+            let linkData: Record<string, unknown> | null = null
             let finaLink = fistLink
             try {
                 finaLink = await backend.call('Onebot', 'sys:getFinalRedirectUrl', true, fistLink)
@@ -849,22 +849,22 @@ async function parseText(index: number) {
     textIndex.value[index] = text
 }
 
-function loadLinkPreview(domain: string, res: any) {
+function loadLinkPreview(domain: string, res: Record<string, unknown>) {
     const logger = new Logger()
-    logger.debug('获取链接预览成功: ' + res['og:title'])
+    logger.debug('获取链接预览成功: ' + String(res['og:title'] ?? ''))
     if(res != undefined) {
         if (res.type == undefined) {
             if(Object.keys(res).length > 0) {
-                let imgUrl = res['og:image']
+                let imgUrl = typeof res['og:image'] === 'string' ? res['og:image'] : undefined
                 if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('www')) {
                     imgUrl = new URL(imgUrl.startsWith('/') ? imgUrl : '/' + imgUrl, domain).toString()
                 }
                 const pageData = {
-                    site: res['og:site_name'] === undefined ? '' : res['og:site_name'],
-                    title: res['og:title'] === undefined ? '' : res['og:title'],
-                    desc: res['og:description'] === undefined ? '' : res['og:description'],
+                    site: typeof res['og:site_name'] === 'string' ? res['og:site_name'] : '',
+                    title: typeof res['og:title'] === 'string' ? res['og:title'] : '',
+                    desc: typeof res['og:description'] === 'string' ? res['og:description'] : '',
                     img: imgUrl,
-                    link: res['og:url'],
+                    link: typeof res['og:url'] === 'string' ? res['og:url'] : undefined,
                 }
                 pageViewInfo.value = pageData
             }
