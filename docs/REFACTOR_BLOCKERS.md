@@ -34,3 +34,4 @@
 - JSONPath message mapping now uses an explicit query-result type and normalizes mapped list items through unknown-safe records; the legacy `jsonpath` declaration remains the compatibility boundary for later replacement.
 - The initial message path loader now avoids inline `any` casts by naming its legacy JSON module shape; the broader `msg.ts` handler payload migration remains blocked on staged protocol types.
 - Removed the development chat-menu action and friend-removal console output that exposed complete messages or user identifiers; remaining startup banners and structured logger output are being reviewed separately.
+- Connector response storage now uses `unknown` and validates API responses as JSON records before JSONPath mapping, preventing malformed or non-object replies from crossing the protocol boundary.

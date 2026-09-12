@@ -26,6 +26,11 @@ import { backoffDelay, HttpTransport, SseTransport, WebSocketTransport } from '@
 
 const logger = new Logger()
 const popInfo = new PopInfo()
+type JsonRecord = Record<string, unknown>
+
+function asJsonRecord(value: unknown): JsonRecord | undefined {
+    return typeof value === 'object' && value !== null ? value as JsonRecord : undefined
+}
 
 let retry = 0
 let forceCloseReason: string | undefined = undefined
@@ -267,9 +272,9 @@ export class Connector {
     /**
      * 返回值Map
      */
-    private static ReMap: Map<string, any> = new Map()
+    private static ReMap: Map<string, unknown> = new Map()
 
-    private static waitReturn(echo: string, timeout: number=50000): Promise<any> {
+    private static waitReturn(echo: string, timeout: number=50000): Promise<unknown> {
         return new Promise((resolve, reject) => {
             const startTime = Date.now()
 
@@ -433,7 +438,12 @@ export class Connector {
         // 处理响应
         try{
             const re = await this.waitReturn(echo)
-            return getMsgData(api, re, apiMap)
+            const response = asJsonRecord(re)
+            if (!response) {
+                logger.error(null, `API ${api} 返回了无效响应`)
+                return null
+            }
+            return getMsgData(api, response, apiMap)
         }catch (e) {
             if (e instanceof TimeoutError) {
                 logger.error(e, `API ${api} 请求超时`)
