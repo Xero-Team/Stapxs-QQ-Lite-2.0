@@ -66,7 +66,21 @@
         getTrueLang,
     } from '@renderer/function/utils/systemUtil'
     import { pokeAnime } from '@renderer/function/utils/msgUtil'
-    import { backend } from '@renderer/runtime/backend'
+import { backend } from '@renderer/runtime/backend'
+import type { MsgItemElem } from '@renderer/function/elements/information'
+
+interface NoticePayload {
+    notice_type?: string
+    sub_type?: string
+    user_id?: number
+    operator_id?: number
+    duration?: number
+    str?: string
+    time?: number
+    originMsg?: MsgItemElem
+    pokeMe?: boolean
+    name?: string | number
+}
 
     const $t = i18n.global.t
 
@@ -75,17 +89,17 @@
 
     defineOptions({ name: 'NoticeBody' })
 
-    const props = defineProps(['data', 'id'])
-    defineEmits(['reedit'])
+    const props = defineProps<{ data: NoticePayload; id?: string | number }>()
+    defineEmits<{ reedit: [message: MsgItemElem] }>()
 
     const trueLang = getTrueLang()
-    const info = ref(props.data) as { [key: string]: any }
+    const info = ref<NoticePayload>(props.data)
 
-    function isMe(id: number) {
+    function isMe(id: number | undefined) {
         return String(authStore.loginInfo.uin) === String(id)
     }
 
-    function getName(id: number) {
+    function getName(id: number | undefined) {
         const back = chatStore.chatInfo.info.group_members.filter(
             (item) => {
                 return item.user_id === id
@@ -94,10 +108,11 @@
         if (back.length === 1) {
             return back[0].card === '' || back[0].card == null? back[0].nickname: back[0].card
         }
-        return id
+        return id ?? ''
     }
 
-    function fTime(time: number) {
+    function fTime(time: number | undefined) {
+        time ??= 0
         // 将秒数转换为可阅读的时间，最大单位天
         const day = Math.floor(time / 86400)
         const hour = Math.floor((time % 86400) / 3600)

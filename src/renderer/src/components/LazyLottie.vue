@@ -13,13 +13,18 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Vue3Lottie as Lottie } from 'vue3-lottie'
 
+interface LottieController {
+    play?: () => void
+    pause?: () => void
+}
+
 defineProps<{
     animationLink: string
     title?: string
 }>()
 
 const lottieContainer = ref<HTMLElement | null>(null)
-const lottieRef = ref<any>(null)
+const lottieRef = ref<LottieController | null>(null)
 const loaded = ref(false)
 let observer: IntersectionObserver | null = null
 
