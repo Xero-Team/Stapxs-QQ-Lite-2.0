@@ -11,6 +11,7 @@ permissions:
 jobs:
     quality:
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         steps:
             - name: Checkout with compatibility assets
               uses: actions/checkout@v4
@@ -35,11 +36,9 @@ jobs:
             - name: OneBot contract tests
               run: yarn test:contract
             - name: Lint protocol and platform primitives
-              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests
+              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-onebot-smoke.js
             - name: Generate dependency inventory and SBOM
               run: yarn sbom
-            - name: Dependency audit
-              run: yarn npm audit --all --recursive
             - name: Web build
               run: yarn build
             - name: Electron renderer build
@@ -47,10 +46,10 @@ jobs:
               env:
                   DESKTOP: '1'
             - name: Install Chromium for Playwright smoke
-              run: npx --yes playwright install --with-deps chromium
+              run: npx --yes --package @playwright/cli@0.1.19 playwright-cli install-browser --with-deps chromium
             - name: Start Web preview
               run: |
-                  yarn preview --host 127.0.0.1 > /tmp/xero-qq-lite-preview.log 2>&1 &
+                  yarn preview --host 127.0.0.1 --strictPort > /tmp/xero-qq-lite-preview.log 2>&1 &
                   for attempt in $(seq 1 30); do
                     curl --fail --silent http://127.0.0.1:4173/ >/dev/null && exit 0
                     sleep 1
@@ -59,5 +58,28 @@ jobs:
                   exit 1
             - name: Playwright smoke
               run: bash scripts/playwright-smoke.sh
+            - name: Playwright OneBot login smoke
+              run: bash scripts/playwright-onebot-smoke.sh
             - name: Rust check
               run: yarn lint:tauri
+
+    dependency-audit:
+        # Audit failures must still fail the workflow without skipping browser coverage.
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+            - name: Setup Node 22 and Yarn 4
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: yarn
+            - name: Enable Corepack
+              run: corepack enable
+            - name: Install dependencies
+              run: yarn install --immutable --mode=skip-build
+            - name: Dependency audit
+              run: yarn npm audit --all --recursive
