@@ -30,15 +30,15 @@ if(argv['port']) {
 if(argv['help'] || !hostname || !port) {
     // eslint-disable-next-line no-console
     console.log(`
-        Stapxs QQ Lite 网页服务工具：
+        Xero QQ Lite 网页服务工具：
             --hostname  指定服务运行的主机名
             --port      指定服务运行的端口
             --help      查看帮助
 
-        主仓库：https://github.com/Stapxs/Stapxs-QQ-Lite-2.0
+        项目主页：https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0
         网页服务工具：https://www.npmjs.com/package/ssqq-web
 
-        ** 欢迎 star 项目，如果有问题请在主仓库提 issue **
+        ** 更新检查默认关闭；如需启用，请设置 XERO_QQ_LITE_UPDATE_ENDPOINT **
     `)
     process.exit(0)
 }
