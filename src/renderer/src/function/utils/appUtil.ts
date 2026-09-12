@@ -11,7 +11,7 @@ import WelPan from '@renderer/components/WelPan.vue'
 import { KeyboardInfo } from '@capacitor/keyboard'
 import { LogType, Logger, PopInfo, PopType } from '@renderer/function/base'
 import { Connector, login } from '@renderer/function/connect'
-import { BaseChatInfoElem, MenuEventData } from '@renderer/function/elements/information'
+import { BaseChatInfoElem, MenuEventData, Session } from '@renderer/function/elements/information'
 import { useAuthStore } from '@renderer/state/auth'
 import { useContactStore } from '@renderer/state/contact'
 import { useChatStore } from '@renderer/state/chat'
@@ -1495,6 +1495,17 @@ export function useLocalStorage<T>(key: string, defaultValue: T): Ref<T> {
 //#endregion
 
 //#region == v命令封装 ======================================
+const menuControllers = new WeakMap<HTMLElement, AbortController>()
+const searchStates = new WeakMap<HTMLInputElement, {
+    controller: AbortController
+    stopWatch: WatchHandle
+    stopWatchEffect: WatchHandle
+}>()
+const escControllers = new WeakMap<HTMLElement, AbortController>()
+const moveControllers = new WeakMap<HTMLElement, AbortController>()
+const longHoverControllers = new WeakMap<HTMLElement, AbortController>()
+const tooltipControllers = new WeakMap<HTMLElement, AbortController>()
+
 /**
  * 创建一个右键菜单指令
  * 用于闭包公用停留事件控制器
@@ -1604,14 +1615,14 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             }, options)
 
                 // 绑定控制器
-                ; (el as any)._vMenuController = controller
+            menuControllers.set(el, controller)
         },
         unmounted(el: HTMLElement) {
-            const controller = (el as any)._vMenuController
+            const controller = menuControllers.get(el)
             if (!controller) return
 
             controller.abort()
-            delete (el as any)._vMenuController
+            menuControllers.delete(el)
         },
     }
 }
@@ -1679,21 +1690,15 @@ export function createVSearch<T extends object>(): Directive<HTMLInputElement, S
                     binding.value.query = []
                 }
             })
-                ; (el as any)._vSearchController = controller
-                ; (el as any)._vStopWatch = { stopWatch, stopWatchEffect }
+            searchStates.set(el, { controller, stopWatch, stopWatchEffect })
         },
         unmounted(el) {
-            const controller = (el as any)._vSearchController
-            const stopWatch = (el as any)._vStopWatch
-            if (controller) {
-                controller.abort()
-                delete (el as any)._vSearchController
-            }
-            if (stopWatch) {
-                (stopWatch.stopWatch as WatchHandle).stop()
-                    ; (stopWatch.stopWatchEffect as WatchHandle).stop()
-                delete (el as any)._vStopWatch
-            }
+            const state = searchStates.get(el)
+            if (!state) return
+            state.controller.abort()
+            state.stopWatch.stop()
+            state.stopWatchEffect.stop()
+            searchStates.delete(el)
         }
     }
 }
@@ -1706,7 +1711,7 @@ export function createVSearch<T extends object>(): Directive<HTMLInputElement, S
  * }"
  * @see createVSearch
  */
-export const vSearch = createVSearch<any>()
+export const vSearch = createVSearch<Session>()
 
 /**
  * 是否隐藏元素
@@ -1749,15 +1754,15 @@ export const vEsc: Directive<HTMLElement, () => void> = {
             }
         }
         document.addEventListener('keydown', keydownHandler, options)
-            ; (el as any)._vEscController = controller
+        escControllers.set(el, controller)
     },
     unmounted(el: HTMLElement) {
-        const controller = (el as any)._vEscController
+        const controller = escControllers.get(el)
 
         if (!controller) return
 
         controller.abort()
-        delete (el as any)._vEscController
+        escControllers.delete(el)
     }
 }
 
@@ -2018,15 +2023,15 @@ function createVMove<T extends HTMLElement>(): Directive<T, VMoveOptions<T>> {
             el.addEventListener('touchstart', chatMoveStartEvent, listenerOptions)
             el.addEventListener('touchmove', chatMoveEvent, listenerOptions)
             el.addEventListener('touchend', chatMoveEndEvent, listenerOptions)
-                ; (el as any)._vMoveController = controller
+            moveControllers.set(el, controller)
 
         },
         unmounted(el: T) {
-            const controller = (el as any)._vMoveController
+            const controller = moveControllers.get(el)
             if (!controller) return
 
             controller.abort()
-            delete (el as any)._vMoveController
+            moveControllers.delete(el)
         }
     }
 }
@@ -2060,14 +2065,14 @@ function createVLongHover(): Directive<HTMLElement, undefined> {
             el.addEventListener('mouseleave', (event) => {
                 userHoverEnd(event)
             }, options)
-                ; (el as any)._vLongHoverController = controller
+            longHoverControllers.set(el, controller)
         },
         unmounted(el: HTMLElement) {
-            const controller = (el as any)._vLongHoverController
+            const controller = longHoverControllers.get(el)
             if (!controller) return
 
             controller.abort()
-            delete (el as any)._vLongHoverController
+            longHoverControllers.delete(el)
         }
     }
 }
@@ -2089,7 +2094,7 @@ function createVLongHover(): Directive<HTMLElement, undefined> {
  * onV-move-right="(move) => 右滑动事件(move)"
  * />
  */
-export const vMove = createVMove<any>()
+export const vMove = createVMove<HTMLDivElement>()
 
 /**
  * 监听元素长时间悬停事件
@@ -2100,7 +2105,10 @@ export const vMove = createVMove<any>()
  * onV-long-hover-end="() => 长悬停结束事件()"
  * />
  */
-export const vLongHover = createVLongHover()
+export const vLongHover = createVLongHover() as {
+    mounted(el: HTMLElement): void
+    unmounted(el: HTMLElement): void
+}
 
 type VTooltipBinding<T extends Component> =
     | T
@@ -2140,8 +2148,8 @@ export const vTooltip = {
     mounted<T extends Component>(el: HTMLElement, binding: DirectiveBinding<VTooltipBinding<T>> & { modifiers: { debug?: boolean } }) {
         const controller = new AbortController()
         const options = { signal: controller.signal }
-            ; (vLongHover as any).mounted(el)
-            ; (el as any)._vTooltipController = controller
+        vLongHover.mounted(el)
+        tooltipControllers.set(el, controller)
 
         let tooltip: TooltipController | undefined
 
@@ -2160,12 +2168,12 @@ export const vTooltip = {
     },
 
     unmounted(el: HTMLElement) {
-        (vLongHover as any).unmounted(el)
-        const controller = (el as any)._vTooltipController
+        vLongHover.unmounted(el)
+        const controller = tooltipControllers.get(el)
         if (!controller) return
 
         controller.abort()
-        delete (el as any)._vTooltipController
+        tooltipControllers.delete(el)
     }
 }
 
