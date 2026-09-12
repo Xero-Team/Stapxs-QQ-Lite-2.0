@@ -749,8 +749,8 @@ async function parseText(index: number) {
     text = ViewFuns.parseText(text)
     const filtedText = text.replace(/(.)(\1{10,})/g, '$1<span style="opacity:0.7;margin-right:10px;">...</span>')
     if(filtedText != text) {
-        const style = 'display:block;margin-top:10px;opacity:0.7;cursor:pointer;'
-        text = filtedText + '<a style="' + style +'" data-raw="' + text + '" onclick="this.parentNode.innerText = this.dataset.raw;return false;">' + $t('显示原始消息') + '</a>'
+    const style = 'display:block;margin-top:10px;opacity:0.7;cursor:pointer;'
+        text = filtedText + '<a href="#" style="' + style + '" data-raw="' + encodeURIComponent(text) + '">' + $t('显示原始消息') + '</a>'
     }
 
     if(type == 'body') {
@@ -759,7 +759,7 @@ async function parseText(index: number) {
     }
 
     const reg = /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gi
-    text = text.replaceAll(reg, '<a href="" data-link="$&" onclick="return false">$&</a>')
+    text = text.replaceAll(reg, '<a href="#" data-link="$&">$&</a>')
     const linkList = text.match(reg)
     if (linkList !== null && !gotLink.value && !isDebugMsg) {
         queueMicrotask(async() => {
@@ -962,7 +962,14 @@ function downloadFile(fileData: any, message_id: string) {
 
 function textClick(event: Event) {
     const target = event.target as HTMLElement
+    if (target.dataset.raw) {
+        event.preventDefault()
+        const parent = target.parentElement
+        if (parent) parent.textContent = decodeURIComponent(target.dataset.raw)
+        return
+    }
     if (target.dataset.link) {
+        event.preventDefault()
         const link = target.dataset.link
         openLink(link)
     }
