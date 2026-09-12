@@ -311,7 +311,7 @@ function updateWinColorOpt(value: boolean) {
     }
 }
 
-function setMsgType(value: any) {
+function setMsgType(value: unknown) {
     if (value) {
         const uiStore = useUIStore()
         uiStore.msgType = Number(value)
@@ -325,10 +325,10 @@ function setMsgType(value: any) {
 function changeInitialScale(value: number) {
     const viewport = document.getElementById('viewport')
     if (viewport && value && value >= 0.5 && value <= 1.5) {
-        (viewport as any).content =
+        (viewport as HTMLMetaElement).content =
             `width=device-width, initial-scale=${value}, maximum-scale=5, user-scalable=0`
     } else {
-        (viewport as any).content =
+        (viewport as HTMLMetaElement).content =
             'width=device-width, initial-scale=0.85, maximum-scale=5, user-scalable=0'
     }
 }
@@ -347,9 +347,9 @@ function setLanguage(name: string) {
     for (let i = 0; i < languageConfig.length; i++) {
         if (
             languageConfig[i].value == name &&
-            (languageConfig[i] as any).fallback
+            typeof (languageConfig[i] as { fallback?: unknown }).fallback === 'string'
         ) {
-            const fbname = (languageConfig[i] as any).fallback
+            const fbname = (languageConfig[i] as { fallback: string }).fallback
             const fbLang = getPortableFileLang(fbname)
             i18n.global.setLocaleMessage(fbname, fbLang)
             get = true
@@ -776,7 +776,7 @@ export function runASWEvent(event: Event) {
     if (sender != null) {
         const type = sender.nodeName
         const name = sender.getAttribute('name')
-        let value = null as any
+        let value: unknown = null
         switch (type) {
             case 'SELECT': {
                 value = (sender as HTMLSelectElement).options[
