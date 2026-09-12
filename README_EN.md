@@ -24,11 +24,6 @@
 
 ![view](README/view.png)
 
-## Community Versions
-The following are some community-supported versions, highly recommended to try:
-- [Xero QQ Lite X](https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X): A community version with extended features, supporting more functionality closer to the official QQ client.
-- [Xero QQ Lite Pre Preview](https://github.com/dev-soragoto/Stapxs-QQ-Lite-2.0-pre-release): A preview version of Xero QQ Lite that follows the dev branch updates, allowing you to experience the latest features.
-
 ## ✨ Feature Support
 
 - ✅ Built with the Vue.js ecosystem, with a clean frontend-backend separation

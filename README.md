@@ -27,11 +27,6 @@
 
 ![view](README/view.png)
 
-## 社区版本
-以下是一些社区支持的版本，非常推荐大家试用：
-- [Xero QQ Lite X](https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X)：扩展了更多功能的社区版本，支持更多接近原版 QQ 的功能
-- [Xero QQ Lite Pre Preview](https://github.com/dev-soragoto/Stapxs-QQ-Lite-2.0-pre-release)：Xero QQ Lite 的预览版本，跟随 dev 分支更新，可体验最新功能
-
 ## ✨ 特性支持
 
 - ✅ 使用 Vue.js 全家桶开发，快乐前后端分离
