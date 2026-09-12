@@ -84,3 +84,11 @@ restore, migration-failure rollback, legacy localStorage migration, database reo
 and namespace clear, and recovery of older duplicate rows. Every run uses a new
 browser context and synthetic values; real user storage is never opened. This
 covers the storage adapter, not the settings UI or native SQLite migration.
+
+## Release metadata validation
+
+After building the Web bundle, run `yarn verify:release-metadata dist`. It checks
+CycloneDX 1.5 metadata against `package.json`, verifies license records for direct
+dependencies, and requires the renderer CSP to restrict scripts to `self` and
+objects to `none`. Artifact checksums are validated separately with
+`scripts/verify-artifacts.sh`.
