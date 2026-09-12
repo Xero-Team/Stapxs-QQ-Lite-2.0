@@ -89,6 +89,16 @@ if (msgPathAt != undefined) {
 // 其他 tag
 let listLoadTimes = 0
 const logger = new Logger()
+type MessagePayload = Record<string, unknown>
+
+function asMessagePayload(value: unknown): MessagePayload | undefined {
+    return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
+}
+
+function stringField(payload: MessagePayload, key: string): string | undefined {
+    const value = payload[key]
+    return typeof value === 'string' ? value : undefined
+}
 let firstHeartbeatTime = -1
 let heartbeatTime = -1
 const MILLISECONDS_PER_SECOND = 1000
@@ -282,7 +292,7 @@ function refreshMetaEventWatchdog(intervalSeconds: number) {
     }, timeoutSeconds * MILLISECONDS_PER_SECOND)
 }
 
-function getObservedHeartbeatIntervalSeconds(msg: { [key: string]: any }) {
+function getObservedHeartbeatIntervalSeconds(msg: MessagePayload) {
     const currentHeartbeatTimeSeconds = Number(msg.time)
     if (
         firstHeartbeatTime > 0 &&
@@ -295,7 +305,7 @@ function getObservedHeartbeatIntervalSeconds(msg: { [key: string]: any }) {
     return -1
 }
 
-function getHeartbeatIntervalSeconds(msg: { [key: string]: any }) {
+function getHeartbeatIntervalSeconds(msg: MessagePayload) {
     // OneBot heartbeat `interval` is reported in milliseconds; `time` is a Unix timestamp in seconds.
     const reportedIntervalMilliseconds = Number(msg.interval)
     if (Number.isFinite(reportedIntervalMilliseconds) && reportedIntervalMilliseconds > 0) {
@@ -305,23 +315,34 @@ function getHeartbeatIntervalSeconds(msg: { [key: string]: any }) {
     return getObservedHeartbeatIntervalSeconds(msg)
 }
 
-export function dispatch(raw: string | { [k: string]: any }, echo?: string) {
-    let msg: any;
+export function dispatch(raw: string | MessagePayload, echo?: string) {
+    let msg: MessagePayload | undefined
 
     // 1) 如有需要先 parse
     if (typeof raw === 'string') {
         try {
-            msg = JSON.parse(raw);
+            msg = asMessagePayload(JSON.parse(raw) as unknown)
         } catch {
             logger.add(LogType.WS, 'GET：收到无效 JSON', undefined, true)
             return;
         }
     } else {
-        msg = raw;
+        msg = raw
+    }
+    if (!msg) {
+        logger.add(LogType.WS, 'GET：收到非对象消息', undefined, true)
+        return
     }
 
     // 2) 決定 name/key
-    const name = echo ? echo.split('_')[0] : msg.post_type === 'notice' ? msg.sub_type ?? msg.notice_type : msg.post_type;
+    const postType = stringField(msg, 'post_type')
+    const name = echo?.split('_')[0] ?? (postType === 'notice'
+        ? stringField(msg, 'sub_type') ?? stringField(msg, 'notice_type')
+        : postType)
+    if (!name) {
+        logger.error(null, '跳转事件处理失败：消息缺少事件类型')
+        return
+    }
 
     // 3) 安全調用 handler
     try {
@@ -339,8 +360,10 @@ const noticeFunctions = {
     /**
      * 心跳包
      */
-    meta_event: (_: string, msg: { [key: string]: any }) => {
+    meta_event: (_: string, msg: MessagePayload) => {
         const connectionStore = useConnectionStore()
+        const time = Number(msg.time)
+        if (!Number.isFinite(time)) return
         if (firstHeartbeatTime == -1) {
             firstHeartbeatTime = 0
             connectionStore.heartbeatTime = 0
@@ -348,8 +371,8 @@ const noticeFunctions = {
             return
         }
         if (firstHeartbeatTime == 0) {
-            firstHeartbeatTime = msg.time
-            connectionStore.lastHeartbeatTime = msg.time
+            firstHeartbeatTime = time
+            connectionStore.lastHeartbeatTime = time
             clearMetaEventWatchdog()
             return
         }
@@ -361,7 +384,7 @@ const noticeFunctions = {
         if (heartbeatTime != -1) {
             connectionStore.heartbeatTime = heartbeatTime
             connectionStore.oldHeartbeatTime = connectionStore.lastHeartbeatTime
-            connectionStore.lastHeartbeatTime = msg.time
+            connectionStore.lastHeartbeatTime = time
             refreshMetaEventWatchdog(heartbeatTime)
         }
     },
@@ -375,7 +398,7 @@ const noticeFunctions = {
     /**
      * 请求
      */
-    request: (_: string, msg: { [key: string]: any }) => {
+    request: (_: string, msg: MessagePayload) => {
         const contactStore = useContactStore()
         if (contactStore.systemNoticesList) {
             contactStore.systemNoticesList.push(msg)
@@ -387,16 +410,16 @@ const noticeFunctions = {
     /**
      * 好友变动
      */
-    friend: (_: string, msg: { [key: string]: any }) => {
+    friend: (_: string, msg: MessagePayload) => {
         // 重新加载联系人列表
         reloadUsers()
-        switch (msg.sub_type) {
+        switch (stringField(msg, 'sub_type')) {
             case 'increase': {
                 // 添加系统通知
                 new PopInfo().add(
                     PopType.INFO,
                     app.config.globalProperties.$t('添加好友 {name} 成功！', {
-                        name: msg.nickname,
+                        name: stringField(msg, 'nickname'),
                     }),
                 )
                 break
@@ -1497,15 +1520,16 @@ const msgFunctions = {
     ) => void
 }
 
-const handlers: Record<string, (payload: any, metaArgs?: string[]) => void> = {
-    ...(Object.entries(msgFunctions).reduce((acc, [key, fn]) => ({
-        ...acc,
-        [key]: (payload: any, metaArgs?: string[]) => fn(key, payload, metaArgs)
-    }), {})),
-    ...(Object.entries(noticeFunctions).reduce((acc, [key, fn]) => ({
-        ...acc,
-        [key]: (payload: any) => fn(key, payload)
-    }), {}))
+type MessageHandler = (payload: MessagePayload, metaArgs?: string[]) => void
+const handlers: Record<string, MessageHandler> = {
+    ...(Object.entries(msgFunctions).reduce<Record<string, MessageHandler>>((acc, [key, fn]) => {
+        acc[key] = (payload, metaArgs) => fn(key, payload, metaArgs)
+        return acc
+    }, {})),
+    ...(Object.entries(noticeFunctions).reduce<Record<string, MessageHandler>>((acc, [key, fn]) => {
+        acc[key] = (payload) => fn(key, payload)
+        return acc
+    }, {}))
 };
 
 // ==========================================
