@@ -56,9 +56,9 @@ export function getMsgData(
                     replaceJPValue(typeof map == 'string' ? map : map.source),
                 )
                 if (back && typeof map != 'string' && map.list != undefined) {
-                    const backList = [] as any[]
+                    const backList: JsonRecord[] = []
                     back.forEach((item) => {
-                        const itemObj = {} as any
+                        const itemObj: JsonRecord = {}
                         Object.keys(map.list).forEach((key: string) => {
                             if (map.list[key] && map.list[key] != '') {
                                 if (map.list[key].startsWith('/'))
@@ -78,7 +78,8 @@ export function getMsgData(
                                     )
                                     if (regexKey != null) {
                                         const regex = new RegExp(regexKey)
-                                        const match = itemObj[key].match(regex)
+                                        const rawValue = itemObj[key]
+                                        const match = typeof rawValue === 'string' ? rawValue.match(regex) : null
                                         if (match != null) {
                                             itemObj[key] = match[0]
                                         }
@@ -97,7 +98,7 @@ export function getMsgData(
                 )
             }
         } else {
-            const data = {} as { [key: string]: any }
+            const data: JsonRecord = {}
             Object.keys(map).forEach((key) => {
                 if (
                     map[key] != undefined &&
@@ -140,7 +141,7 @@ export function buildMsgList(msgList: { [key: string]: any }): {
             keys.push(item.expression.value)
         }
     })
-    const result = {} as any
+    const result: JsonRecord = {}
     let acc = result
     keys.forEach((key, index) => {
         if (index === keys.length - 1) {
@@ -148,7 +149,7 @@ export function buildMsgList(msgList: { [key: string]: any }): {
         } else {
             acc[key] = {}
         }
-        acc = acc[key]
+        acc = (acc[key] as JsonRecord | undefined) ?? {}
     })
     return result
 }
