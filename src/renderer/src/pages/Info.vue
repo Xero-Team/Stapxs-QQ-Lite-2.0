@@ -345,7 +345,7 @@ function removeUser(nickname: string, group_id: number, user_id: number) {
     uiStore.popBoxList.push(popInfo)
 }
 
-function copyText(text: any) {
+function copyText(text: unknown) {
     const popInfo = new PopInfo()
     app.config.globalProperties.$copyText(String(text)).then(
         () => {
