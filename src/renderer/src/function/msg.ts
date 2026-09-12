@@ -247,6 +247,7 @@ function buildPinyinForContacts(
 
     for (let index = startIndex; index < endIndex; index++) {
         const item = list[index]
+        if (!item) continue
         item.py_name = getPinyin(resolveContactPinyinName(item))
         item.py_start = item.py_name.main.at(0)?.substring(0, 1).toUpperCase() ?? ' '
     }
@@ -471,7 +472,7 @@ const noticeFunctions = {
         // 寻找消息
         chatStore.messageList.forEach((item, index) => {
             if (item.message_id === msgId) {
-                chatStore.messageList[index].emoji_like = emojiList
+                item.emoji_like = emojiList
             }
         })
     },
@@ -578,14 +579,15 @@ const noticeFunctions = {
                         str += stringField(itemPayload, 'txt') ?? ''
                         break
                     case 'qq': {
-                        str += userInfo[getQQTimes].txt
+                        str += userInfo[getQQTimes]?.txt ?? ''
+                        if (userInfo[getQQTimes]?.isMe) msg.pokeMe = true
                         getQQTimes++
                     }
                 }
             })
             // 插入系统消息
             msg.str = str
-            msg.pokeMe = userInfo[1].isMe
+            msg.pokeMe = userInfo[1]?.isMe ?? false
             chatStore.messageList.push(msg as MsgItemElem)
         }
     },
@@ -688,7 +690,7 @@ const msgFunctions = {
                 authStore.botInfo.app_name != data.app_name && !login.status,
             )
 
-            authStore.botInfo = data
+            Object.assign(authStore.botInfo, data)
             if (Option.get('open_ga_bot') !== false) {
                 const appVersion = data.app_version ? ',' + data.app_version : ''
                 const appInfo = data.app_name ? data.app_name + appVersion : '（未知）'
@@ -1051,7 +1053,7 @@ const msgFunctions = {
             completeUploadTask(taskId)
         }
         const newEchoList = ['sendMsgBack', ...echoList.slice(4)]
-        msgFunctions['sendMsgBack'](_, msg, newEchoList)
+        msgFunctions.sendMsgBack(_, msg, newEchoList)
     },
     /**
      * 获取收藏表情
@@ -1195,8 +1197,8 @@ const msgFunctions = {
      * 下载文件（聊天中）
      */
     downloadFile: (_: string, msg: MessagePayload, echoList: string[]) => {
-        const data = getMsgData('file_download', msg, msgPath.file_download)[0]
-        const url = data.file_url
+        const data = getMsgData('file_download', msg, msgPath.file_download)[0] ?? {}
+        const url = typeof data.file_url === 'string' ? data.file_url : ''
 
         const fileName = decodeURIComponent(atob(echoList[2]))
         const fileSize = data.file_size || 0
@@ -1214,8 +1216,8 @@ const msgFunctions = {
      * 下载文件（群文件）
      */
     downloadGroupFile: (_: string, msg: MessagePayload, echoList: string[]) => {
-        const data = getMsgData('file_download', msg, msgPath.file_download)[0]
-        const url = data.file_url
+        const data = getMsgData('file_download', msg, msgPath.file_download)[0] ?? {}
+        const url = typeof data.file_url === 'string' ? data.file_url : ''
 
         const fileName = decodeURIComponent(atob(echoList[2]))
         const fileSize = data.file_size || 0
@@ -1316,6 +1318,7 @@ const msgFunctions = {
                 let fakeMsg: MsgItemElem | null = null
                 for (let i = chatStore.messageList.length - 1; i > 0; i--) {
                     const msg = chatStore.messageList[i]
+                    if (!msg) continue
                     if (msg.fake_msg != undefined && info.sender == authStore.loginInfo.uin) {
                         fakeMsg = msg
                         break
@@ -1332,9 +1335,11 @@ const msgFunctions = {
                     getMessageList(trueMsg).then((trueMsg) => {
                         if (trueMsg?.length == 1) {
                             // 使用消息对象引用直接更新，避免索引问题
-                            fakeMsg.message = trueMsg[0].message
-                            fakeMsg.raw_message = trueMsg[0].raw_message
-                            fakeMsg.time = trueMsg[0].time
+                            const replacement = trueMsg[0]
+                            if (!replacement) return
+                            fakeMsg.message = replacement.message
+                            fakeMsg.raw_message = replacement.raw_message
+                            fakeMsg.time = replacement.time
                             fakeMsg.fake_msg = undefined
                             fakeMsg.revoke = false
                         }
@@ -1448,10 +1453,10 @@ const msgFunctions = {
         // 从消息列表中找到这条消息
         chatStore.messageList.forEach((item, index) => {
             if (item.message_id === msgId) {
-                if (chatStore.messageList[index].emoji_like) {
+                if (item.emoji_like) {
                     // 寻找有没有 emoji_id 相同的
                     let hasAdd = false
-                    chatStore.messageList[index].emoji_like.forEach(
+                    item.emoji_like.forEach(
                         (item: { emoji_id: number; count: number }) => {
                             if (item.emoji_id == id) {
                                 item.count++
@@ -1460,13 +1465,13 @@ const msgFunctions = {
                         },
                     )
                     if (!hasAdd) {
-                        chatStore.messageList[index].emoji_like.push({
+                        item.emoji_like.push({
                             emoji_id: id,
                             count: 1,
                         })
                     }
                 } else {
-                    chatStore.messageList[index].emoji_like = [
+                    item.emoji_like = [
                         { emoji_id: id, count: 1 },
                     ]
                 }
@@ -1489,9 +1494,8 @@ const msgFunctions = {
         const response = asMessagePayload(msg.data)
         const cookies = typeof response?.cookies === 'string' ? response.cookies : ''
         cookies.split('; ').forEach((item: string) => {
-            const key = item.split('=')[0]
-            const value = item.split('=')[1]
-            cookieObject[key] = value
+            const [key, value] = item.split('=')
+            if (key && value !== undefined) cookieObject[key] = value
         })
         // 计算 bkn
         const skey = cookieObject['skey'] || ''
@@ -1646,7 +1650,7 @@ function saveUser(msg: MessagePayload, type: string) {
             for (const key in groupNames) {
                 groupNamesList.push({
                     class_id: Number(key),
-                    class_name: groupNames[key],
+                    class_name: groupNames[key] ?? '',
                 })
             }
             saveClassInfo(groupNamesList)
@@ -1731,7 +1735,7 @@ function saveClassInfo(
     list: { class_id: number; class_name: string; sort_id?: number }[],
 ) {
     const settingsStore = useSettingsStore()
-    if (list[0].sort_id != undefined) {
+    if (list[0]?.sort_id != undefined) {
         // 如果有 sort_id，按 sort_id 排序，从小到大
         list.sort((a, b) => {
             if (a.sort_id && b.sort_id) return a.sort_id - b.sort_id
@@ -1760,6 +1764,7 @@ async function saveMsg(msg: MessagePayload, append = undefined as undefined | st
 
         // 检查消息是否是当前聊天的消息
         const firstMsg = list[0]
+        if (!firstMsg) return
         const infoList = getMsgData(
             'message_info',
             firstMsg,
@@ -2155,6 +2160,7 @@ async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
     const filter: MessagePayload[] = []
     for (let id = 0; id < segments.length; id++) {
         const seg = segments[id]
+        if (!seg) continue
         filter.push(seg)
         if (seg.type === 'mface') id++
     }
@@ -2235,6 +2241,7 @@ function newMsg(_: string, rawData: MessagePayload) {
         let fakeMsg: MsgItemElem | null = null
         for (let i = chatStore.messageList.length - 1; i > 0; i--) {
             const msg = chatStore.messageList[i]
+            if (!msg) continue
             if (msg.fake_msg != undefined && sender == loginId) {
                 fakeMsg = msg
                 break
@@ -2251,9 +2258,11 @@ function newMsg(_: string, rawData: MessagePayload) {
             getMessageList(trueMsg).then((trueMsg) => {
                 if (trueMsg?.length == 1) {
                     // 使用消息对象引用直接更新，避免索引问题
-                    fakeMsg.message = trueMsg[0].message
-                    fakeMsg.raw_message = trueMsg[0].raw_message
-                    fakeMsg.time = trueMsg[0].time
+                    const replacement = trueMsg[0]
+                    if (!replacement) return
+                    fakeMsg.message = replacement.message
+                    fakeMsg.raw_message = replacement.raw_message
+                    fakeMsg.time = replacement.time
                     fakeMsg.fake_msg = undefined
                     fakeMsg.revoke = false
                 }
