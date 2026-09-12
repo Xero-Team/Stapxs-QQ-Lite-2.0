@@ -25,7 +25,7 @@
 import * as z from 'zod'
 
 import { ref } from 'vue'
-import { addMusic } from '@renderer/components/MusicPlayer.vue'
+import { addMusic, type MusicInfo } from '@renderer/components/MusicPlayer.vue'
 import { Logger } from '@renderer/function/base'
 import { openLink } from '@renderer/function/utils/appUtil'
 import { getForegroundToneGridFromImageUrl } from '@renderer/function/utils/systemUtil'
@@ -60,15 +60,22 @@ const music = z
         icon: o.meta.music.tagIcon,
         name: o.meta.music.tag,
     }))
-const json = JSON.parse(jsonData)
+let json: unknown
+try {
+    json = JSON.parse(jsonData) as unknown
+} catch {
+    json = null
+}
 const parsedData = music.safeParse(json)
 const success = parsedData.success
-const parsedContent = parsedData.data!
+const parsedContent = parsedData.success ? parsedData.data : {
+    title: '', desc: '', jumpUrl: '', musicUrl: '', img: '', icon: '', name: '',
+}
 if (!success) {
     new Logger().error(parsedData.error, 'Card Parse Error')
 }
 
-const getType = () => {
+const getType = (): { type: MusicInfo['type']; data?: string } => {
     switch(parsedContent.name) {
         case '网易云音乐': return {
             type: 'music163',
@@ -82,9 +89,13 @@ const getType = () => {
 }
 
 const lightColor = ref(true)
- getForegroundToneGridFromImageUrl(backend.proxyUrl(parsedContent.img), 0.4).then(tone => {
-    lightColor.value = tone[1][1] === 'light'
- })
+if (success) {
+    void getForegroundToneGridFromImageUrl(backend.proxyUrl(parsedContent.img), 0.4)
+        .then((tone) => {
+            lightColor.value = tone[1][1] === 'light'
+        })
+        .catch(() => undefined)
+}
 
 const sendPlay = () => {
     const typeInfo = getType()
@@ -92,7 +103,7 @@ const sendPlay = () => {
         title: parsedContent.title,
         author: [parsedContent.desc],
         url: parsedContent.musicUrl,
-        type: typeInfo.type as any,
+        type: typeInfo.type,
         data: typeInfo.data,
         cover: parsedContent.img,
     }, 'current', true)
