@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
     import { ref, onMounted } from 'vue'
     import { vAutoFocus } from '@renderer/function/utils/appUtil'
 
@@ -232,8 +233,7 @@
             type: data.user_id ? 'user' : 'group',
             id: data.user_id ? data.user_id : data.group_id,
             name: getShowName(data),
-            avatar: data.user_id? 'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.user_id: 'https://p.qlogo.cn/gh/' +
-                  data.group_id + '/' + data.group_id + '/0',
+            avatar: data.user_id? avatarUrl(data.user_id): avatarUrl(data.group_id, 'group'),
             jump: sender.dataset.jump,
         } as BaseChatInfoElem
         // 更新聊天框

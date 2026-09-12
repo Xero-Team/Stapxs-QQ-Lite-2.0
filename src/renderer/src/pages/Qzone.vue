@@ -149,7 +149,7 @@
                     </template>
                 </div>
                 <div class="qzone-feed-reply">
-                    <img :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${authStore.loginInfo.uin}`">
+                    <img :src="avatarUrl(authStore.loginInfo.uin)">
                     <label :for="`qzone-reply-input-${item.id}`" class="sr-only">{{ $t('评论输入框') }}</label>
                     <input :id="`qzone-reply-input-${item.id}`"
                         v-model="getReplyDraft(item.id).content"
@@ -183,6 +183,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
     import { computed, inject, markRaw, onMounted, reactive, ref } from 'vue'
     import QzonePermissionPan from '@renderer/components/QzonePermissionPan.vue'
     import { PopInfo, PopType } from '@renderer/function/base'
@@ -662,7 +663,7 @@
             nickname: feed.nickname,
             time: feed.time,
             text: extractTextFromHtml(feed.html ?? ''),
-            avatar: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${feed.uin}`,
+            avatar: avatarUrl(feed.uin),
             images: extractImagesFromHtml(feed.html ?? ''),
             timeText: formatFeedTime(Number(feed.time ?? 0)),
             footInfo: getFootInfo(feed.html ?? ''),

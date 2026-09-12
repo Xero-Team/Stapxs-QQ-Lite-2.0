@@ -35,7 +35,7 @@
         </div>
         <span v-show="needShow && !showAll">{{ $t('点击展开') }}</span>
         <div class="info">
-            <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.sender">
+            <img :src="avatarUrl(data.sender)">
             <a>{{
                 chatStore.chatInfo.info.group_members.filter((item) => {
                     return Number(item.user_id) === Number(data.sender)
@@ -53,6 +53,7 @@
 </template>
 
 <script lang="ts" setup>
+import { avatarUrl } from '@renderer/function/utils/avatar'
     import xss from 'xss'
     import { ref, onMounted, nextTick, inject } from 'vue'
     import { openLink } from '@renderer/function/utils/appUtil'

@@ -15,7 +15,7 @@
                 <font-awesome-icon :icon="['fas', 'globe']" />
                 <div>
                     <label for="opt-function-enable-external-services">{{ $t('启用外部服务') }}</label>
-                    <span>{{ $t('允许更新检查和远程公告；默认关闭，OneBot 连接不受影响') }}</span>
+                    <span>{{ $t('允许远程头像、地图、链接预览和更新检查；默认关闭，OneBot 连接不受影响') }}</span>
                 </div>
                 <label class="ss-switch">
                     <input id="opt-function-enable-external-services" v-model="settingsStore.sysConfig.enable_external_services"

@@ -17,8 +17,8 @@
         <div />
         <img loading="lazy"
             :title="getShowName(session.group_name || session.nickname, session.remark)"
-            :src="session.user_id ? 'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + session.user_id :
-                'https://p.qlogo.cn/gh/' + session.group_id + '/' + session.group_id + '/0'">
+            :src="session.user_id ? avatarUrl(session.user_id) :
+                avatarUrl(session.group_id, 'group')">
         <div>
             <p>
                 {{ getShowName(session.group_name || session.nickname, session.remark) }}
@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import { UserGroupElem, UserFriendElem } from '@renderer/function/elements/information'
 import { getShowName } from '@renderer/function/utils/msgUtil'
 

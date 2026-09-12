@@ -128,7 +128,7 @@
                                                 :class="{ 'selected': tags.selectedHistoryIndex === index }"
                                                 @click="selectHistoryItem(index)">
                                                 <div v-if="item.uin" class="history-item-avatar">
-                                                    <img :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${item.uin}`" :alt="item.nickname || '未知用户'">
+                                                    <img :src="avatarUrl(item.uin)" :alt="item.nickname || '未知用户'">
                                                 </div>
                                                 <div class="history-item-content">
                                                     <span class="history-item-name">
@@ -306,6 +306,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import Spacing from 'spacingjs/src/spacing'
 import Option from '@renderer/function/option'
 import * as App from './function/utils/appUtil'
@@ -871,8 +872,6 @@ onMounted(() => {
         setLoginWaveTimer(waveAnimation(
             document.getElementById('login-wave'),
         ))
-        // AMAP：初始化高德地图
-        window._AMapSecurityConfig = import.meta.env.VITE_APP_AMAP_SECRET
         // =============================================================
         // 初始化功能
         App.createMenu() // Electron：创建菜单
@@ -1067,7 +1066,7 @@ onMounted(() => {
                     list.push({
                         id: item.user_id ? item.user_id : item.group_id,
                         name: item.group_name ? item.group_name : item.remark === item.nickname ? item.nickname : item.remark + '（' + item.nickname + '）',
-                        image: item.user_id ? 'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + item.user_id : 'https://p.qlogo.cn/gh/' + item.group_id + '/' + item.group_id + '/0'
+                        image: item.user_id ? avatarUrl(item.user_id) : avatarUrl(item.group_id, 'group')
                     })
                 })
                 backend.call(undefined, 'sys:flushOnMessage', false, list)

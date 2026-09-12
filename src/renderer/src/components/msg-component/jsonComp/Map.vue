@@ -1,7 +1,7 @@
 <template>
-    <div v-if="success" v-once class="msg-json">
+    <div v-if="success" class="msg-json">
         <p>{{ parsedContent.title }}</p>
-        <ElAmap :center="[parsedContent.lng, parsedContent.lat]" :zoom="15">
+        <ElAmap v-if="mapEnabled" :center="[parsedContent.lng, parsedContent.lat]" :zoom="15">
             <ElAmapMarker :position="[parsedContent.lng, parsedContent.lat]" />
         </ElAmap>
         <div class="bottom-bar">
@@ -16,7 +16,9 @@
 
 <script setup lang="ts">
 import { Logger } from '@renderer/function/base'
-import { ElAmap, ElAmapMarker } from '@vuemap/vue-amap'
+import { ElAmap, ElAmapMarker, initAMapApiLoader } from '@vuemap/vue-amap'
+import { computed, watch } from 'vue'
+import { useSettingsStore } from '@renderer/state/settings'
 import * as z from 'zod'
 
 const { data: jsonData, id } = defineProps<{
@@ -46,6 +48,18 @@ const json = JSON.parse(jsonData)
 const parsedData = map.safeParse(json)
 const success = parsedData.success
 const parsedContent = parsedData.data!
+const settingsStore = useSettingsStore()
+const mapEnabled = computed(() => success
+    && settingsStore.sysConfig.enable_external_services === true
+    && Boolean(import.meta.env.VITE_APP_AMAP_KEY?.trim()))
+watch(mapEnabled, (enabled) => {
+    if (enabled) {
+        initAMapApiLoader({
+            key: import.meta.env.VITE_APP_AMAP_KEY,
+            securityJsCode: import.meta.env.VITE_APP_AMAP_SECRET,
+        })
+    }
+}, { immediate: true })
 if (!success) {
     new Logger().error(parsedData.error, 'Card Parse Error')
 }

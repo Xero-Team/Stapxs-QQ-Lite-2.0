@@ -177,7 +177,7 @@
                                 <div v-for="(item, index) in chat.info.jin_info.list"
                                     :key="'jin-' + index">
                                     <div>
-                                        <img :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${item.sender_uin}`">
+                                        <img :src="avatarUrl(item.sender_uin)">
                                         <div>
                                             <a>{{ item.sender_nick }}</a>
                                             <span>{{ item.sender_time ? Intl.DateTimeFormat(
@@ -312,7 +312,7 @@
                         :key="'atFind-' + item.user_id"
                         :class="{ selected: index === atSelectedIndex }"
                         @click="choiceAt(item.user_id)">
-                        <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + item.user_id">
+                        <img :src="avatarUrl(item.user_id)">
                         <span>{{
                             item.card != '' && item.card != null ? item.card : item.nickname
                         }}</span>
@@ -531,8 +531,8 @@
                             <img loading="lazy"
                                 :title="getShowName(data.group_name || data.nickname, data.remark)"
                                 :src="data.user_id ?
-                                    'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.user_id :
-                                    'https://p.qlogo.cn/gh/' + data.group_id + '/' + data.group_id + '/0'">
+                                    avatarUrl(data.user_id) :
+                                    avatarUrl(data.group_id, 'group')">
                             <div>
                                 <p>
                                     {{ data.group_name ?
@@ -555,6 +555,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import app from '@renderer/main'
 import { i18n } from '@renderer/main'
 import SendUtil from '@renderer/function/sender'

@@ -11,7 +11,7 @@
     <div class="opt-page">
         <template v-if="Object.keys(authStore.loginInfo).length > 0">
             <div class="ss-card account-info">
-                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + authStore.loginInfo.uin">
+                <img :src="avatarUrl(authStore.loginInfo.uin)">
                 <div>
                     <div>
                         <span>{{ authStore.loginInfo.nickname }}</span>
@@ -116,6 +116,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import { remove } from '@renderer/function/option'
 import { Connector } from '@renderer/function/connect'
 import { useConnectionStore } from '@renderer/state/connection'

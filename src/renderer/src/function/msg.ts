@@ -11,6 +11,7 @@
  *      3.0 - 优化更优雅的代码结构
  * @Description: 此模块用于拆分和保存/处理 bot 返回的各类信息，整个运行时数据也保存在这儿。
  */
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import qed from '@renderer/assets/qed.txt?raw'
 
 import app from '@renderer/main'
@@ -2387,7 +2388,7 @@ function newMsg(_: string, data: any) {
                         data.message_type === 'group' ? data.sender.nickname + ':' + raw : raw,
                     tag: `${sessionId}/${data.message_id}`,
                     icon:
-                        data.message_type === 'group' ? `https://p.qlogo.cn/gh/${id}/${id}/0` : `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`,
+                        data.message_type === 'group' ? avatarUrl(id, 'group') : avatarUrl(id),
                     image: undefined as any,
                     type: data.group_id ? 'group' : 'user',
                     is_important: isImportant,

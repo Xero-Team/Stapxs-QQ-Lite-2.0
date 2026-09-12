@@ -106,7 +106,7 @@
                         <img
                             name="avatar"
                             :src="
-                                'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + danmu.id
+                                avatarUrl(danmu.id)
                             ">
                         <a>{{ danmus.length - index + 1 }}</a>
                         <span>{{ danmu.text }}</span>
@@ -332,6 +332,7 @@
 </template>
 
 <script lang="ts" setup>
+import { avatarUrl } from '@renderer/function/utils/avatar'
     import vueDanmaku from 'vue3-danmaku'
 
     import { Connector } from '@renderer/function/connect'

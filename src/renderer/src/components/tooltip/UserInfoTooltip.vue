@@ -14,7 +14,7 @@
         <!-- 已退群 -->
         <template v-if="typeof userInfo === 'number'">
             <div>
-                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + userInfo">
+                <img :src="avatarUrl(userInfo)">
                 <div>
                     <span name="id">{{ userInfo }}</span>
                     <div>
@@ -26,7 +26,7 @@
         <!-- 群成员 -->
         <template v-else>
             <div>
-                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + userInfo.user_id">
+                <img :src="avatarUrl(userInfo.user_id)">
                 <div>
                     <span name="id">{{ userInfo.user_id }}</span>
                     <div>
@@ -77,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import { getTrueLang } from '@renderer/function/utils/systemUtil';
 
 type IUser = any

@@ -186,6 +186,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
     import { ref, onMounted, markRaw } from 'vue'
     import { i18n } from '@renderer/main'
     import FriendBody from '@renderer/components/FriendBody.vue'
@@ -266,9 +267,7 @@
                 type: data.user_id ? 'user' : 'group',
                 id: id,
                 name: getShowName(data.group_name || data.nickname, data.remark),
-                avatar: data.user_id? 'https://q1.qlogo.cn/g?b=qq&s=0&nk=' +
-                      data.user_id: 'https://p.qlogo.cn/gh/' +
-                      data.group_id + '/' + data.group_id + '/0',
+                avatar: data.user_id? avatarUrl(data.user_id): avatarUrl(data.group_id, 'group'),
             }
             if (props.chat.id != back.id) {
                 // 更新聊天框

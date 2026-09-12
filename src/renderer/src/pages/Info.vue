@@ -109,7 +109,7 @@
                         key-field="user_id">
                         <div class="member-item edit">
                             <img alt="nk" loading="lazy"
-                                :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${item.user_id}`">
+                                :src="avatarUrl(item.user_id)">
                             <div>
                                 <a @click="startChat(item)">{{
                                     item.card ? item.card : item.nickname
@@ -159,7 +159,7 @@
             </BcTab>
             <div :class="'ss-card user-config' + (Object.keys(showUserConfig).length > 0 ? ' show' : '')">
                 <div>
-                    <img alt="nk" :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${showUserConfig.user_id}`">
+                    <img alt="nk" :src="avatarUrl(showUserConfig.user_id)">
                     <div>
                         <a>{{ showUserConfig.card != '' ? showUserConfig.card : showUserConfig.nickname }}</a>
                         <span>{{ showUserConfig.user_id }}</span>
@@ -229,6 +229,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import app, { i18n } from '@renderer/main'
 import BulletinBody from '@renderer/components/BulletinBody.vue'
 import FileBody from '@renderer/components/FileBody.vue'
