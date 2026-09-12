@@ -2530,7 +2530,7 @@ function copyMsgs() {
 
 async function recallMsgs() {
     const msgList = list.filter((item: any) => multipleSelectList.value.includes(item.message_id))
-    const tasks: Promise<true | undefined>[] = []
+    const tasks: Promise<unknown>[] = []
     for (const msgItem of msgList) {
         const msgId = msgItem.message_id
         tasks.push(Connector.callApi('delete_msg', { message_id: msgId }))

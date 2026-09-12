@@ -28,6 +28,7 @@ import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/one
 const logger = new Logger()
 const popInfo = new PopInfo()
 type JsonRecord = Record<string, unknown>
+type ApiResult = ReturnType<typeof getMsgData>
 
 function asJsonRecord(value: unknown): JsonRecord | undefined {
     return typeof value === 'object' && value !== null ? value as JsonRecord : undefined
@@ -440,7 +441,7 @@ export class Connector {
      * @param args 参数
      * @returns undefined 表示无此API, null表示调用失败, 其余为经getMsgData过滤的返回值
      */
-    static async callApi(api: string, args: {[key: string]: any}): Promise<any|undefined|null>{
+    static async callApi(api: string, args: JsonRecord): Promise<ApiResult | undefined | null>{
         // 组建信息
         const echo = uuid()
         const authStore = useAuthStore()
@@ -486,7 +487,7 @@ export class Connector {
      */
     static send(
         name: string,
-        value: { [key: string]: any },
+        value: JsonRecord,
         echo: string = name,
     ) {
         echo = 'send_' + echo
@@ -505,7 +506,7 @@ export class Connector {
      */
     static sendSeeMod(
         name: string,
-        args: { [key: string]: any },
+        args: JsonRecord,
         echo: string = name,
     ) {
         const transport = new HttpTransport(`${import.meta.env.VITE_APP_SSE_HTTP_ADDRESS}/${name}`, {
@@ -527,7 +528,7 @@ export class Connector {
      */
     static sendRaw(
         name: string,
-        args: { [key: string]: any },
+        args: JsonRecord,
         echo: string = name,
     ) {
         const actionData: BotActionElem = {
@@ -552,12 +553,21 @@ export class Connector {
         }
     }
     static sendRawJson(str: string) {
-        const json = JSON.parse(str)
-        this.sendRaw(
-            json.action,
-            json.params,
-            json.echo,
-        )
+        let parsed: unknown
+        try {
+            parsed = JSON.parse(str) as unknown
+        } catch (error: unknown) {
+            logger.error(error instanceof Error ? error : new Error('Invalid JSON payload'), '无法发送无效 JSON')
+            return
+        }
+        const json = asJsonRecord(parsed)
+        if (!json || typeof json.action !== 'string') {
+            logger.error(null, '无法发送缺少 action 的 JSON')
+            return
+        }
+        const params = asJsonRecord(json.params) ?? {}
+        const echo = typeof json.echo === 'string' ? json.echo : undefined
+        this.sendRaw(json.action, params, echo)
     }
 }
 

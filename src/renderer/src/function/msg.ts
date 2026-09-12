@@ -2062,7 +2062,9 @@ async function msgPreprocess(msg: any): Promise<any> {
                 } else {
                     // 否则调用接口获取
                     const originData = await Connector.callApi('forward_msg', { id: forwardId })
-                    const data = await getMessageList(originData)
+                    const data = Array.isArray(originData)
+                        ? await getMessageList(originData)
+                        : undefined
                     if (data) msg.message.at(0).content = data
                 }
             } catch (e) {
