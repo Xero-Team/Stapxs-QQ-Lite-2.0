@@ -310,7 +310,6 @@ import Spacing from 'spacingjs/src/spacing'
 import Option from '@renderer/function/option'
 import * as App from './function/utils/appUtil'
 import anime from 'animejs'
-import packageInfo from '../../../package.json'
 
 import { computed, watch, onMounted, onUnmounted, shallowReactive, shallowRef, provide } from 'vue'
 import { Connector, login as loginInfo, loadConnectionHistory, loadConnectionFromHistory, deleteConnectionHistory, decodeStoredToken } from '@renderer/function/connect'
@@ -1048,7 +1047,7 @@ onMounted(() => {
                 history.pushState('ssqqweb', '', location.href)
             }
         }
-    }
+
         App.checkUpdate() // 检查更新
         App.checkOpenTimes() // 检查打开次数
         App.checkNotice() // 检查公告
@@ -1090,7 +1089,7 @@ onMounted(() => {
             document.title = title
             backend.call(undefined, 'win:setTitle', false, title)
         }
-    }
+
     // 页面关闭前
     window.onbeforeunload = () => {
         logger.system('开发者阁下—— 唔，阁下离开的太匆忙了！让我来帮开发者阁下收拾下东西吧。')
@@ -1099,8 +1098,10 @@ onMounted(() => {
             Connector.close()
         }
     }
-})
+}
 
+
+})
 onUnmounted(() => {
     // 移除全局点击事件监听器
     document.removeEventListener('click', handleClickOutside)
