@@ -101,6 +101,8 @@ async function createWindow() {
         }
     }
     win = new BrowserWindow(windowConfig)
+    // Identify the client without including account data or connection tokens.
+    win.webContents.setUserAgent(`${win.webContents.getUserAgent()} XeroQQLite/${packageInfo.version}`)
     win.once('focus', () => { if (win) win.flashFrame(false) })
     mainWindowState.manage(win)     // 窗口状态管理器
     logger.info('创建窗体完成')
