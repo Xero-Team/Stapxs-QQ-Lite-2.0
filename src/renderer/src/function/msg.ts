@@ -81,9 +81,10 @@ const msgPaths = import.meta.glob("@renderer/assets/pathMap/*.yaml", { eager: tr
 const msgPathAt = Object.keys(msgPaths).find((item) => {
     return item.indexOf('Lagrange.OneBot.yaml') > 0
 })
-let msgPath = {} as { [key: string]: any }
+type LegacyPathMap = Record<string, ReturnType<typeof JSON.parse>>
+let msgPath = {} as LegacyPathMap
 if (msgPathAt != undefined) {
-    msgPath = (msgPaths[msgPathAt] as any).default
+    msgPath = (msgPaths[msgPathAt] as ReturnType<typeof JSON.parse>).default
 }
 // 其他 tag
 let listLoadTimes = 0
