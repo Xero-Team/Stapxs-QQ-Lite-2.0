@@ -41,3 +41,27 @@ export async function clearLocalData(namespace?: string): Promise<void> {
     }
     await localStoreDb.records.where('namespace').equals(namespace).delete()
 }
+
+/** Copy legacy localStorage values once; source data is retained for rollback. */
+export async function migrateLegacyLocalStorage(namespace = 'legacy-localstorage'): Promise<number> {
+    if (typeof globalThis.localStorage === 'undefined') return 0
+    const marker = `${namespace}:migration-v1`
+    if (await getLocalValue<boolean>(namespace, marker)) return 0
+    let migrated = 0
+    for (let index = 0; index < globalThis.localStorage.length; index++) {
+        const key = globalThis.localStorage.key(index)
+        if (!key || key === marker) continue
+        const raw = globalThis.localStorage.getItem(key)
+        if (raw === null) continue
+        let value: unknown = raw
+        try { value = JSON.parse(raw) as unknown } catch { /* retain string values */ }
+        await setLocalValue(namespace, key, value)
+        migrated++
+    }
+    await setLocalValue(namespace, marker, true)
+    return migrated
+}
+
+export async function exportLocalDataJson(): Promise<string> {
+    return JSON.stringify(await exportLocalData())
+}
