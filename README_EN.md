@@ -5,7 +5,7 @@
 ---
 
 <p align="center">
-  <a href="https://blog.stapxs.cn" target="blank">
+  <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0" target="blank">
     <img src="src/renderer/public/img/icons/icon.svg" alt="Logo" width="156" height="156">
   </a>
   <h2 align="center" style="font-weight: 600">Xero QQ Lite</h2>

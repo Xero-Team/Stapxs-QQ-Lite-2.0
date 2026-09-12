@@ -12,7 +12,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>zh</string>
     <key>CFBundleDisplayName</key>
-    <string>Stapxs QQ Lite</string>
+    <string>Xero QQ Lite</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -35,9 +35,9 @@
       <true/>
     </dict>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>Stapxs QQ Lite 需要访问局域网以自动发现可用的服务</string>
+    <string>Xero QQ Lite 需要访问局域网以自动发现可用的服务</string>
     <key>NSRemoteNotificationType</key>
-    <string>Stapxs QQ Lite 需要能的同意才能推送新的通知消息</string>
+    <string>Xero QQ Lite 需要能的同意才能推送新的通知消息</string>
     <key>UIBackgroundModes</key>
     <array>
       <string>fetch</string>

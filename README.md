@@ -5,7 +5,7 @@
 ---
 
 <p align="center">
-  <a href="https://blog.stapxs.cn" target="blank">
+  <a href="https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0" target="blank">
     <img src="src/renderer/public/img/icons/icon.svg" alt="Logo" width="156" height="156">
   </a>
   <h2 align="center" style="font-weight: 600">Xero QQ Lite</h2>
@@ -280,9 +280,9 @@ Xero QQ Lite 的 Tauri 版本使用了来自 [DeltaChat](https://github.com/delt
 
 ## ⭐️ Star History
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&theme=dark&legend=top-left" />
-  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
-  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&theme=dark&legend=top-left" />
+  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
+  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=XeroTeam/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
 </picture>
 
 

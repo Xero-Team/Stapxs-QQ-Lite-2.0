@@ -67,7 +67,7 @@ pub fn run() {
             println!(" _____ _____ _____ _____ __ __ ");
             println!("|   __|_   _|  _  |  _  |  |  |");
             println!("|__   | | | |     |   __|-   -|");
-            println!("|_____| |_| |__|__|__|  |__|__| CopyRight © Stapx Steve");
+            println!("|_____| |_| |__|__|__|  |__|__| CopyRight © Xero-Team");
             println!("=======================================================");
             println!("日志等级:{}", log_level);
 
@@ -167,7 +167,7 @@ pub fn run() {
             info!("初始化通知管理器完成");
 
             // 创建主窗体 ============
-            info!("欢迎使用 Stapxs QQ Lite, 当前版本: {}", env!("CARGO_PKG_VERSION"));
+            info!("欢迎使用 Xero QQ Lite, 当前版本: {}", env!("CARGO_PKG_VERSION"));
             info!("启动平台架构：{}", std::env::consts::OS);
             info!("正在创建窗体 ……");
             let window = create_window(app)?;
@@ -269,7 +269,7 @@ pub fn run() {
 /// 创建主窗体配置
 fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
     let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/".into()))
-        .title("Stapxs QQ Lite")
+        .title("Xero QQ Lite")
         .inner_size(850.0, 530.0)
         .transparent(true);
     let store =

@@ -5,7 +5,7 @@ export type PinYinData = {
 
 /* eslint-disable no-console */
 
-const PINYIN_SCRIPT_SRC = 'https://lib.stapxs.cn/modules/pinyin.min.js'
+const PINYIN_SCRIPT_SRC = import.meta.env.VITE_APP_PINYIN_URL ?? ''
 
 let pinyinLoadPromise: Promise<boolean> | null = null
 
@@ -44,6 +44,7 @@ export function isPinyinReady() {
 
 export function ensurePinyinLoaded(): Promise<boolean> {
     if (hasPinyinLib()) return Promise.resolve(true)
+    if (!PINYIN_SCRIPT_SRC) return Promise.resolve(false)
     if (typeof window === 'undefined' || typeof document === 'undefined') {
         return Promise.resolve(false)
     }

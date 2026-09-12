@@ -1053,7 +1053,8 @@ export function checkOpenTimes() {
 export function checkNotice() {
     if (option.get('enable_external_services') !== true) return
     const uiStore = useUIStore()
-    let url = 'https://lib.stapxs.cn/download/stapxs-qq-lite/notice-config.json'
+    let url = import.meta.env.VITE_APP_NOTICE_URL ?? ''
+    if (!url && !import.meta.env.DEV) return
     if (import.meta.env.DEV) {
         url = 'notice_local.json'
     }

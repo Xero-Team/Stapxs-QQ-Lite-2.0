@@ -196,7 +196,7 @@ mod linux_secret {
     use std::collections::HashMap;
 
     /// 条目显示标签
-    const LABEL: &str = "Stapxs QQ Lite 数据库密钥";
+    const LABEL: &str = "Xero QQ Lite 数据库密钥";
     /// 搜索属性：应用标识
     const ATTR_APP: &str = "application";
     const ATTR_APP_VAL: &str = "cn.stapxs.qqweb";
