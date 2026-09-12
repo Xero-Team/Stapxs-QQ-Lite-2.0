@@ -275,7 +275,7 @@ async function onRobotClick() {
     }
 }
 
-function getMessageDetail(chatMessage: any) {
+function getMessageDetail(chatMessage: MsgItemElem) {
     return JSON.stringify({
         id: chatMessage.messageId,
         time: getViewTime(chatMessage.time),
@@ -284,12 +284,12 @@ function getMessageDetail(chatMessage: any) {
             nickname: chatMessage.sender.nickname,
         },
         content: getMsgRawTxt(chatMessage),
-        replyMessages: chatMessage.message?.map((msg: any) => {
+        replyMessages: chatMessage.message?.map((msg: MsgItemElem) => {
             if(msg.type === 'reply') {
                 return msg.id
             }
         }) || [],
-        mentionUsers: chatMessage.message?.map((msg: any) => {
+        mentionUsers: chatMessage.message?.map((msg: MsgItemElem) => {
             if(msg.type === 'at') {
                 return msg.qq
             }
