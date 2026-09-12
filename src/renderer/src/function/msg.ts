@@ -878,7 +878,7 @@ const msgFunctions = {
     /**
      * 保存聊天记录
      */
-    getChatHistoryFist: (_: string, msg: { [key: string]: any }) => {
+    getChatHistoryFist: (_: string, msg: MessagePayload) => {
         const uiStore = useUIStore()
         if (msg.data === null) {
             new PopInfo().add(
@@ -893,7 +893,7 @@ const msgFunctions = {
     },
     getChatHistoryGapFill: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         metaArgs?: string[],
     ) => {
         const authStore = useAuthStore()
@@ -918,7 +918,7 @@ const msgFunctions = {
             })
             .catch(() => {})
     },
-    getChatHistory: (_: string, msg: { [key: string]: any }) => {
+    getChatHistory: (_: string, msg: MessagePayload) => {
         const uiStore = useUIStore()
         if (msg.data === null) {
             new PopInfo().add(
@@ -949,7 +949,7 @@ const msgFunctions = {
 
     getChatHistoryOnMsg: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const contactStore = useContactStore()
@@ -983,13 +983,14 @@ const msgFunctions = {
      */
     sendMsgBack: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const authStore = useAuthStore()
         const chatStore = useChatStore()
         if (msg.message_id == undefined) {
-            msg.message_id = msg.data.message_id
+            const response = asMessagePayload(msg.data)
+            if (response?.message_id != null) msg.message_id = response.message_id
         }
         if (echoList[1] == 'forward') {
             // PS：这儿写是写了转发成功，事实上不确定消息有没有真的发送出去（x
@@ -1019,7 +1020,7 @@ const msgFunctions = {
     },
     sendFileBack: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         // 标记上传任务完成
@@ -1035,15 +1036,15 @@ const msgFunctions = {
      */
     getRoamingStamp: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const authStore = useAuthStore()
         const getCount = Number(echoList[1])
-        const data = msg.data
-        if (msgPath.roaming_stamp.reverse) {
-            data.reverse()
-        }
+        const data = Array.isArray(msg.data)
+            ? msg.data.filter((item): item is string => typeof item === 'string')
+            : []
+        if (msgPath.roaming_stamp.reverse) data.reverse()
         const stickerStore = useStickerStore()
         const stickerCache = stickerStore.stickerCache ?? []
         if (stickerCache.length == 0) {
@@ -1064,16 +1065,17 @@ const msgFunctions = {
      * 保存群补充信息
      * @deprecated 功能在后期更新中未被重构检查，可能存在问题
      */
-    getMoreGroupInfo: (_: string, msg: { [key: string]: any }) => {
+    getMoreGroupInfo: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
-        chatStore.chatInfo.info.group_info = msg.data.data
+        const data = asMessagePayload(msg.data)
+        if (data) chatStore.chatInfo.info.group_info = data
     },
 
     /**
      * 保存好友补充信息
      * @deprecated 功能在后期更新中未被重构检查，可能存在问题
      */
-    getMoreUserInfo: (_: string, msg: { [key: string]: any }) => {
+    getMoreUserInfo: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         // chatStore.chatInfo.info.user_info =
         //     msg.data.data.result.buddy.info_list[0]
@@ -1087,7 +1089,7 @@ const msgFunctions = {
     /**
      * 获取群通知
      */
-    getGroupNotices: (_: string, msg: { [key: string]: any }) => {
+    getGroupNotices: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const list = getMsgData('group_notices', msg, msgPath.group_notices)
         if (!list) return
@@ -1109,7 +1111,7 @@ const msgFunctions = {
     /**
      * 获取群文件列表
      */
-    getGroupFiles: (_: string, msg: { [key: string]: any }) => {
+    getGroupFiles: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const list = getMsgData('group_files', msg, msgPath.group_files) as (GroupFileElem & GroupFileFolderElem)[]
         // 排序；文件夹在前，文件在后
@@ -1133,7 +1135,7 @@ const msgFunctions = {
     /**
      * 获取群文件文件夹文件
      */
-    getGroupDirFiles: (_: string, msg: { [key: string]: any }, echoList: string[]) => {
+    getGroupDirFiles: (_: string, msg: MessagePayload, echoList: string[]) => {
         const chatStore = useChatStore()
         // TODO: 有分页
 
@@ -1170,7 +1172,7 @@ const msgFunctions = {
     /**
      * 下载文件（聊天中）
      */
-    downloadFile: (_: string, msg: { [key: string]: any }, echoList: string[]) => {
+    downloadFile: (_: string, msg: MessagePayload, echoList: string[]) => {
         const data = getMsgData('file_download', msg, msgPath.file_download)[0]
         const url = data.file_url
 
@@ -1189,7 +1191,7 @@ const msgFunctions = {
     /**
      * 下载文件（群文件）
      */
-    downloadGroupFile: (_: string, msg: { [key: string]: any }, echoList: string[]) => {
+    downloadGroupFile: (_: string, msg: MessagePayload, echoList: string[]) => {
         const data = getMsgData('file_download', msg, msgPath.file_download)[0]
         const url = data.file_url
 
@@ -1210,7 +1212,7 @@ const msgFunctions = {
      */
     loadFileBase: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const chatStore = useChatStore()
@@ -1240,7 +1242,7 @@ const msgFunctions = {
     /**
      * 保存精华消息
      */
-    getJin: (_: string, msg: { [key: string]: any }) => {
+    getJin: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const jinList = getMsgData('group_essence', msg, msgPath.group_essence)
         const is_end = getMsgData(
@@ -1268,12 +1270,14 @@ const msgFunctions = {
      */
     getSendMsg: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const authStore = useAuthStore()
         const chatStore = useChatStore()
-        const msgInfo = getMsgData('message_info', msg.data, msgPath.message_info)
+        const response = asMessagePayload(msg.data)
+        if (!response) return
+        const msgInfo = getMsgData('message_info', response, msgPath.message_info)
         if (msgInfo) {
             const info = msgInfo[0]
             if (echoList[1] !== info.message_id.toString()) {
@@ -1300,7 +1304,7 @@ const msgFunctions = {
                     // 将这条消息直接替换掉
                     const trueMsg = getMsgData(
                         'message_list',
-                        buildMsgList([msg.data]),
+                        buildMsgList([response]),
                         msgPath.message_list,
                     )
                     getMessageList(trueMsg).then((trueMsg) => {
@@ -1321,9 +1325,10 @@ const msgFunctions = {
     /**
      * 设置消息已读
      */
-    readMemberMessage: (_: string, msg: { [key: string]: any }) => {
+    readMemberMessage: (_: string, msg: MessagePayload) => {
         const authStore = useAuthStore()
-        const data = msg.data[0]
+        const data = Array.isArray(msg.data) ? asMessagePayload(msg.data[0]) : undefined
+        if (!data) return
         const msgName = authStore.jsonMap.set_message_read.private_name
         let private_name = authStore.jsonMap.set_message_read.private_name
         if (!private_name) private_name = msgName
@@ -1347,7 +1352,7 @@ const msgFunctions = {
             )
         }
         // 关闭所有通知
-        new Notify().closeAll(data.group_id ?? data.self_id)
+        new Notify().closeAll(String(data.group_id ?? data.self_id ?? ''))
     },
 
     /**
@@ -1412,7 +1417,7 @@ const msgFunctions = {
      */
     SendRespondBack: (
         _: string,
-        __: { [key: string]: any },
+        __: MessagePayload,
         echoList: string[],
     ) => {
         const chatStore = useChatStore()
@@ -1453,13 +1458,15 @@ const msgFunctions = {
      */
     getCookies: (
         _: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList: string[],
     ) => {
         const authStore = useAuthStore()
         // 拆分 cookie
         const cookieObject = {} as { [key: string]: string }
-        msg.data.cookies.split('; ').forEach((item: string) => {
+        const response = asMessagePayload(msg.data)
+        const cookies = typeof response?.cookies === 'string' ? response.cookies : ''
+        cookies.split('; ').forEach((item: string) => {
             const key = item.split('=')[0]
             const value = item.split('=')[1]
             cookieObject[key] = value
@@ -1494,7 +1501,7 @@ const msgFunctions = {
      * @param _
      * @param msg
      */
-    getQzoneFeed: (_: string, msg: { [key: string]: any }) => {
+    getQzoneFeed: (_: string, msg: MessagePayload) => {
         const qzoneStore = useQzoneStore()
         const list = getMsgData('get_qzone_feed', msg, msgPath.get_qzone_feed)
         if (list) {
@@ -1508,7 +1515,7 @@ const msgFunctions = {
      * @param _
      * @param msg
      */
-    getQzoneMsg: (_: string, msg: { [key: string]: any }) => {
+    getQzoneMsg: (_: string, msg: MessagePayload) => {
         const qzoneStore = useQzoneStore()
         const list = getMsgData('get_qzone_msg', msg, msgPath.get_qzone_msg)
         if (list) {
@@ -1528,7 +1535,7 @@ const msgFunctions = {
 } as {
     [key: string]: (
         name: string,
-        msg: { [key: string]: any },
+        msg: MessagePayload,
         echoList?: string[],
     ) => void
 }
@@ -1547,7 +1554,7 @@ const handlers: Record<string, MessageHandler> = {
 
 // ==========================================
 
-function saveUser(msg: { [key: string]: any }, type: string) {
+function saveUser(msg: MessagePayload, type: string) {
     const authStore = useAuthStore()
     const contactStore = useContactStore()
     const settingsStore = useSettingsStore()
@@ -2137,7 +2144,7 @@ function revokeMsg(_: string, msg: any) {
     dbRevokeMessage(authStore.loginInfo.uin, String(msgId))
 
     // 寻找消息
-    let msgGet = null as { [key: string]: any } | null
+    let msgGet = null as MessagePayload | null
     let msgIndex!: number
     for (const [index, msg] of chatStore.messageList.entries()) {
         if (msg.message_id === msgId) {
@@ -2154,7 +2161,8 @@ function revokeMsg(_: string, msg: any) {
     // 移除消息
     chatStore.messageList.splice(msgIndex, 1)
 
-    if (msgGet.sender.user_id === authStore.loginInfo.uin)
+    const sender = asMessagePayload(msgGet.sender)
+    if (sender?.user_id === authStore.loginInfo.uin)
         msg.originMsg = msgGet
 
     // 显示撤回提示
@@ -2414,7 +2422,7 @@ function newMsg(_: string, data: any) {
  */
 function updateSysInfo(
     _: string,
-    __: { [key: string]: any },
+    __: MessagePayload,
     echoList: string[],
 ) {
     const contactStore = useContactStore()
@@ -2473,7 +2481,7 @@ export function resetRimtime(resetAll = false) {
                 group_members: [],
                 group_files: {},
                 group_sub_files: {},
-                jin_info: { list: [] as { [key: string]: any }[], pages: 0 },
+                jin_info: { list: [] as MessagePayload[], pages: 0 },
             },
         })
         chatStore.messageList = []
