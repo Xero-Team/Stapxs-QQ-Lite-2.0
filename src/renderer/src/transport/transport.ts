@@ -11,6 +11,8 @@ export interface Transport {
     send(payload: unknown, options?: TransportRequest): Promise<void>
     close(): Promise<void>
     onMessage(handler: (payload: unknown) => void): () => void
+    onClose?(handler: (event: { code: number; reason: string }) => void): () => void
+    onError?(handler: () => void): () => void
 }
 
 export class TransportError extends Error {
@@ -201,11 +203,23 @@ export class WebSocketTransport implements Transport {
 export class HttpTransport implements Transport {
     private currentState: TransportState = 'idle'
     private readonly handlers = new Set<(payload: unknown) => void>()
+    private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
+    private readonly errorHandlers = new Set<() => void>()
 
     constructor(private readonly endpoint: string, private readonly headers: Record<string, string> = {}) {}
     get state(): TransportState { return this.currentState }
 
-    async connect(): Promise<void> { this.currentState = 'authenticated' }
+    async connect(options: TransportRequest = {}): Promise<void> {
+        this.currentState = 'connecting'
+        await withTimeout(async (signal) => {
+            if (signal.aborted) throw new TransportError('HTTP connection aborted', 'aborted')
+            this.currentState = 'authenticated'
+        }, options).catch((error: unknown) => {
+            this.currentState = 'error'
+            this.errorHandlers.forEach((handler) => handler())
+            throw error
+        })
+    }
 
     async send(payload: unknown, options: TransportRequest = {}): Promise<void> {
         this.currentState = 'connecting'
@@ -222,12 +236,18 @@ export class HttpTransport implements Transport {
             this.currentState = 'authenticated'
         }, options).catch((error: unknown) => {
             this.currentState = 'error'
+            this.errorHandlers.forEach((handler) => handler())
             throw error
         })
     }
 
-    async close(): Promise<void> { this.currentState = 'closed' }
+    async close(): Promise<void> {
+        this.currentState = 'closed'
+        this.closeHandlers.forEach((handler) => handler({ code: 1000, reason: 'closed' }))
+    }
     onMessage(handler: (payload: unknown) => void): () => void { this.handlers.add(handler); return () => this.handlers.delete(handler) }
+    onClose(handler: (event: { code: number; reason: string }) => void): () => void { this.closeHandlers.add(handler); return () => this.closeHandlers.delete(handler) }
+    onError(handler: () => void): () => void { this.errorHandlers.add(handler); return () => this.errorHandlers.delete(handler) }
 }
 
 export interface EventSourceLike {
@@ -242,6 +262,7 @@ export class SseTransport implements Transport {
     private currentState: TransportState = 'idle'
     private readonly handlers = new Set<(payload: unknown) => void>()
     private readonly errorHandlers = new Set<() => void>()
+    private readonly closeHandlers = new Set<(event: { code: number; reason: string }) => void>()
 
     constructor(private readonly endpoint: string) {}
     get state(): TransportState { return this.currentState }
@@ -254,8 +275,14 @@ export class SseTransport implements Transport {
             this.source = source
             source.onopen = () => { settled = true; this.currentState = 'authenticated'; resolve() }
             source.onmessage = (event) => {
-                try { this.handlers.forEach((handler) => handler(JSON.parse(event.data) as unknown)) }
-                catch { this.currentState = 'error' }
+                try {
+                    const payload: unknown = JSON.parse(event.data) as unknown
+                    this.handlers.forEach((handler) => handler(payload))
+                }
+                catch {
+                    this.currentState = 'error'
+                    this.errorHandlers.forEach((handler) => handler())
+                }
             }
             source.onerror = () => {
                 this.currentState = 'error'
@@ -269,7 +296,13 @@ export class SseTransport implements Transport {
         }), options)
     }
     async send(): Promise<void> { throw new TransportError('SSE is receive-only; use HttpTransport for API calls', 'protocol') }
-    async close(): Promise<void> { this.source?.close(); this.source = undefined; this.currentState = 'closed' }
+    async close(): Promise<void> {
+        this.source?.close()
+        this.source = undefined
+        this.currentState = 'closed'
+        this.closeHandlers.forEach((handler) => handler({ code: 1000, reason: 'closed' }))
+    }
     onMessage(handler: (payload: unknown) => void): () => void { this.handlers.add(handler); return () => this.handlers.delete(handler) }
     onError(handler: () => void): () => void { this.errorHandlers.add(handler); return () => this.errorHandlers.delete(handler) }
+    onClose(handler: (event: { code: number; reason: string }) => void): () => void { this.closeHandlers.add(handler); return () => this.closeHandlers.delete(handler) }
 }

@@ -18,6 +18,16 @@ describe('transport contracts', () => {
         expect(transport.state).toBe('authenticated')
     })
 
+    it('supports the shared lifecycle hooks for stateless HTTP transport', async () => {
+        const transport = new HttpTransport('http://bot/api')
+        const closed: Array<{ code: number; reason: string }> = []
+        transport.onClose?.((event) => closed.push(event))
+        await transport.connect()
+        await transport.close()
+        expect(transport.state).toBe('closed')
+        expect(closed).toEqual([{ code: 1000, reason: 'closed' }])
+    })
+
     it('connects, forwards WebSocket messages, and closes', async () => {
         class FakeSocket {
             static instance: FakeSocket
@@ -137,6 +147,26 @@ describe('transport contracts', () => {
         source.onmessage?.({ data: '{"post_type":"meta_event"}' })
         expect(received).toEqual([{ post_type: 'meta_event' }])
         await expect(transport.send({ action: 'x' })).rejects.toThrow('receive-only')
+        await transport.close()
+    })
+
+    it('reports malformed SSE payloads through the shared error hook', async () => {
+        class FakeSource {
+            onopen: (() => void) | null = null
+            onmessage: ((event: { data: string }) => void) | null = null
+            onerror: (() => void) | null = null
+            close = vi.fn()
+            constructor() { queueMicrotask(() => this.onopen?.()) }
+        }
+        vi.stubGlobal('EventSource', FakeSource)
+        const transport = new SseTransport('http://bot/events')
+        const errors = vi.fn()
+        transport.onError(errors)
+        await transport.connect({ timeoutMs: 100 })
+        const source = (transport as unknown as { source: FakeSource }).source
+        source.onmessage?.({ data: '{invalid' })
+        expect(transport.state).toBe('error')
+        expect(errors).toHaveBeenCalledOnce()
         await transport.close()
     })
 })
