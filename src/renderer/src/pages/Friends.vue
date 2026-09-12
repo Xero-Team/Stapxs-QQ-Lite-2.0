@@ -52,11 +52,11 @@
                         <template v-for="info in settingsStore.classes"
                             :key="'class-' + info.class_id">
                             <div :class=" 'list exp-body' +
-                                (classStatus[info.class_id] == true ? ' open' : '')">
+                                (classStatus[String(info.class_id)] == true ? ' open' : '')">
                                 <header :title="info.class_name"
                                     :class="'exp-header' +
                                         (uiStore.openSideBar ? ' open' : '')"
-                                    @click="classClick(info.class_id)">
+                                    @click="classClick(String(info.class_id))">
                                     <div />
                                     <span>{{ info.class_name }}</span>
                                     <a>{{
