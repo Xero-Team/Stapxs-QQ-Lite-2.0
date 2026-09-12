@@ -48,6 +48,32 @@ import { Notify } from '../notify'
 const popInfo = new PopInfo()
 const logger = new Logger()
 
+interface ReleaseInfo {
+    tag_name: string
+    body: string
+    published_at: string
+    html_url: string
+    author: { login: string, avatar_url: string, html_url: string }
+}
+
+function parseRelease(value: unknown): ReleaseInfo | undefined {
+    if (typeof value !== 'object' || value === null) return undefined
+    const candidate = value as Partial<ReleaseInfo>
+    const author = candidate.author
+    if (typeof candidate.tag_name !== 'string' || typeof candidate.body !== 'string'
+        || typeof candidate.published_at !== 'string' || typeof candidate.html_url !== 'string'
+        || typeof author !== 'object' || author === null
+        || typeof author.login !== 'string' || typeof author.avatar_url !== 'string'
+        || typeof author.html_url !== 'string') return undefined
+    return {
+        tag_name: candidate.tag_name,
+        body: candidate.body,
+        published_at: candidate.published_at,
+        html_url: candidate.html_url,
+        author: { login: author.login, avatar_url: author.avatar_url, html_url: author.html_url },
+    }
+}
+
 /**
  * 滚动到目标消息（不自动加载）
  * @param seqName DOM 名（chat-xx）
@@ -789,8 +815,9 @@ export function checkUpdate() {
     auditExternalRequest(packageUrl, 'release-check')
     fetch(packageUrl).then((response) => {
         if (response.ok) {
-            response.json().then((data) => {
-                showUpadteLog(data)
+            response.json().then((data: unknown) => {
+                const release = parseRelease(data)
+                if (release) showUpadteLog(release)
             })
         }
     })
@@ -801,7 +828,7 @@ export function checkUpdate() {
 * 展示更新弹窗
 * @param data 更新数据
 */
-function showUpadteLog(data: any) {
+function showUpadteLog(data: ReleaseInfo) {
     const appVersion = appInfo.version // 当前版本
     const cacheVersion = localStorage.getItem('version') // 缓存版本
     // 这儿有两种情况：
@@ -822,7 +849,7 @@ function showUpadteLog(data: any) {
         showReleaseLog(data, true)
     }
 }
-function showReleaseLog(data: any, isUpdated: boolean) {
+function showReleaseLog(data: ReleaseInfo, isUpdated: boolean) {
     const uiStore = useUIStore()
     const { $t } = app.config.globalProperties
     let msg = data.body
@@ -904,9 +931,12 @@ export function showReleaseHistory() {
 
     fetch(packageUrl).then((response) => {
         if (response.ok) {
-            response.json().then((dataList: any[]) => {
+            response.json().then((dataList: unknown) => {
+                if (!Array.isArray(dataList)) return
                 // 解析最近5条更新记录
-                const releases = dataList.map((data) => {
+                const releases = dataList.flatMap((rawData): Array<{ version: string, date: string, user: { name: string, avatar: string, url: string }, message: string, html_url: string }> => {
+                    const data = parseRelease(rawData)
+                    if (!data) return []
                     let msg = data.body
                     const title = msg.split('\r\n')[0].substring(1)
                     const start = msg.indexOf('## 更新内容\r\n')
@@ -919,7 +949,7 @@ export function showReleaseHistory() {
                     }
                     msg = title + '\r\n' + msg
 
-                    return {
+                    return [{
                         version: data.tag_name.substring(1),
                         date: data.published_at,
                         user: {
@@ -929,7 +959,7 @@ export function showReleaseHistory() {
                         },
                         message: msg,
                         html_url: data.html_url,
-                    }
+                    }]
                 })
 
                 const popInfo = {
