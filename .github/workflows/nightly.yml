@@ -62,11 +62,7 @@ jobs:
             - name: 更新依赖
               run: yarn install --immutable --mode=skip-build
             - name: 设置 Rust
-              uses: actions-rs/toolchain@b2417cde72dcf67f306c0ae8e0828a81bf0b189f
-              with:
-                  toolchain: stable
-                  profile: minimal
-                  override: true
+              uses: dtolnay/rust-toolchain@stable
 
             - name: 检查 Tauri 环境
               run: yarn tauri info
