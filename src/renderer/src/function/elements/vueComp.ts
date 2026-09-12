@@ -2,15 +2,15 @@ import { AllowedComponentProps, ExtractPropTypes, VNodeProps, ComponentPropsOpti
 
 type Empty = Record<string, never>
 
-type GetAllProps<T extends Component> = T extends new (...args: any) => { $props: infer P }
+type GetAllProps<T extends Component> = T extends new (...args: never[]) => { $props: infer P }
     ? P
     : T extends () => VNode
     ? object
-    : T extends (props: infer P, ...args: any) => any
+    : T extends (props: infer P, ...args: never[]) => unknown
     ? P
     : T extends { props: infer P }
         ? (P extends ComponentPropsOptions ? ExtractPropTypes<P> : P)
-        : any
+        : unknown
 
 type GetDefineProps<T extends Component> = GetAllProps<T> extends infer P & VNodeProps & AllowedComponentProps ? P : never
 
