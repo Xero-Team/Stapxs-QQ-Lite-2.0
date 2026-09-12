@@ -15,7 +15,11 @@ trap '"${cli[@]}" close >/dev/null 2>&1 || true' EXIT
         const response = JSON.parse(input);
         if (response.isError) throw new Error(response.error ?? "Storage smoke failed");
         const result = JSON.parse(response.result);
-        if (result.passed !== true || result.scenarios?.length !== 9)
+        const expected = ["concurrent-upsert", "repeat-import", "newest-merge", "compound-key",
+            "invalid-restore", "transaction-rollback", "export-clear-restore", "migration-rollback",
+            "legacy-migration", "reopen-namespace-clear", "legacy-duplicate-read-export"];
+        if (result.passed !== true || result.scenarios?.length !== expected.length ||
+            !expected.every((name) => result.scenarios.includes(name)))
             throw new Error("Incomplete storage regression result");
         console.log(JSON.stringify(result));
     '
