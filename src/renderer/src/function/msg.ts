@@ -845,7 +845,7 @@ const msgFunctions = {
             chatStore.chatInfo.info.group_members = createrList.concat(adminList.concat(memberList))
         }
 
-        data.forEach((item: any) => {
+        data.forEach((item: GroupMemberInfoElem) => {
             let name: string
             if (item.card != undefined && item.card != '') {
                 name = item.card
@@ -863,7 +863,7 @@ const msgFunctions = {
         if (!isPinyinReady()) {
             void ensurePinyinLoaded().then((loaded) => {
                 if (!loaded) return
-                data.forEach((item: any) => {
+                data.forEach((item: GroupMemberInfoElem) => {
                     let name: string
                     if (item.card != undefined && item.card != '') {
                         name = item.card
