@@ -37,16 +37,17 @@ mod windows_cred {
     use windows::core::PWSTR;
 
     /// 凭据目标名称（在凭据管理器 UI 中可见）
-    const TARGET: &str = "cn.stapxs.qqweb/db_encryption_key";
+    const TARGET: &str = "team.xero.qqlite/db_encryption_key";
+    const LEGACY_TARGET: &str = "cn.stapxs.qqweb/db_encryption_key";
     /// 凭据关联的用户名
-    const USERNAME: &str = "stapxs-qq-lite";
+    const USERNAME: &str = "xero-qq-lite";
 
     /// HRESULT(ERROR_NOT_FOUND)：凭据条目不存在
     const ERROR_NOT_FOUND_HR: i32 = 0x80070490u32 as i32;
 
     /// 从 Windows 凭据管理器读取数据库密钥；若不存在则生成并写入后返回。
     pub fn get_or_create_db_key() -> Result<String, String> {
-        match read_credential() {
+        match read_credential(TARGET).or_else(|_| read_credential(LEGACY_TARGET)) {
             Ok(key) => {
                 log::info!("从 Windows 凭据管理器读取数据库密钥成功");
                 return Ok(key);
@@ -65,8 +66,8 @@ mod windows_cred {
         Ok(key)
     }
 
-    fn read_credential() -> Result<String, String> {
-        let target_wide: Vec<u16> = TARGET.encode_utf16().chain(std::iter::once(0)).collect();
+    fn read_credential(target: &str) -> Result<String, String> {
+        let target_wide: Vec<u16> = target.encode_utf16().chain(std::iter::once(0)).collect();
         let mut pcred: *mut CREDENTIALW = std::ptr::null_mut();
 
         unsafe {
@@ -142,7 +143,8 @@ mod macos {
     use security_framework::passwords::{get_generic_password, set_generic_password};
 
     /// 应用标识符，与 tauri.conf.json identifier 保持一致
-    const SERVICE: &str = "cn.stapxs.qqweb";
+    const SERVICE: &str = "team.xero.qqlite";
+    const LEGACY_SERVICE: &str = "cn.stapxs.qqweb";
     /// 钥匙串条目的账户名称
     const ACCOUNT: &str = "db_encryption_key";
 
@@ -151,7 +153,7 @@ mod macos {
     /// 错误时返回 Err(String) 供调用方决定是否回退。
     pub fn get_or_create_db_key() -> Result<String, String> {
         // ── 尝试读取 ──────────────────────────────────────────
-        match get_generic_password(SERVICE, ACCOUNT) {
+        match get_generic_password(SERVICE, ACCOUNT).or_else(|_| get_generic_password(LEGACY_SERVICE, ACCOUNT)) {
             Ok(bytes) => {
                 let key = String::from_utf8(bytes)
                     .map_err(|e| format!("钥匙串密钥编码无效：{}", e))?;
@@ -199,7 +201,8 @@ mod linux_secret {
     const LABEL: &str = "Xero QQ Lite 数据库密钥";
     /// 搜索属性：应用标识
     const ATTR_APP: &str = "application";
-    const ATTR_APP_VAL: &str = "cn.stapxs.qqweb";
+    const ATTR_APP_VAL: &str = "team.xero.qqlite";
+    const LEGACY_ATTR_APP_VAL: &str = "cn.stapxs.qqweb";
     /// 搜索属性：密钥类型
     const ATTR_KEY: &str = "key_type";
     const ATTR_KEY_VAL: &str = "db_encryption_key";
@@ -254,10 +257,17 @@ mod linux_secret {
         .collect();
 
         // ── 尝试读取已存在的密钥 ─────────────────────────────
-        let items = collection
+        let mut items = collection
             .search_items(attrs.clone())
             .await
             .map_err(|e| format!("搜索密钥条目失败：{}", e))?;
+
+        if items.is_empty() {
+            let legacy_attrs: HashMap<&str, &str> = [(ATTR_APP, LEGACY_ATTR_APP_VAL), (ATTR_KEY, ATTR_KEY_VAL)]
+                .iter().cloned().collect();
+            items = collection.search_items(legacy_attrs).await
+                .map_err(|e| format!("搜索旧密钥条目失败：{}", e))?;
+        }
 
         if let Some(item) = items.first() {
             let secret = item

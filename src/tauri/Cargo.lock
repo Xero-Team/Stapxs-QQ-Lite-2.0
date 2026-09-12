@@ -5335,54 +5335,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
-name = "xero-qq-lite"
-version = "3.5.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "cocoa 0.26.1",
- "futures-util",
- "http 1.4.2",
- "liquid-glass-rs",
- "log",
- "log4rs",
- "objc2 0.6.4",
- "once_cell",
- "rand 0.9.4",
- "raw-window-handle",
- "reqwest 0.12.28",
- "rfd",
- "rusqlite",
- "rustls",
- "secret-service",
- "security-framework 2.11.1",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-deep-link",
- "tauri-plugin-notification",
- "tauri-plugin-opener",
- "tauri-plugin-shell",
- "tauri-plugin-single-instance",
- "tauri-plugin-store",
- "tauri-plugin-window-state",
- "tokio",
- "tokio-tungstenite 0.26.2",
- "tungstenite 0.26.2",
- "urlencoding",
- "user-notify",
- "warp",
- "webkit2gtk",
- "window-vibrancy",
- "windows 0.61.3",
- "windows-result 0.3.4",
- "winver",
-]
-
-[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7730,6 +7682,54 @@ checksum = "ec1cdab258fb55c0da61328dc52c8764709b249011b2cad0454c72f0bf10a1f6"
 dependencies = [
  "libc",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "xero-qq-lite"
+version = "3.5.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "cocoa 0.26.1",
+ "futures-util",
+ "http 1.4.2",
+ "liquid-glass-rs",
+ "log",
+ "log4rs",
+ "objc2 0.6.4",
+ "once_cell",
+ "rand 0.9.4",
+ "raw-window-handle",
+ "reqwest 0.12.28",
+ "rfd",
+ "rusqlite",
+ "rustls",
+ "secret-service",
+ "security-framework 2.11.1",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-deep-link",
+ "tauri-plugin-notification",
+ "tauri-plugin-opener",
+ "tauri-plugin-shell",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-store",
+ "tauri-plugin-window-state",
+ "tokio",
+ "tokio-tungstenite 0.26.2",
+ "tungstenite 0.26.2",
+ "urlencoding",
+ "user-notify",
+ "warp",
+ "webkit2gtk",
+ "window-vibrancy",
+ "windows 0.61.3",
+ "windows-result 0.3.4",
+ "winver",
 ]
 
 [[package]]
