@@ -1126,9 +1126,9 @@ function fillSeqGaps(anchorMsgIds: string[]) {
     const id = chatStore.chatInfo.show.id
     let name: string
     if (authStore.jsonMap.message_list && type != 'group') {
-        name = authStore.jsonMap.message_list.private_name
+        name = authStore.jsonMap.message_list.private_name ?? 'get_friend_msg_history'
     } else {
-        name = authStore.jsonMap.message_list?.name
+        name = authStore.jsonMap.message_list?.name ?? 'get_group_msg_history'
     }
     for (const anchorMsgId of anchorMsgIds) {
         Connector.send(

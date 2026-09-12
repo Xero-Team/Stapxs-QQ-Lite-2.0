@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { shallowReactive, ref } from 'vue'
+import { createEmptyJsonPathMap, type JsonPathMap } from '@renderer/protocol/json-map'
 
 export interface ConnectionHistoryItem {
     address: string
@@ -61,7 +62,7 @@ export function createLoginInfo(): LoginInfo {
 export const useAuthStore = defineStore('auth', () => {
     const loginInfo = shallowReactive<LoginInfo>(createLoginInfo())
     const botInfo = shallowReactive<BotInfo>({})
-    const jsonMap = ref<any>(undefined)
+    const jsonMap = ref<JsonPathMap>(createEmptyJsonPathMap())
 
     return {
         loginInfo,

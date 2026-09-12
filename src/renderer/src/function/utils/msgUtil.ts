@@ -142,7 +142,7 @@ function replaceJPValue(jpStr: string) {
  */
 export function buildMsgList(msgList: JsonRecord | JsonRecord[]): JsonRecord {
     const authStore = useAuthStore()
-    const path = jp.parse(authStore.jsonMap.message_list.source)
+    const path = jp.parse(authStore.jsonMap.message_list.source ?? '$')
     const keys = [] as string[]
     path.forEach((item) => {
         if (item.expression.value != '*' && item.expression.value != '$') {
@@ -252,7 +252,10 @@ export function parseMsgList(
                 })
             })
             // 补充 infoList
-            const infoList = getMsgData('message_info', records[i], authStore.jsonMap.message_info)
+            const infoList = getMsgData(
+                'message_info', records[i],
+                authStore.jsonMap.message_info as unknown as Parameters<typeof getMsgData>[2],
+            )
             if (infoList != undefined) {
                 records[i].infoList = infoList[0]
             }

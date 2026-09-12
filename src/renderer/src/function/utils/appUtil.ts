@@ -44,7 +44,7 @@ import { sendMsgRaw } from './msgUtil'
 import { dbGetLatest } from './localHistoryUtil'
 import { parseMsg } from '../sender'
 import { Notify } from '../notify'
-import { normalizeJsonPathMap } from '@renderer/protocol/json-map'
+import { createEmptyJsonPathMap, normalizeJsonPathMap } from '@renderer/protocol/json-map'
 
 const popInfo = new PopInfo()
 const logger = new Logger()
@@ -196,9 +196,9 @@ export function loadHistoryMessage(
     let name: string
     const fullPage = authStore.jsonMap.message_list?.pagerType == 'full'
     if (authStore.jsonMap.message_list && type != 'group') {
-        name = authStore.jsonMap.message_list.private_name
+        name = authStore.jsonMap.message_list.private_name ?? 'get_friend_msg_history'
     } else {
-        name = authStore.jsonMap.message_list.name
+        name = authStore.jsonMap.message_list.name ?? 'get_group_msg_history'
     }
 
     Connector.send(
@@ -1258,7 +1258,7 @@ export function loadJsonMap(name: string) {
                 logger.system('开发者，没有找到你需要的映射表……')
             }
             const authStore = useAuthStore()
-            authStore.jsonMap = normalizeJsonPathMap(msgPath)
+            authStore.jsonMap = normalizeJsonPathMap(msgPath) ?? createEmptyJsonPathMap()
         } catch (ex) {
             logger.system('很抱歉开发者，映射表加载失败 ……' + ex)
         }

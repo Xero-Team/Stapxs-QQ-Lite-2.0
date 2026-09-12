@@ -1329,7 +1329,7 @@ const msgFunctions = {
         if (!private_name) private_name = msgName
         if (data.group_id != undefined) {
             Connector.send(
-                msgName,
+                msgName ?? private_name ?? 'set_msg_read',
                 {
                     message_id: data.message_id,
                     group_id: data.group_id,
@@ -1338,7 +1338,7 @@ const msgFunctions = {
             )
         } else {
             Connector.send(
-                private_name,
+                private_name ?? 'set_msg_read',
                 {
                     message_id: data.message_id,
                     user_id: data.self_id,
@@ -1845,7 +1845,7 @@ export async function normalizeMessagesForPreview(payload: any): Promise<any[]> 
         const directList = parseMsgList(
             [payload],
             map?.message_list?.type ?? '$',
-            map?.message_value,
+            map?.message_value as unknown as Parameters<typeof parseMsgList>[2],
         )
 
         if (directList.length === 0) return []
@@ -1854,20 +1854,21 @@ export async function normalizeMessagesForPreview(payload: any): Promise<any[]> 
 
     if (!map?.message_list) return []
 
-    let rawList = getMsgData('message_list', payload, map.message_list)
+    const messagePathMap = map.message_list as unknown as Parameters<typeof getMsgData>[2]
+    let rawList = getMsgData('message_list', payload, messagePathMap)
     if (rawList == undefined) {
         rawList = getMsgData(
             'message_list',
             buildMsgList([payload]),
-            map.message_list,
+            messagePathMap,
         )
     }
     if (rawList == undefined) return []
 
     const list = parseMsgList(
         rawList,
-        map.message_list.type,
-        map.message_value,
+        map.message_list.type ?? '$',
+        map.message_value as unknown as Parameters<typeof parseMsgList>[2],
     )
     if (list.length === 0) return []
 

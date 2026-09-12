@@ -953,7 +953,7 @@ function downloadFile(fileData: any, message_id: string) {
     if(chatStore.chatInfo.show.type == 'group') {
         name = authStore.jsonMap.file_download?.name
     }
-    Connector.send(name, {
+    Connector.send(name ?? 'get_group_file_url', {
         file_id: fileData.file_id,
         group_id: chatStore.chatInfo.show.type == 'group' ? chatStore.chatInfo.show.id : undefined,
     },

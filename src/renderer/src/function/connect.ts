@@ -23,6 +23,7 @@ import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
 import { backoffDelay, HttpTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
+import { getJsonPathEntry } from '@renderer/protocol/json-map'
 import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
 
 const logger = new Logger()
@@ -445,7 +446,7 @@ export class Connector {
         // 组建信息
         const echo = uuid()
         const authStore = useAuthStore()
-        const apiMap = authStore.jsonMap[api]
+        const apiMap = getJsonPathEntry(authStore.jsonMap, api)
         if (!apiMap) {
             logger.debug(`${authStore.jsonMap.name} 未适配 API ${JSON.stringify(api)}`)
             return undefined
@@ -467,7 +468,7 @@ export class Connector {
                 logger.error(null, `API ${api} 返回了无效响应`)
                 return null
             }
-            return getMsgData(api, response, apiMap)
+            return getMsgData(api, response, apiMap as unknown as Parameters<typeof getMsgData>[2])
         }catch (e) {
             if (e instanceof TimeoutError) {
                 logger.error(e, `API ${api} 请求超时`)
