@@ -26,3 +26,4 @@
 - Optional notice responses now require a validated array/object boundary before rendering; notice template data uses `Record<string, unknown>`.
 - Message path maps and list-builder inputs now use explicit JSON record types; the remaining untyped message payload APIs are isolated for later staged migration.
 - Lagrange forward-message conversion now validates node and segment records before building the OneBot payload, removing an untyped forwarding boundary.
+- Message value-map contracts now require string JSONPath mappings; remaining `any` is limited to legacy message list and raw-message compatibility APIs.
