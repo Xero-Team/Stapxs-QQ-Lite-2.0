@@ -2762,7 +2762,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modyfi/vite-plugin-yaml@npm:^1.1.0":
+"@modyfi/vite-plugin-yaml@npm:^1.1.1":
   version: 1.1.1
   resolution: "@modyfi/vite-plugin-yaml@npm:1.1.1"
   dependencies:
@@ -14543,7 +14543,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:^6.7.0"
     "@fortawesome/free-solid-svg-icons": "npm:^6.7.0"
     "@fortawesome/vue-fontawesome": "npm:^3.0.8"
-    "@modyfi/vite-plugin-yaml": "npm:^1.1.0"
+    "@modyfi/vite-plugin-yaml": "npm:^1.1.1"
     "@rushstack/eslint-patch": "npm:^1.10.3"
     "@stapxs/capacitor-sync-version": "npm:^1.0.10"
     "@tauri-apps/api": "npm:~2.11.1"

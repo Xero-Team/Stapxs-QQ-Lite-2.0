@@ -40,6 +40,12 @@
   metadata, release metadata, and 92-file artifact checksums. Roll back with
   `yarn up vite-plugin-static-copy@^3.1.2`; Yarn linking still reports the
   unrelated optional `sharp` native postinstall failure locally.
+- `@modyfi/vite-plugin-yaml` was upgraded independently from 1.1.0 to 1.1.1.
+  YAML asset loading remains compatible; Web/core typecheck, browser harness
+  typecheck, contract tests, production build, Tauri lint, SBOM/license/CSP
+  metadata, release metadata, and 92-file artifact checksums pass. Roll back
+  with `yarn up @modyfi/vite-plugin-yaml@^1.1.0`; the local `sharp` postinstall
+  failure is unchanged.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item

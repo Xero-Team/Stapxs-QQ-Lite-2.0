@@ -90,7 +90,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.0",
     "@fortawesome/free-solid-svg-icons": "^6.7.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "@modyfi/vite-plugin-yaml": "^1.1.0",
+    "@modyfi/vite-plugin-yaml": "^1.1.1",
     "@rushstack/eslint-patch": "^1.10.3",
     "@stapxs/capacitor-sync-version": "^1.0.10",
     "@tauri-apps/cli": "~2.11.4",
