@@ -15,6 +15,13 @@
   SBOM/license/CSP metadata, and artifact checksums pass. The rollback target
   is `yarn up vue-i18n@^10.0.4`; the `sharp` native postinstall limitation is
   unchanged.
+- The AI SDK provider pair was upgraded independently: `ai` 6.0.145 to
+  7.0.99 and `@ai-sdk/openai-compatible` 2.0.38 to 3.0.48. The provider's
+  LanguageModel V4 type now matches the `streamText` consumer; full Web/core
+  typecheck, browser harness typecheck, contract tests, production build,
+  SBOM/license/CSP metadata, and artifact checksums pass. Roll back both
+  packages together with `yarn up ai@^6.0.145 @ai-sdk/openai-compatible@^2.0.38`.
+  The optional `sharp` postinstall remains the only local install failure.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
@@ -150,10 +157,11 @@ current result are recorded below.
 ## Dependency audit refresh (2026-09-13, latest local run)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
-`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 5.0.0. A fresh
-recursive audit using the repository Yarn 4.12.0 entrypoint exits 1 with 129
+`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, Vitest 5.0.0, and the AI
+SDK pair listed above. A fresh recursive audit using the repository Yarn
+4.12.0 entrypoint exits 1 with 128
 advisory paths across the current dependency graph: 2 critical, 79 high,
-42 moderate, and 6 low. The report includes repeated package/version paths, so
+42 moderate, and 5 low. The report includes repeated package/version paths, so
 the count is an advisory-path count rather than a unique CVE count. Remaining
 exposure is primarily transitive build tooling (`sharp`, `tar`, `postcss`,
 `nanoid`, Rollup), `@xmldom/xmldom`, the Vitest mocker range, `underscore`
