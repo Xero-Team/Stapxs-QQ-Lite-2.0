@@ -22,6 +22,12 @@
   SBOM/license/CSP metadata, and artifact checksums pass. Roll back both
   packages together with `yarn up ai@^6.0.145 @ai-sdk/openai-compatible@^2.0.38`.
   The optional `sharp` postinstall remains the only local install failure.
+- Pinia was upgraded independently from 3.0.4 to 4.0.3, with the required
+  direct `@vue/devtools-api` 8.2.1 peer added. Existing setup stores and reset
+  actions pass full Web/core typecheck, browser harness typecheck, contract
+  tests, production build, Tauri lint, SBOM/license/CSP metadata, release
+  metadata, and 90-file artifact checksums. Roll back with `yarn up
+  pinia@^3.0.3` and remove the direct devtools peer if restoring the old graph.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item

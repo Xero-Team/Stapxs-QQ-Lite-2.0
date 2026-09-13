@@ -680,6 +680,25 @@
     },
     {
       "type": "library",
+      "name": "@vue/devtools-api",
+      "version": "8.2.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/@vue/devtools-api@8.2.1",
+      "properties": [
+        {
+          "name": "xero:dependency-scope",
+          "value": "devDependencies"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "@vue/eslint-config-typescript",
       "version": "13.0.0",
       "licenses": [
@@ -1099,7 +1118,7 @@
     {
       "type": "library",
       "name": "pinia",
-      "version": "3.0.4",
+      "version": "4.0.3",
       "licenses": [
         {
           "license": {
@@ -1107,7 +1126,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/pinia@3.0.4",
+      "purl": "pkg:npm/pinia@4.0.3",
       "properties": [
         {
           "name": "xero:dependency-scope",
