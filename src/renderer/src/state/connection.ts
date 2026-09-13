@@ -9,6 +9,16 @@ export const useConnectionStore = defineStore('connection', () => {
     const metaEventWatchTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined)
     const metaEventTimeoutTriggered = ref(false)
 
+    function reset(): void {
+        if (metaEventWatchTimer.value) clearTimeout(metaEventWatchTimer.value)
+        metaEventWatchTimer.value = undefined
+        metaEventTimeoutTriggered.value = false
+        heartbeatTime.value = -1
+        oldHeartbeatTime.value = -1
+        lastHeartbeatTime.value = -1
+        backTimes.value = 0
+    }
+
     return {
         heartbeatTime,
         oldHeartbeatTime,
@@ -16,5 +26,6 @@ export const useConnectionStore = defineStore('connection', () => {
         backTimes,
         metaEventWatchTimer,
         metaEventTimeoutTriggered,
+        reset,
     }
 })

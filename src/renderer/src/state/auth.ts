@@ -64,9 +64,15 @@ export const useAuthStore = defineStore('auth', () => {
     const botInfo = shallowReactive<BotInfo>({})
     const jsonMap = ref<JsonPathMap>(createEmptyJsonPathMap())
 
+    function reset(): void {
+        Object.assign(loginInfo, createLoginInfo())
+        Object.keys(botInfo).forEach((key) => delete botInfo[key])
+    }
+
     return {
         loginInfo,
         botInfo,
         jsonMap,
+        reset,
     }
 })

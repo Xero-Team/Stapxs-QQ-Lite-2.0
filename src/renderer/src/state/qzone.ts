@@ -13,8 +13,17 @@ export const useQzoneStore = defineStore('qzone', () => {
         myLoading: false,
     })
 
+    function reset(): void {
+        qzoneFeedList.value = []
+        state.currentView = 'feed'
+        state.myPagePos = 0
+        state.myHasMore = true
+        state.myLoading = false
+    }
+
     return {
         qzoneFeedList,
-        state
+        state,
+        reset,
     }
 })

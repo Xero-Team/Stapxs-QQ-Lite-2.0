@@ -7,6 +7,10 @@ const MAX_LENGTH = 50
 export const useSessionHistoryStore = defineStore('session-history', () => {
     const record = shallowRef<Session[]>([])
 
+    function reset(): void {
+        record.value = []
+    }
+
     function add(session: Session) {
         record.value = [
             session,
@@ -21,5 +25,6 @@ export const useSessionHistoryStore = defineStore('session-history', () => {
     return {
         record,
         add,
+        reset,
     }
 })

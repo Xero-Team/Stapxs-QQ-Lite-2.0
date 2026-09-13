@@ -22,6 +22,16 @@ export const useContactStore = defineStore('contact', () => {
     const newMsgCount = ref(0)
     const systemNoticesList = shallowRef<SystemNotice[] | undefined>(undefined)
 
+    function reset(): void {
+        userList.value = []
+        showList.value = []
+        groupAssistList.value = []
+        baseOnMsgList.clear()
+        onMsgList.value = []
+        newMsgCount.value = 0
+        systemNoticesList.value = []
+    }
+
     return {
         userList,
         showList,
@@ -30,5 +40,6 @@ export const useContactStore = defineStore('contact', () => {
         onMsgList,
         newMsgCount,
         systemNoticesList,
+        reset,
     }
 })

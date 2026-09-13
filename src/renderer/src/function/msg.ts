@@ -38,7 +38,7 @@ import {
     updateMenu,
     loadJsonMap,
 } from '@renderer/function/utils/appUtil'
-import { reactive, markRaw, nextTick } from 'vue'
+import { markRaw, nextTick } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
 import { Connector, login, saveConnectionToHistory } from './connect'
 import {
@@ -69,6 +69,7 @@ import { useStickerStore } from '@renderer/state/sticker'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useQzoneStore } from '@renderer/state/qzone'
+import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
 import { normalizeLoginInfo, normalizeVersionInfo } from '@renderer/protocol/login'
 import {
     getSessionId,
@@ -2493,24 +2494,19 @@ export function resetRimtime(resetAll = false) {
     if (resetAll) {
         // Reset auth store
         const authStore = useAuthStore()
-        authStore.loginInfo = reactive(createLoginInfo())
-        authStore.botInfo = reactive({})
+        authStore.reset()
         // Reset contact store
         const contactStore = useContactStore()
-        contactStore.userList = reactive([])
-        contactStore.showList = reactive([])
-        contactStore.systemNoticesList = reactive([])
-        contactStore.baseOnMsgList = reactive(new Map())
-        contactStore.onMsgList = reactive([])
-        contactStore.groupAssistList = reactive([])
+        contactStore.reset()
         // Reset chat store
         const chatStore = useChatStore()
         chatStore.reset()
         // Reset connection store
         const connectionStore = useConnectionStore()
-        connectionStore.heartbeatTime = -1
-        connectionStore.oldHeartbeatTime = -1
-        connectionStore.lastHeartbeatTime = -1
-        connectionStore.backTimes = 0
+        connectionStore.reset()
+        // Clear account-scoped caches while retaining user settings.
+        useQzoneStore().reset()
+        useStickerStore().reset()
+        useSessionHistoryStore().reset()
     }
 }
