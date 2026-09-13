@@ -9,7 +9,6 @@ import { v4 as uuid } from 'uuid'
 import { Connector } from '@renderer/function/connect'
 import {
     BotMsgType,
-    MsgItemElem,
     UserFriendElem,
     UserGroupElem,
 } from '../elements/information'
