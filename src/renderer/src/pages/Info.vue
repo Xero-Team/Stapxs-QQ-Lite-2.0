@@ -46,7 +46,7 @@
                     <header>
                         <span>{{ $t('等级') }}</span>
                     </header>
-                    <span>{{ qqLevelToEmoji(chat.info.user_info.qqLevel) }}</span>
+                    <span>{{ qqLevelToEmoji(chat.info.user_info.qqLevel ?? 0) }}</span>
                     <header v-if="chat.info.user_info.regTime">
                         <span>{{ $t('注册时间') }}</span>
                     </header>

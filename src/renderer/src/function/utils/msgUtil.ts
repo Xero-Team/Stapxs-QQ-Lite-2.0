@@ -26,6 +26,13 @@ import {
     resolveMediaUrl,
     serializeCqSegments,
 } from '@renderer/protocol/message'
+import { getShowName } from './displayFormat'
+export {
+    getShowName,
+    isShowTime,
+    qqLevelIcons,
+    qqLevelToEmoji,
+} from './displayFormat'
 
 const logger = new Logger()
 type JsonRecord = Record<string, unknown>
@@ -712,86 +719,6 @@ export function sendMsgAppendInfo(msg: unknown) {
             // TODO: 消息附加功能，暂时没用到
         })
     }
-}
-
-/**
- *
- * @param base group_name 或者 nickname
- * @param remark remark
- * @returns 显示的名称
- */
-export function getShowName(base: string, remark: string) {
-    if (!remark || remark == '' || remark == base) {
-        return base.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
-    } else {
-        return (remark + '（' + base + '）').replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
-    }
-}
-
-/**
- * 判断是否需要显示时间戳（上下超过五分钟的消息）
- * @param timePrv 上条消息的时间戳（10 位）
- * @param timeNow 当前消息的时间戳（10 位）
- */
-export function isShowTime(
-    timePrv: number | undefined,
-    timeNow: number,
-    alwaysShow = false,
-): boolean {
-    if (alwaysShow) return true
-    if (timePrv == undefined) return false
-    // 五分钟 10 位时间戳相差 300
-    return timeNow - timePrv >= 300
-}
-
-/**
- * 计算 QQ 等级图标
- * @param level QQ 等级
- * @returns 图标数量
- */
-export function qqLevelIcons(level) {
-    const result = {
-        crown: 0,  // 皇冠
-        sun: 0,    // 太阳
-        moon: 0,   // 月亮
-        star: 0    // 星星
-    };
-
-    result.crown = Math.floor(level / 64);
-    level %= 64;
-
-    result.sun = Math.floor(level / 16);
-    level %= 16;
-
-    result.moon = Math.floor(level / 4);
-    level %= 4;
-
-    result.star = level;
-
-    return result;
-}
-
-/**
- * 计算 QQ 等级表情
- * @param level QQ 等级
- * @returns 表情字符串
- */
-export function qqLevelToEmoji(level) {
-    const rawLevel = level
-    if (level <= 0) return level
-
-    const crown = Math.floor(level / 64);
-    level %= 64;
-
-    const sun = Math.floor(level / 16);
-    level %= 16;
-
-    const moon = Math.floor(level / 4);
-    level %= 4;
-
-    const star = level;
-
-    return '👑'.repeat(crown) + '☀️'.repeat(sun) + '🌙'.repeat(moon) + '⭐️'.repeat(star) + '（' + rawLevel + '）';
 }
 
 /**
