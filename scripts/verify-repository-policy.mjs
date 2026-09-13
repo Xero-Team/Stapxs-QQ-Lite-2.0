@@ -6,7 +6,9 @@ const root = process.cwd()
 const maxLines = Number(process.env.MAX_SOURCE_LINES ?? 3000)
 const sourceRoots = ['src', 'scripts', 'tests']
 const extensions = new Set(['.ts', '.tsx', '.vue', '.js', '.jsx', '.mjs', '.cjs'])
-const ignored = new Set(['node_modules', 'dist', 'out', 'coverage', '.git'])
+// Generated native/web bundles are build products, not maintainable source.
+// Exclude them so the size gate measures files that are actually reviewed.
+const ignored = new Set(['node_modules', 'dist', 'out', 'coverage', '.git', 'build', 'target', 'intermediates', 'assets'])
 
 function collect(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
