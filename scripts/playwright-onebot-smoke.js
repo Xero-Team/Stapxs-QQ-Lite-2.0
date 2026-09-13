@@ -40,11 +40,12 @@ async (page) => {
                     get_group_msg_history: { messages: [] },
                     send_private_msg: { message_id: 'mock-send-1' },
                     get_msg: { message_id: 'mock-send-1', user_id: 10001, message: [{ type: 'text', data: { text: 'hello from Playwright' } }] },
+                    delete_msg: null,
                     fetch_custom_face: [],
                     ...(backend === 'NapCat.Onebot' ? { get_recent_contact: [] } : {}),
                 }
                 const initializationActions = Object.keys(responses).filter((action) => ![
-                    'send_private_msg', 'get_msg', 'fetch_custom_face',
+                    'send_private_msg', 'get_msg', 'delete_msg', 'fetch_custom_face',
                     'get_friend_msg_history', 'get_group_msg_history',
                 ].includes(action))
                 let activeSocket
@@ -136,13 +137,40 @@ async (page) => {
                         sub_type: 'friend',
                         time: Math.floor(Date.now() / 1000),
                         self_id: 10001,
-                        user_id: 30003,
+                        user_id: 20002,
+                        sender: { user_id: 20002, nickname: 'Mock Friend' },
                         message_id: 30003001,
                         message: [{ type: 'text', data: { text: 'hello from OneBot' } }],
                         raw_message: 'hello from OneBot',
                     }))
-                    await smokePage.getByText('hello from OneBot', { exact: true }).waitFor()
+                    await smokePage.getByText('hello from OneBot', { exact: true }).first().waitFor()
                     messageFlow.received = true
+
+                    // Reply is selected from the rendered incoming message.
+                    // Run it before later messages can replace the current
+                    // transition-group entry during the synthetic flow.
+                    const incomingMessage = smokePage.getByText('hello from OneBot', { exact: true })
+                        .locator('xpath=ancestor::div[contains(@class, "message")]').first()
+                    await incomingMessage.click({ button: 'right' })
+                    const menu = smokePage.locator('#msgMenu')
+                    await menu.getByText('回复', { exact: true }).click()
+                    await smokePage.locator('.replay-tag.show').waitFor({ state: 'visible' })
+                    await input.fill('reply from Playwright')
+                    await input.press('Enter')
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        const replySent = requestPayloads.some((request) =>
+                            request.action === 'send_private_msg'
+                            && Array.isArray(request.params?.message)
+                            && request.params.message.some((segment) => segment?.type === 'reply'
+                                && String(segment?.data?.id) === '30003001'))
+                        if (replySent) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.replySent = requestPayloads.some((request) =>
+                        request.action === 'send_private_msg'
+                        && Array.isArray(request.params?.message)
+                        && request.params.message.some((segment) => segment?.type === 'reply'
+                            && String(segment?.data?.id) === '30003001'))
 
                     // Exercise the actual file input and ensure the outgoing
                     // OneBot payload contains an image segment. A tiny PNG
@@ -197,6 +225,34 @@ async (page) => {
                         request.action === 'send_private_msg'
                         && Array.isArray(request.params?.message)
                         && request.params.message.some((segment) => segment?.type === 'file'))
+
+                    // Confirm the pre-send item with a normal OneBot event
+                    // before exercising the self-message recall action.
+                    activeSocket?.send(JSON.stringify({
+                        post_type: 'message_sent',
+                        message_type: 'private',
+                        sub_type: 'friend',
+                        time: Math.floor(Date.now() / 1000),
+                        self_id: 10001,
+                        user_id: 10001,
+                        target_id: 20002,
+                        message_id: 10001001,
+                        sender: { user_id: 10001, nickname: 'Mock Login' },
+                        message: [{ type: 'text', data: { text: 'confirmed OneBot send' } }],
+                        raw_message: 'confirmed OneBot send',
+                    }))
+
+                    // Recall is only enabled after the fake pre-send message
+                    // is confirmed by the synthetic OneBot event above.
+                    const sentMessage = smokePage.locator('.message.me:not(.revoke)').first()
+                    await sentMessage.waitFor({ state: 'visible' })
+                    await sentMessage.click({ button: 'right' })
+                    await menu.getByText('撤回', { exact: true }).click()
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        if (requests.includes('delete_msg')) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.recalled = requests.includes('delete_msg')
                 }
 
                 // Validate the persisted account type through the public settings format.
@@ -224,7 +280,8 @@ async (page) => {
                     || externalRequests !== 0 || unexpectedRequests !== 0 || pageErrors !== 0
                     || (backend === 'Lagrange.OneBot' && accountId === 10001
                         && (!messageFlow.sent || !messageFlow.received
-                            || !messageFlow.imageSent || !messageFlow.fileSent))) {
+                            || !messageFlow.imageSent || !messageFlow.fileSent
+                            || !messageFlow.replySent || !messageFlow.recalled))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })

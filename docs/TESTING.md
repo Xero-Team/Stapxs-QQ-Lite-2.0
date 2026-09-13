@@ -39,10 +39,11 @@ requests, page exceptions, and incomplete login fail the script. It uses no real
 account or access token and blocks service workers in these scenarios to avoid
 testing a cached build.
 
-These mocks do not validate a live bot, reconnect/authentication failures, media,
-revoke/reply, settings migration, or native platforms. The OneBot smoke now
-also exercises synthetic UI send and server-pushed receive messages. The remaining
-checks stay open in `REFACTOR_CHECKLIST.md`. Repository-wide
+These mocks do not validate a live bot, reconnect/authentication failures, media
+reception/download, settings migration, or native platforms. The OneBot smoke
+exercises synthetic UI text/image/file sending, server-pushed receive messages,
+reply composition (including the OneBot `reply` segment), and confirmed-message
+recall (`delete_msg`). The remaining checks stay open in `REFACTOR_CHECKLIST.md`. Repository-wide
 ESLint and dependency-audit failures are tracked in `REFACTOR_BLOCKERS.md`;
 passing these focused regressions does not imply a passing release gate.
 
