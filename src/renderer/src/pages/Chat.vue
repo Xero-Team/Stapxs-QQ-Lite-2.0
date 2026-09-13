@@ -23,44 +23,7 @@
         @v-move-right.prevent="exitWin()">
         <slot name="chat-extra" />
         <!-- 聊天基本信息 -->
-        <div class="info">
-            <font-awesome-icon class="back" :icon="['fas', 'angle-left']" @click="exitWin" />
-            <img :src="chat.show.avatar">
-            <div class="info">
-                <p>
-                    {{ chat.show.name }}
-                    <template
-                        v-if="chat.show.type == 'group'">
-                        ({{
-                            chat.info.group_members.length
-                        }})
-                    </template>
-                </p>
-                <span v-if="chat.show.temp">
-                    {{ $t('来自群聊：{group}', { group: chat.show.temp }) }}
-                </span>
-                <span v-else>
-                    <template v-if="chat.show.appendInfo">
-                        {{ chat.show.appendInfo }}
-                    </template>
-                    <template v-else>
-                        {{
-                            list[list.length - 1] ? $t('上次消息 - {time}', {
-                                time: Intl.DateTimeFormat(trueLang, {
-                                    hour: 'numeric',
-                                    minute: 'numeric',
-                                    second: 'numeric',
-                                }).format(new Date((list[list.length - 1]?.time ?? 0) * 1000)),
-                            }) : $t('暂无消息')
-                        }}
-                    </template>
-                </span>
-            </div>
-            <div class="space" />
-            <div class="more">
-                <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" @click="openChatInfoPan" />
-            </div>
-        </div>
+        <ChatHeader :chat="chat" :list="list" @back="exitWin" @open-info="openChatInfoPan" />
         <!-- 加载中指示器 -->
         <div :class=" 'loading' + (uiStore.nowGetHistory && uiStore.canLoadHistory ? ' show' : '')">
             <font-awesome-icon :icon="['fas', 'spinner']" />
@@ -620,6 +583,7 @@ import { toBackgroundImageStyle } from '@renderer/function/utils/backgroundUtil'
 import { dbGetBefore, dbGetBeforeByTime, dbSearchMessages } from '@renderer/function/utils/localHistoryUtil'
 import Emoji from '@renderer/function/model/emoji'
 import EmojiFace from '@renderer/components/EmojiFace.vue'
+import ChatHeader from '@renderer/components/ChatHeader.vue'
 import { Img } from '@renderer/function/model/img'
 import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
 import { useConnectionStore } from '@renderer/state/connection'
