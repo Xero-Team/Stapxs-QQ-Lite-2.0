@@ -26,18 +26,18 @@ jobs:
               with:
                   submodules: recursive
                   persist-credentials: false
-            - name: 启用 Corepack
-              run: corepack enable
+            - name: 设置 pnpm
+              uses: pnpm/action-setup@v4
             - name: 设置 Nodejs
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: 'yarn'
+                  cache: pnpm
             - name: 更新依赖
-              run: yarn install --immutable --mode=skip-build
+              run: pnpm install --frozen-lockfile --ignore-scripts
             # 代码检查
             - name: 前端代码检查
-              run: yarn check
+              run: pnpm check
 
             - name: Tauri 代码检查
-              run: yarn lint:tauri
+              run: pnpm lint:tauri

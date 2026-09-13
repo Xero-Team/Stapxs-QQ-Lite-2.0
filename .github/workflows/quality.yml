@@ -18,44 +18,44 @@ jobs:
               with:
                   submodules: recursive
                   persist-credentials: false
-            - name: Setup Node 22 and Yarn 4
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+            - name: Setup Node 22
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: yarn
-            - name: Enable Corepack
-              run: corepack enable
+                  cache: pnpm
             - name: Install dependencies
-              run: yarn install --immutable --mode=skip-build
+              run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Check patch whitespace
               run: git diff --check
             - name: Verify repository policy
-              run: yarn verify:repository-policy
+              run: pnpm verify:repository-policy
             - name: TypeScript strict check
-              run: yarn typecheck
+              run: pnpm typecheck
             - name: Browser harness strict check
-              run: yarn typecheck:browser
+              run: pnpm typecheck:browser
             - name: Electron TypeScript check
               run: npx tsc --noEmit -p tsconfig.node.json
             - name: OneBot contract tests
-              run: yarn test:contract
+              run: pnpm test:contract
             - name: Lint protocol and platform primitives
-              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-auth-failure-smoke.js scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js scripts/playwright-storage-smoke.js
+              run: pnpm exec eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-auth-failure-smoke.js scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js scripts/playwright-storage-smoke.js
             - name: Generate dependency inventory and SBOM
-              run: yarn sbom
+              run: pnpm sbom
             - name: Web build
-              run: yarn build
+              run: pnpm build
             - name: Verify SBOM, licenses and CSP
-              run: yarn verify:release-metadata dist
+              run: pnpm verify:release-metadata dist
             - name: Electron renderer build
-              run: yarn electron-vite build
+              run: pnpm exec electron-vite build
               env:
                   DESKTOP: '1'
             - name: Install Chromium for Playwright smoke
               run: npx --yes --package @playwright/cli@0.1.19 playwright-cli install-browser --with-deps chromium
             - name: Start Web preview
               run: |
-                  yarn preview --host 127.0.0.1 --strictPort > /tmp/xero-qq-lite-preview.log 2>&1 &
+                  pnpm preview --host 127.0.0.1 --strictPort > /tmp/xero-qq-lite-preview.log 2>&1 &
                   for attempt in $(seq 1 30); do
                     curl --fail --silent http://127.0.0.1:4173/ >/dev/null && exit 0
                     sleep 1
@@ -92,7 +92,7 @@ jobs:
             - name: Playwright OneBot login smoke
               run: bash scripts/playwright-onebot-smoke.sh
             - name: Rust check
-              run: yarn lint:tauri
+              run: pnpm lint:tauri
 
     dependency-audit:
         # Audit failures must still fail the workflow without skipping browser coverage.
@@ -103,14 +103,14 @@ jobs:
               uses: actions/checkout@v4
               with:
                   persist-credentials: false
-            - name: Setup Node 22 and Yarn 4
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+            - name: Setup Node 22
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: yarn
-            - name: Enable Corepack
-              run: corepack enable
+                  cache: pnpm
             - name: Install dependencies
-              run: yarn install --immutable --mode=skip-build
+              run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Dependency audit
-              run: yarn npm audit --all --recursive
+              run: pnpm audit --recursive

@@ -25,13 +25,13 @@ jobs:
               with:
                   submodules: recursive
                   persist-credentials: false
+            - name: 设置 pnpm
+              uses: pnpm/action-setup@v4
             - name: 设置 Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: yarn
-            - name: 启用 Corepack
-              run: corepack enable
+                  cache: pnpm
             - name: 设置 Java
               uses: actions/setup-java@v4
               with:
@@ -39,17 +39,17 @@ jobs:
                   java-version: '21'
                   cache: gradle
             - name: 安装依赖
-              run: yarn install --immutable --mode=skip-build
+              run: pnpm install --frozen-lockfile --ignore-scripts
             - name: 构建 Android
               env:
                   KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
                   KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
               run: |
                   if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEYSTORE_ALIAS_PASSWORD" ]; then
-                    yarn build:android
+                    pnpm build:android
                   else
                     echo "No Android signing secrets; producing an unsigned release APK."
-                    yarn build:android:unsigned
+                    pnpm build:android:unsigned
                   fi
             - name: 收集 Android 产物
               run: |
