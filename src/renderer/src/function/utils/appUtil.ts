@@ -48,6 +48,15 @@ import { createEmptyJsonPathMap, normalizeJsonPathMap } from '@renderer/protocol
 import { useStayEvent } from './stayEvent'
 export { useStayEvent } from './stayEvent'
 
+interface SafeAreaInsets { top: number; right: number; bottom: number; left: number }
+function asSafeAreaInsets(value: unknown): SafeAreaInsets | undefined {
+    if (typeof value !== 'object' || value === null) return undefined
+    const record = value as Record<string, unknown>
+    return ['top', 'right', 'bottom', 'left'].every((key) => typeof record[key] === 'number')
+        ? { top: record.top as number, right: record.right as number, bottom: record.bottom as number, left: record.left as number }
+        : undefined
+}
+
 const popInfo = new PopInfo()
 const logger = new Logger()
 
@@ -686,7 +695,7 @@ export async function loadMobile() {
                 sendMore.style.paddingBottom = '105px'
             }
 
-            const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+            const safeArea = asSafeAreaInsets(await backend.call('SafeArea', 'getSafeArea', true))
             const tabBar = document.getElementsByTagName('ul')[0]
             // iOS 26 后键盘背景是半透明的，不能让 webview 调整高度，会漏出背景的黑色
             // 干脆把所有的 iOS 版本处理方法都改为内部避让
@@ -694,7 +703,7 @@ export async function loadMobile() {
                 const baseApp = document.getElementById('base-app')
                 // 使用键盘高度减去底部安全区域，不添加额外偏移量
                 // 避免硬编码的 +100 导致 WebView 定位错误，引发键盘焦点丢失
-                const keyboardOffset = Math.max(0, keyboardHeight - safeArea.bottom)
+                const keyboardOffset = Math.max(0, keyboardHeight - (safeArea?.bottom ?? 0))
                 if (safeArea && baseApp) {
                     baseApp.style.setProperty('--safe-area-bottom', keyboardOffset + 'px')
                 }
@@ -718,7 +727,7 @@ export async function loadMobile() {
             }
             if (backend.platform == 'ios') {
                 const baseApp = document.getElementById('base-app')
-                const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+                const safeArea = asSafeAreaInsets(await backend.call('SafeArea', 'getSafeArea', true))
                 if (safeArea && baseApp) {
                     baseApp.style.setProperty('--safe-area-bottom', safeArea.bottom + 'px')
                 }
