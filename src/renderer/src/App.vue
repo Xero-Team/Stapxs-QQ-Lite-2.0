@@ -11,26 +11,13 @@
     <div v-if="tags.musicLyric != ''" class="lyric-bar">
         {{ tags.musicLyric }}
     </div>
-    <div v-if="['linux', 'win32'].includes(backend.platform ?? '')"
-        :class="['top-bar', {
-            'win': backend.platform == 'win32' && dev
-        }]"
-        name="appbar"
-        data-tauri-drag-region="true"
-        @mousedown="handleAppbarMouseDown">
-        <div class="bar-button" @click="barMainClick()" />
-        <div class="space" />
-        <div class="controller">
-            <div class="min" @click="controllWin('minimize')">
-                <font-awesome-icon :icon="['fas', 'minus']" />
-            </div>
-            <div class="close" @click="controllWin('close')">
-                <font-awesome-icon :icon="['fas', 'xmark']" />
-            </div>
-        </div>
-    </div>
-    <div v-if="backend.platform == 'darwin'" class="controller mac-controller"
-        data-tauri-drag-region="true" />
+    <AppWindowBar
+        :platform="backend.platform"
+        :dev="dev"
+        @home="barMainClick"
+        @minimize="controllWin('minimize')"
+        @close="controllWin('close')"
+        @drag="handleAppbarMouseDown" />
     <div id="load-view" class="load-view">
         <font-awesome-icon :icon="['fas', 'circle-notch']" />
     </div>
@@ -338,6 +325,7 @@ import GlobalSessionSearchBar from './components/GlobalSessionSearchBar.vue'
 import NtViewer from './components/ViewerCom.vue'
 import Tooltips from './components/tooltip/Tooltips.vue'
 import AppNotifications from './components/AppNotifications.vue'
+import AppWindowBar from './components/AppWindowBar.vue'
 import { useQzoneStore } from './state/qzone'
 
 // 注册组件实例
@@ -951,9 +939,9 @@ onMounted(() => {
         // Capacitor：移动端初始化安全区域
         if (backend.isMobile()) {
             // 我把 viewer 挂在 body 上，所以css也得改到 body 上
-            const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+            const safeArea = await App.getSafeAreaInsets()
             if (safeArea) {
-                logger.add(LogType.DEBUG, '安全区域：', safeArea)
+                logger.add(LogType.DEBUG, '安全区域：', { top: '[ok]', right: '[ok]', bottom: '[ok]', left: '[ok]' })
                 document.body.style.setProperty('--safe-area-top', safeArea.top + 'px')
                 document.body.style.setProperty('--safe-area-bottom', safeArea.bottom + 'px')
                 document.body.style.setProperty('--safe-area-left', safeArea.left + 'px')

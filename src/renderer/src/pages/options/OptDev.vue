@@ -304,7 +304,7 @@
     import { BrowserInfo, detect } from 'detect-browser'
     import { BotMsgType } from '@renderer/function/elements/information'
     import { uptime } from '@renderer/main'
-    import { loadJsonMap } from '@renderer/function/utils/appUtil'
+    import { getSafeAreaInsets, loadJsonMap } from '@renderer/function/utils/appUtil'
     import { backend } from '@renderer/runtime/backend'
     import RawMsgRenderPreviewPan from '@renderer/components/RawMsgRenderPreviewPan.vue'
     import { useSettingsStore } from '@renderer/state/settings'
@@ -393,7 +393,7 @@
             if (switcher) {
                 (switcher as HTMLDivElement).click()
             // safeArea
-            backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
+            getSafeAreaInsets().then((safeArea) => {
                 if (safeArea) {
                     const vcPanel = document.getElementById('__vconsole')?.getElementsByClassName('vc-panel')[0]
                     if (vcPanel) {
@@ -487,7 +487,7 @@
 
         // capactior：索要 safeArea
         if (backend.isMobile()) {
-            const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+            const safeArea = await getSafeAreaInsets()
             if (safeArea) {
                 // 按照前端习惯，这儿的 safeArea 顺序是 top, right, bottom, left
                 const safeAreaStr = safeArea.top + ', ' + safeArea.right + ', ' + safeArea.bottom + ', ' + safeArea.left

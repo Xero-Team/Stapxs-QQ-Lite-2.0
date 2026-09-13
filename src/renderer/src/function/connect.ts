@@ -25,6 +25,7 @@ import { useConnectionStore } from '@renderer/state/connection'
 import { HttpTransport, ReconnectingTransport, SseTransport, TransportError, WebSocketTransport } from '@renderer/transport/transport'
 import { getJsonPathEntry } from '@renderer/protocol/json-map'
 import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
+import { ONEBOT_NATIVE_COMMANDS } from '@renderer/runtime/onebotNative'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -138,7 +139,7 @@ export class Connector {
         // Electron 默认使用后端连接模式
         if (!backend.isWeb()) {
             logger.add(LogType.WS, '使用后端连接模式')
-            backend.call('Onebot', 'onebot:connect', false,
+            backend.call('Onebot', ONEBOT_NATIVE_COMMANDS.connect, false,
                 backend.isDesktop() ?  { address: address, token: token, } : { url: appendAccessToken(address, token) })
             return
         }
@@ -377,7 +378,7 @@ export class Connector {
         forceCloseReason = undefined
 
         if(!backend.isWeb()) {
-            backend.call('Onebot', 'onebot:close', false)
+            backend.call('Onebot', ONEBOT_NATIVE_COMMANDS.close, false)
         } else {
             popInfo.add(
                 PopType.INFO,
@@ -524,7 +525,7 @@ export class Connector {
         const json = JSON.stringify(actionData)
         // 发送
         if(!backend.isWeb()) {
-            backend.call('Onebot', 'onebot:send', false, json)
+            backend.call('Onebot', ONEBOT_NATIVE_COMMANDS.send, false, json)
         } else if (webSocketTransport) {
             void webSocketTransport.send(actionData).catch((error: unknown) => {
                 logger.error(error instanceof Error ? error : new Error('WebSocket transport failed'), '发送消息失败')

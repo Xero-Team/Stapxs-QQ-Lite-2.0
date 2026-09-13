@@ -17,8 +17,8 @@ project(':capacitor-status-bar').projectDir = new File('../../../node_modules/@c
 include ':capgo-capacitor-navigation-bar'
 project(':capgo-capacitor-navigation-bar').projectDir = new File('../../../node_modules/@capgo/capacitor-navigation-bar/android')
 
-include ':untiny-capacitor-safe-area'
-project(':untiny-capacitor-safe-area').projectDir = new File('../../../node_modules/@untiny/capacitor-safe-area/android')
+include ':capacitor-plugin-safe-area'
+project(':capacitor-plugin-safe-area').projectDir = new File('../../../node_modules/capacitor-plugin-safe-area/android')
 
 include ':capacitor-onebot-connctor'
 project(':capacitor-onebot-connctor').projectDir = new File('../../../ssqq.capacitor-onebot-connector/android')

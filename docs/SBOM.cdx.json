@@ -623,25 +623,6 @@
     },
     {
       "type": "library",
-      "name": "@untiny/capacitor-safe-area",
-      "version": "1.0.3",
-      "licenses": [
-        {
-          "license": {
-            "name": "MIT"
-          }
-        }
-      ],
-      "purl": "pkg:npm/@untiny/capacitor-safe-area@1.0.3",
-      "properties": [
-        {
-          "name": "xero:dependency-scope",
-          "value": "devDependencies"
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "@vitejs/plugin-vue",
       "version": "6.0.8",
       "licenses": [
@@ -804,6 +785,25 @@
         }
       ],
       "purl": "pkg:npm/capacitor-onebot-connctor@0.0.1",
+      "properties": [
+        {
+          "name": "xero:dependency-scope",
+          "value": "devDependencies"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "capacitor-plugin-safe-area",
+      "version": "5.0.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/capacitor-plugin-safe-area@5.0.1",
       "properties": [
         {
           "name": "xero:dependency-scope",

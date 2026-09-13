@@ -47,14 +47,22 @@ import { Notify } from '../notify'
 import { createEmptyJsonPathMap, normalizeJsonPathMap } from '@renderer/protocol/json-map'
 import { useStayEvent } from './stayEvent'
 export { useStayEvent } from './stayEvent'
+import { ONEBOT_NATIVE_COMMANDS } from '@renderer/runtime/onebotNative'
 
-interface SafeAreaInsets { top: number; right: number; bottom: number; left: number }
-function asSafeAreaInsets(value: unknown): SafeAreaInsets | undefined {
+export interface SafeAreaInsets { top: number; right: number; bottom: number; left: number }
+export function asSafeAreaInsets(value: unknown): SafeAreaInsets | undefined {
     if (typeof value !== 'object' || value === null) return undefined
     const record = value as Record<string, unknown>
-    return ['top', 'right', 'bottom', 'left'].every((key) => typeof record[key] === 'number')
-        ? { top: record.top as number, right: record.right as number, bottom: record.bottom as number, left: record.left as number }
+    const candidate = typeof record.insets === 'object' && record.insets !== null
+        ? record.insets as Record<string, unknown>
+        : record
+    return ['top', 'right', 'bottom', 'left'].every((key) => typeof candidate[key] === 'number')
+        ? { top: candidate.top as number, right: candidate.right as number, bottom: candidate.bottom as number, left: candidate.left as number }
         : undefined
+}
+
+export async function getSafeAreaInsets(): Promise<SafeAreaInsets | undefined> {
+    return asSafeAreaInsets(await backend.call('SafeArea', 'getSafeAreaInsets', true))
 }
 
 const popInfo = new PopInfo()
@@ -557,17 +565,17 @@ export function createIpc() {
         new Notify().closeAll(userId)
     })
     // 后端连接模式
-    backend.addListener(undefined, 'onebot:onopen', (event: RuntimeRecord, data?: RuntimeRecord) => {
+    backend.addListener(undefined, ONEBOT_NATIVE_COMMANDS.onOpen, (event: RuntimeRecord, data?: RuntimeRecord) => {
         const info = runtimePayload(event, data)
         const address = runtimeString(info.address) ?? login.address
         const token = runtimeString(info.token)
         Connector.onopen(address, token)
     })
-    backend.addListener(undefined, 'onebot:onmessage', (event: RuntimeRecord, message?: unknown) => {
+    backend.addListener(undefined, ONEBOT_NATIVE_COMMANDS.onMessage, (event: RuntimeRecord, message?: unknown) => {
         const payload = runtimeString(message) ?? runtimeString(event.payload)
         if (payload !== undefined) Connector.onmessage(payload)
     })
-    backend.addListener(undefined, 'onebot:onclose', (event: RuntimeRecord, data?: RuntimeRecord) => {
+    backend.addListener(undefined, ONEBOT_NATIVE_COMMANDS.onClose, (event: RuntimeRecord, data?: RuntimeRecord) => {
         const info = runtimePayload(event, data)
         const code = runtimeNumber(info.code)
         const reason = runtimeString(info.reason) ?? runtimeString(info.message)
@@ -585,7 +593,7 @@ export async function loadMobile() {
     // Capacitor：相关初始化
     if (backend.isMobile()) {
         // 注册回调监听
-        backend.addListener('Onebot', 'onebot:event', (data: RuntimeRecord) => {
+        backend.addListener('Onebot', ONEBOT_NATIVE_COMMANDS.capacitorEvent, (data: RuntimeRecord) => {
             const rawData = runtimeString(data.data)
             const eventType = runtimeString(data.type)
             if (rawData === undefined || eventType === undefined) return
@@ -695,7 +703,7 @@ export async function loadMobile() {
                 sendMore.style.paddingBottom = '105px'
             }
 
-            const safeArea = asSafeAreaInsets(await backend.call('SafeArea', 'getSafeArea', true))
+                const safeArea = await getSafeAreaInsets()
             const tabBar = document.getElementsByTagName('ul')[0]
             // iOS 26 后键盘背景是半透明的，不能让 webview 调整高度，会漏出背景的黑色
             // 干脆把所有的 iOS 版本处理方法都改为内部避让
@@ -727,7 +735,7 @@ export async function loadMobile() {
             }
             if (backend.platform == 'ios') {
                 const baseApp = document.getElementById('base-app')
-                const safeArea = asSafeAreaInsets(await backend.call('SafeArea', 'getSafeArea', true))
+            const safeArea = await getSafeAreaInsets()
                 if (safeArea && baseApp) {
                     baseApp.style.setProperty('--safe-area-bottom', safeArea.bottom + 'px')
                 }
