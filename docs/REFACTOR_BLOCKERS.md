@@ -1,5 +1,9 @@
 # Refactor blockers
 
+## 2026-09-13 incremental evidence
+
+- Runtime-scoped Pinia state now has typed reset actions for authentication, contacts, connections, chat messages, Qzone, stickers, and session history. `resetRimtime(true)` delegates to those actions, and history/terminal/chat message-list clearing uses the Chat store mutation API. Web typecheck, browser harness typecheck, `check`, production build, Tauri lint, 79 contract tests, repository policy, SBOM/license/CSP metadata, and 90-file artifact checksum verification pass after this change.
+
 ## 2026-09-12
 
 - Capacitor navigation-bar peer incompatibility resolved on 2026-09-13 by replacing the Capacitor 4–6-only `@hugotomazi/capacitor-navigation-bar` with `@capgo/capacitor-navigation-bar` 8.2.7 (peer `@capacitor/core >=8`). Android Gradle and iOS Pod references were migrated; Web build, core typecheck, and 77 contract tests pass. Native device builds remain covered by the cross-platform CI matrix.
