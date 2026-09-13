@@ -43,7 +43,7 @@
 ## 5. 数据与协议层
 
 - [x] 建立 OneBot schema 包：事件/API 请求响应使用 Zod；必要时评估 protobuf 仅用于明确的高吞吐内部通道，不改变 OneBot 公共 JSON 协议。
-- [x] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。实现位于 `src/renderer/src/transport/transport.ts`，并由 9 项 transport 契约测试覆盖；真实 OneBot 服务联调仍由发布验证矩阵负责。
+- [x] 将 WebSocket、SSE、HTTP 抽象为同一 Transport；实现心跳、指数退避、取消、超时、鉴权和重连状态机。实现位于 `src/renderer/src/transport/transport.ts`，并由 11 项 transport 契约测试覆盖；真实 OneBot 服务联调仍由发布验证矩阵负责。
 - [x] 用 Dexie/idb 迁移聊天历史、缓存和设置；设计版本化 schema、迁移、导出/清除和容量策略。
 - [x] 消息解析、CQ 码、媒体 URL、转发消息全部使用纯函数和兼容性测试。
 
