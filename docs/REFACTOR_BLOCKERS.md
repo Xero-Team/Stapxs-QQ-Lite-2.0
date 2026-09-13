@@ -91,6 +91,12 @@
   metadata, release metadata, and 92-file artifact checksums pass. Roll back
   with `yarn up @electron-toolkit/preload@^3.0.0`; the optional `sharp`
   postinstall failure remains environment-specific.
+- `@electron-toolkit/eslint-config` was upgraded independently from 1.0.2 to
+  2.1.0. The flat configuration remains warning-only for legacy formatting;
+  Web/Node/core/browser typechecks, contract tests, production and Electron
+  builds, Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file
+  artifact checksums pass. Roll back with `yarn up
+  @electron-toolkit/eslint-config@^1.0.2`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item

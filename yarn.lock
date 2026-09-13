@@ -1666,12 +1666,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-toolkit/eslint-config@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@electron-toolkit/eslint-config@npm:1.0.2"
+"@electron-toolkit/eslint-config@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@electron-toolkit/eslint-config@npm:2.1.0"
+  dependencies:
+    "@eslint/js": "npm:^9.24.0"
+    globals: "npm:^16.0.0"
   peerDependencies:
-    eslint: ">= 8.0.0"
-  checksum: 10c0/078d67a8898c26100fd85568b5416521066434279c14525802ee7456c7fb3433177e5d531a62ea2d8ec9a63e61f86f17dd492b4d1162651225db5c4dafe67e45
+    eslint: ">=9.0.0"
+  checksum: 10c0/7e26c43bb4da584db505cb21c748c0aacfd4223636317c926ba2bf41c93f6622b86fb5ef42bdfea3fa79d4bd75f8138d0bf1d4d924e2e95a18eb2a149f5d91b9
   languageName: node
   linkType: hard
 
@@ -2273,7 +2276,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:9.39.5":
+"@eslint/js@npm:9.39.5, @eslint/js@npm:^9.24.0":
   version: 9.39.5
   resolution: "@eslint/js@npm:9.39.5"
   checksum: 10c0/49894e98ba313a7d3bfb1b20d55c0f9826be45a7db876fd84e533ac7f101b1d95b51cd22c6a6db3a45066b9c0d068c31b4a22fa0db8a6cc8744a25540efdb824
@@ -8473,6 +8476,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"globals@npm:^16.0.0":
+  version: 16.5.0
+  resolution: "globals@npm:16.5.0"
+  checksum: 10c0/615241dae7851c8012f5aa0223005b1ed6607713d6813de0741768bd4ddc39353117648f1a7086b4b0fa45eae733f1c0a0fe369aa4e543bb63f8de8990178ea9
+  languageName: node
+  linkType: hard
+
 "globalthis@npm:^1.0.1, globalthis@npm:^1.0.4":
   version: 1.0.4
   resolution: "globalthis@npm:1.0.4"
@@ -14551,7 +14561,7 @@ __metadata:
     "@capacitor/local-notifications": "npm:^8.3.1"
     "@capacitor/status-bar": "npm:^8.0.3"
     "@capgo/capacitor-navigation-bar": "npm:^8.2.7"
-    "@electron-toolkit/eslint-config": "npm:^1.0.2"
+    "@electron-toolkit/eslint-config": "npm:^2.1.0"
     "@electron-toolkit/eslint-config-ts": "npm:^2.0.0"
     "@electron-toolkit/preload": "npm:^3.0.2"
     "@electron-toolkit/tsconfig": "npm:^2.0.0"

@@ -83,7 +83,7 @@
     "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/status-bar": "^8.0.3",
     "@capgo/capacitor-navigation-bar": "^8.2.7",
-    "@electron-toolkit/eslint-config": "^1.0.2",
+    "@electron-toolkit/eslint-config": "^2.1.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.0",
