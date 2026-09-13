@@ -2,6 +2,13 @@
 
 ## 2026-09-13 incremental evidence
 
+- Vitest was upgraded independently from 3.2.6 to 5.0.0 (commit-local
+  rollback is `yarn up vitest@^3.2.6`). The contract suite, Web typecheck,
+  browser harness typecheck, repository check, production build, SBOM/license
+  generation, release metadata/CSP verification, and 90-file checksum pass.
+  The immutable Yarn link step still exits on this workstation because the
+  optional `sharp@0.32.6` native postinstall cannot build; tests and builds use
+  the already-linked JavaScript packages successfully.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
@@ -137,10 +144,10 @@ current result are recorded below.
 ## Dependency audit refresh (2026-09-13, latest local run)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
-`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 3.2.6. A fresh
-recursive audit using the repository Yarn 4.12.0 entrypoint exits 1 with 132
+`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 5.0.0. A fresh
+recursive audit using the repository Yarn 4.12.0 entrypoint exits 1 with 131
 advisory entries across the current dependency graph: 2 critical, 79 high,
-46 moderate, and 6 low. The report includes repeated package/version paths, so
+44 moderate, and 6 low. The report includes repeated package/version paths, so
 the count is an advisory-path count rather than a unique CVE count. Remaining
 exposure is primarily transitive build tooling (`sharp`, `tar`, `postcss`,
 `nanoid`, Rollup), `@xmldom/xmldom`, the Vitest mocker range, `underscore`

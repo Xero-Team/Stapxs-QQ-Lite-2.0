@@ -1346,7 +1346,7 @@
     {
       "type": "library",
       "name": "vitest",
-      "version": "3.2.7",
+      "version": "5.0.0",
       "licenses": [
         {
           "license": {
@@ -1354,7 +1354,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vitest@3.2.7",
+      "purl": "pkg:npm/vitest@5.0.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
