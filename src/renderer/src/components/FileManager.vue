@@ -140,9 +140,8 @@
         const onprocess = (event: ProgressEvent & { payload?: ProgressEvent }) => {
             const index = downloadTasksState.value.findIndex(t => t.id === task.id)
             // 忽略已取消、已完成或不存在的任务
-            if (index === -1 ||
-                downloadTasksState.value[index].status === 'cancelled' ||
-                downloadTasksState.value[index].status === 'completed') {
+            const existingTask = index === -1 ? undefined : downloadTasksState.value[index]
+            if (!existingTask || existingTask.status === 'cancelled' || existingTask.status === 'completed') {
                 return undefined
             }
 
@@ -150,7 +149,7 @@
             const total = event.total || info.fileSize
 
             // 创建新对象以触发响应式更新
-            const currentTask = { ...downloadTasksState.value[index] }
+            const currentTask: TransferTask = { ...existingTask }
             currentTask.downloaded = loaded
             currentTask.fileSize = total
             currentTask.progress = total > 0 ? Math.round((loaded / total) * 100) : 0
@@ -253,11 +252,12 @@
         // 执行上传
         const onProgress = (loaded: number, total: number) => {
             const index = uploadTasksState.value.findIndex(t => t.id === task.id)
-            if (index === -1 || uploadTasksState.value[index].status === 'cancelled') {
+            const existingTask = index === -1 ? undefined : uploadTasksState.value[index]
+            if (!existingTask || existingTask.status === 'cancelled') {
                 return
             }
             // 创建新对象以触发响应式更新
-            const currentTask = { ...uploadTasksState.value[index] }
+            const currentTask: TransferTask = { ...existingTask }
             currentTask.uploaded = loaded
             currentTask.fileSize = total
             currentTask.progress = total > 0 ? Math.round((loaded / total) * 100) : 0
@@ -281,8 +281,9 @@
      */
     export const completeUploadTask = (taskId: string) => {
         const index = uploadTasksState.value.findIndex(t => t.id === taskId)
-        if (index !== -1 && uploadTasksState.value[index].status !== 'cancelled') {
-            const task = { ...uploadTasksState.value[index] }
+        const existingTask = index === -1 ? undefined : uploadTasksState.value[index]
+        if (existingTask && existingTask.status !== 'cancelled') {
+            const task: TransferTask = { ...existingTask }
             task.status = 'completed'
             task.progress = 100
             task.updatedAt = Date.now()
@@ -299,8 +300,9 @@
      */
     export const failUploadTask = (taskId: string, error: string) => {
         const index = uploadTasksState.value.findIndex(t => t.id === taskId)
-        if (index !== -1 && uploadTasksState.value[index].status !== 'cancelled') {
-            const task = { ...uploadTasksState.value[index] }
+        const existingTask = index === -1 ? undefined : uploadTasksState.value[index]
+        if (existingTask && existingTask.status !== 'cancelled') {
+            const task: TransferTask = { ...existingTask }
             task.status = 'failed'
             task.error = error
             task.updatedAt = Date.now()
@@ -316,8 +318,9 @@
      */
     export const cancelUploadTask = (taskId: string) => {
         const index = uploadTasksState.value.findIndex(t => t.id === taskId)
-        if (index !== -1) {
-            const task = { ...uploadTasksState.value[index] }
+        const existingTask = index === -1 ? undefined : uploadTasksState.value[index]
+        if (existingTask) {
+            const task: TransferTask = { ...existingTask }
             task.status = 'cancelled'
             task.updatedAt = Date.now()
             uploadTasksState.value[index] = task

@@ -426,6 +426,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         if (!feedId || !input.files || input.files.length <= 0) return
 
         const file = input.files[0]
+        if (!file) return
         if (!file.type.includes('image/') || file.size === 0) {
             input.value = ''
             activeReplyImageFeedId.value = null

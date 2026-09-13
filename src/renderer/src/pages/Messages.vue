@@ -55,7 +55,7 @@
                             always_top: true,
                             nickname: $t('系统通知'),
                             remark: $t('系统通知'),
-                            raw_msg: contactStore.systemNoticesList[0].comment
+                            raw_msg: contactStore.systemNoticesList[0]?.comment ?? ''
                         }"
                         @click="systemNoticeClick"
                         @contextmenu.prevent="systemNoticeMenuShow($event)"
@@ -72,9 +72,9 @@
                             always_top: true,
                             nickname: $t('群收纳盒'),
                             remark: $t('群收纳盒'),
-                            time: contactStore.groupAssistList[0].time,
-                            raw_msg: contactStore.groupAssistList[0].group_name + ': ' +
-                                (contactStore.groupAssistList[0].raw_msg_base ?? '')
+                            time: contactStore.groupAssistList[0]?.time ?? 0,
+                            raw_msg: (contactStore.groupAssistList[0]?.group_name ?? '') + ': ' +
+                                (contactStore.groupAssistList[0]?.raw_msg_base ?? '')
                         }"
                         @click="showGroupAssistCheck" />
                     <!-- 其他消息 -->
@@ -298,7 +298,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                     item.new_msg = false
                     contactStore.newMsgCount--
                 }
-                item.highlight = undefined
+                delete item.highlight
                 contactStore.baseOnMsgList.set(id, item)
                 // 关闭所有通知
                 new Notify().closeAll((item.group_id ?? item.user_id).toString())
@@ -378,7 +378,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                 item.new_msg = false
                 contactStore.newMsgCount--
             }
-            item.highlight = undefined
+            delete item.highlight
             contactStore.baseOnMsgList.set(id, item)
         }
         // 标记消息已读
@@ -602,8 +602,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         const info = {
             show: true,
             point: {
-                x: event.targetTouches[0].pageX,
-                y: event.targetTouches[0].pageY,
+            x: event.targetTouches[0]?.pageX ?? 0,
+            y: event.targetTouches[0]?.pageY ?? 0,
             },
         }
         showMenu.value = true

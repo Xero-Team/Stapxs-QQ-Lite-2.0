@@ -96,8 +96,9 @@ function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
         )
         if (taill && taill != '') {
             for (let i = back.length - 1; i >= 0; i--) {
-                if (back[i].type == 'text') {
-                    back[i].text = back[i].text + taill
+                const segment = back[i]
+                if (segment?.type == 'text') {
+                    segment.text = segment.text + taill
                     break
                 }
             }
@@ -127,11 +128,12 @@ function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
                     back += cutMsg
                 }
                 // 添加后段特殊消息
-                if (cache[index] !== null) {
-                    let cqstr = '[CQ:' + cache[index].type
-                    Object.keys(cache[index]).forEach((item) => {
+                const segment = cache[index]
+                if (segment) {
+                    let cqstr = '[CQ:' + segment.type
+                    Object.keys(segment).forEach((item) => {
                         if (item !== 'type') {
-                            cqstr += ',' + item + '=' + cache[index][item]
+                            cqstr += ',' + item + '=' + segment[item]
                         }
                     })
                     back += cqstr + ']'

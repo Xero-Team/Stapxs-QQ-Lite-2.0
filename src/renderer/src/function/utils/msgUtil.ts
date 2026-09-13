@@ -74,7 +74,7 @@ export function getMsgData(
                                     let nameKey = listMap[key]
                                     let regexKey: string | null = null
                                     if (nameKey.indexOf('@') > -1) {
-                                        const [name, key] = nameKey.split('@')
+                                        const [name = '', key = null] = nameKey.split('@')
                                         nameKey = name
                                         regexKey = key
                                     }
@@ -183,16 +183,19 @@ export function parseMsgList(
         case BotMsgType.CQCode: {
             // 这儿会默认处理成 oicq2 的格式，所以 CQCode 消息请使用 oicq2 配置文件修改
             for (let i = 0; i < records.length; i++) {
-                records[i] = parseCQ(records[i])
+                const record = records[i]
+                if (record) records[i] = parseCQ(record)
             }
             break
         }
         case BotMsgType.Array: {
             // 非扁平化消息体，这儿会取 _type 后半段的 JSON Path 将结果并入 message
             for (let i = 0; i < records.length; i++) {
-                let msgList = records[i].message
+                const record = records[i]
+                if (!record) continue
+                let msgList = record.message
                 if (msgList == undefined) {
-                    msgList = records[i].content
+                    msgList = record.content
                 }
                 if (!Array.isArray(msgList)) {
                     continue
@@ -218,11 +221,13 @@ export function parseMsgList(
     // 消息字段的标准化特殊处理
     if (valueMap != undefined) {
             for (let i = 0; i < records.length; i++) {
+            const record = records[i]
+            if (!record) continue
             Object.entries(valueMap).forEach(([type, values]) => {
                 Object.entries(values).forEach(([key, value]) => {
-                    let content = records[i].message
+                    let content = record.message
                     if (content == undefined) {
-                        content = records[i].content
+                        content = record.content
                     }
                     if (!Array.isArray(content)) {
                         return
@@ -238,25 +243,25 @@ export function parseMsgList(
                         }
                     })
                     // 其他处理
-                    if (records[i].content != undefined) {
+                    if (record.content != undefined) {
                         // 把 content 改成 message
-                        records[i].message = content
-                        delete records[i].content
+                        record.message = content
+                        delete record.content
                         // 添加一个 sender.user_id 为 user_id
-                        records[i].sender = {
-                            user_id: records[i].user_id,
-                            nickname: records[i].nickname,
+                        record.sender = {
+                            user_id: record.user_id,
+                            nickname: record.nickname,
                         }
                     }
                 })
             })
             // 补充 infoList
             const infoList = getMsgData(
-                'message_info', records[i],
+                'message_info', record,
                 authStore.jsonMap.message_info as unknown as Parameters<typeof getMsgData>[2],
             )
             if (infoList != undefined) {
-                records[i].infoList = infoList[0]
+                record.infoList = infoList[0]
             }
         }
     }
@@ -276,10 +281,12 @@ export function getMsgRawTxt(data: JsonRecord): string {
     const fromId = data.group_id ?? data.user_id
     let back = ''
     for (let i = 0; i < message.length; i++) {
+        const segment = message[i]
+        if (!segment) continue
         try {
-            switch (message[i].type) {
+            switch (segment.type) {
                 case 'at':
-                    if (typeof message[i].text !== 'string') {
+                    if (typeof segment.text !== 'string') {
                         // 群内才可以 at，如果 at 消息中没有 text 字段
                         // 尝试去群成员列表中找到对应的昵称，群成员列表只在当前打开的群才有
                         if (
@@ -288,7 +295,7 @@ export function getMsgRawTxt(data: JsonRecord): string {
                         ) {
                             const user =
                                 chatStore.chatInfo.info.group_members.find(
-                                    (item) => item.user_id == message[i].qq,
+                                    (item) => item.user_id == segment.qq,
                                 )
                             if (user) {
                                 back +=
@@ -301,7 +308,7 @@ export function getMsgRawTxt(data: JsonRecord): string {
                     }
                 // eslint-disable-next-line
                 case 'text':
-                    back += String(message[i].text ?? '')
+                    back += String(segment.text ?? '')
                         .replaceAll('\n', ' ')
                         .replaceAll('\r', ' ')
                     break
@@ -312,11 +319,11 @@ export function getMsgRawTxt(data: JsonRecord): string {
                     back += '[' + $t('表情') + ']'
                     break
                 case 'bface':
-                    back += String(message[i].text ?? '')
+                    back += String(segment.text ?? '')
                     break
                 case 'image':
                     back +=
-                        (typeof message[i].summary !== 'string' || message[i].summary === '') ? '[' + $t('图片') + ']' : message[i].summary
+                        (typeof segment.summary !== 'string' || segment.summary === '') ? '[' + $t('图片') + ']' : segment.summary
                     break
                 case 'record':
                     back += '[' + $t('语音') + ']'
@@ -325,11 +332,11 @@ export function getMsgRawTxt(data: JsonRecord): string {
                     back += '[' + $t('视频') + ']'
                     break
                 case 'file':
-                    back += '[' + $t('文件') + ']' + String(message[i].name ?? '')
+                    back += '[' + $t('文件') + ']' + String(segment.name ?? '')
                     break
                 case 'json': {
                     try {
-                        const rawData = message[i].data
+                        const rawData = segment.data
                         const card = typeof rawData === 'string' ? JSON.parse(rawData) as JsonRecord : undefined
                         back += String(card?.prompt ?? '')
                     } catch (error) {
@@ -338,7 +345,7 @@ export function getMsgRawTxt(data: JsonRecord): string {
                     break
                 }
                 case 'xml': {
-                    const rawData = message[i].data
+                    const rawData = segment.data
                     const xml = typeof rawData === 'string' ? rawData : ''
                     let name = xml.substring(
                         xml.indexOf('<source name="') + 14,

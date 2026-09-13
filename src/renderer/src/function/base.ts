@@ -106,9 +106,11 @@ export class Logger {
             const stackArr = stack.split('\n')
             // 找到第一个不是 at Logger 开头的调用者信息（WebKit 为第一个 @ 开头）
             for (let i = 1; i < stackArr.length; i++) {
-                if (isWebkit ? stackArr[i].startsWith('@') : !stackArr[i].includes('at Logger')) {
+                const frame = stackArr[i]
+                if (!frame) continue
+                if (isWebkit ? frame.startsWith('@') : !frame.includes('at Logger')) {
                     // 取出链接部分，去除括号
-                    from = stackArr[i].replace(/\(|\)/g, '').split(' ').pop() || ''
+                    from = frame.replace(/\(|\)/g, '').split(' ').pop() || ''
                     from = from.replace(
                         'webpack-internal:///./',
                         'webpack-internal:///',
@@ -169,11 +171,12 @@ export class Logger {
         from?: string
     ): { message: string; styles: string[] } {
         const hasFrom = !hidden && from;
+        const colors = this.logTypeInfo[type] ?? ['000000', 'fff']
         if (hasFrom) {
             return {
                 message: `%c${typeStr}%c${from}%c\n${args}`,
                 styles: [
-                    `background:#${this.logTypeInfo[type][0]};color:#${this.logTypeInfo[type][1]};border-radius:7px 0 0 7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
+                    `background:#${colors[0]};color:#${colors[1]};border-radius:7px 0 0 7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
                     'background:#e3e8ec;color:#000;padding:2px 7px 4px 4px;border-radius:0 7px 7px 0;margin-bottom:7px;',
                     ''
                 ]
@@ -182,7 +185,7 @@ export class Logger {
             return {
                 message: `%c${typeStr}%c ${args}`,
                 styles: [
-                    `background:#${this.logTypeInfo[type][0]};color:#${this.logTypeInfo[type][1]};border-radius:7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
+                    `background:#${colors[0]};color:#${colors[1]};border-radius:7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
                     '',
                     ''
                 ]

@@ -223,7 +223,7 @@ export const backend = {
                 name = name.replaceAll(':', '_').replace(/([A-Z])/g, '_$1').toLowerCase()
             }
             if (this.type == 'capacitor' && name.includes(':')) {
-                name = name.split(':')[1]
+                name = name.split(':')[1] ?? name
             }
             // 调用对应方法
             try {
@@ -255,7 +255,8 @@ export const backend = {
                     const back = await functionGet(args[0])
                     const backRecord = asRecord(back)
                     if (backRecord && Object.keys(backRecord).length == 1) {
-                        return backRecord[Object.keys(backRecord)[0]]
+                        const key = Object.keys(backRecord)[0]
+                        return key === undefined ? back : backRecord[key]
                     } else {
                         return back
                     }

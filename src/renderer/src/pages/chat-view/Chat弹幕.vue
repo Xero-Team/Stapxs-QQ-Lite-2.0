@@ -315,10 +315,7 @@
                                             minute: 'numeric',
                                             second: 'numeric',
                                         }).format(
-                                            new Date(
-                                                list[list.length - 1].time *
-                                                    1000,
-                                            ),
+                                            new Date((list[list.length - 1]?.time ?? 0) * 1000),
                                         ),
                                     })
                                     : $t('暂无消息')
@@ -458,6 +455,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             i++
         ) {
             const item = event.clipboardData.items[i]
+            if (!item) continue
             if (item.kind === 'file') {
                 setImg(item.getAsFile())
                 // 阻止默认行为
@@ -515,7 +513,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             if (props.list.length == 20) {
                 const type = chatStore.chatInfo.show.type
                 const id = chatStore.chatInfo.show.id
-                const firstMsgId = props.list[0].message_id ?? 0
+                const firstMsgId = props.list[0]?.message_id ?? 0
                 let name
                 const fullPage =
                     authStore.jsonMap.message_list?.pagerType ==
@@ -553,10 +551,13 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             danmus.value = list.reverse()
         } else {
             // 只添加最后一条
-            danmakuRef.value?.push({
-                text: getMsgRawTxt(props.list[props.list.length - 1]),
-                id: props.list[props.list.length - 1].sender.user_id,
-            })
+            const latest = props.list[props.list.length - 1]
+            if (latest) {
+                danmakuRef.value?.push({
+                    text: getMsgRawTxt(latest),
+                    id: latest.sender.user_id,
+                })
+            }
         }
     }
 </script>

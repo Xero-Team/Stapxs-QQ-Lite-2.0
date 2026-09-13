@@ -438,8 +438,9 @@
         info += `    Browser Version   -> ${browser.version}\n`
         if (addInfo) {
             const get = addInfo as { [key: string]: [string, string] }
-            Object.keys(get).forEach((name: string) => {
-                info += `    ${get[name][0]}  -> ${get[name][1]}\n`
+                Object.keys(get).forEach((name: string) => {
+                const value = get[name]
+                if (value) info += `    ${value[0]}  -> ${value[1]}\n`
             })
         }
         // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
@@ -495,7 +496,7 @@
         }
 
         info += 'Network Info:\n'
-        const testList = [
+        const testList: [string, string][] = [
             ['Github          ', 'https://api.github.com'],
         ]
         for (const item of testList) {

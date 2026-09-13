@@ -73,9 +73,10 @@ fresh browser context for every run.
 `yarn typecheck:core` enforces `strict`, `noUncheckedIndexedAccess`, and
 `exactOptionalPropertyTypes` for protocol, transport, storage and network modules;
 `yarn typecheck:browser` applies the same settings to the harness and its imports.
-The Web project's effective config currently only enables `strict`; the remaining
-full-project migration is tracked in `REFACTOR_BLOCKERS.md`. Root project
-references do not propagate compiler options to the referenced projects.
+The Web renderer's `tsconfig.web.json` now explicitly enables all three strict
+flags plus `useUnknownInCatchVariables`, and its full `vue-tsc` check is part of
+the normal `yarn typecheck` command. Root project references do not propagate
+compiler options to referenced projects, so each project keeps explicit settings.
 
 `yarn verify:repository-policy` enforces the current source-file size ceiling
 (3000 lines) and Conventional Commits subject format. It is included in the

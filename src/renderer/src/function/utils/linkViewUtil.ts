@@ -78,7 +78,7 @@ export const linkView = {
                         id: id,
                         play_link: jp.query(getData['url'], '$..url')[0],
                         cover: jp.query(getData['detail'], '$..al.picUrl')[0],
-                        cover_light: colorInfo[1][1] == 'light',
+                        cover_light: colorInfo[1]?.[1] == 'light',
                         info: {
                             name: jp.query(getData['detail'], '$..name')[0],
                             author: jp.query(getData['detail'], '$..ar[*].name'),

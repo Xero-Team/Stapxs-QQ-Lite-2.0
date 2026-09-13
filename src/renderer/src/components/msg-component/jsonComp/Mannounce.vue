@@ -66,10 +66,12 @@ const mannounce = z
             content: o.meta.mannounce.text,
         }
         if (o.meta.mannounce.pic?.length === 1) {
+            const image = o.meta.mannounce.pic[0]
+            if (!image) return out
             out['img'] = {
-                url: `https://gdynamic.qpic.cn/gdynamic/${o.meta.mannounce.pic[0].url}/0`,
-                width: o.meta.mannounce.pic[0].width,
-                height: o.meta.mannounce.pic[0].height,
+                url: `https://gdynamic.qpic.cn/gdynamic/${image.url}/0`,
+                width: image.width,
+                height: image.height,
             }
         }
         return out

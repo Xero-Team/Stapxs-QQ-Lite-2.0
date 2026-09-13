@@ -167,7 +167,8 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
             (item) => item.user_id == id || item.group_id == id,
         )
         if (knowUser.length > 0) {
-            return knowUser[0].nickname || knowUser[0].group_name
+            const user = knowUser[0]
+            return user ? user.nickname || user.group_name : null
         } else {
             return null
         }

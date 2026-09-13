@@ -61,7 +61,7 @@ export function appendAccessToken(url: string, token?: string) {
         return parsedUrl.toString()
     }
 
-    const [baseUrl, hash = ''] = url.split('#')
+    const [baseUrl = url, hash = ''] = url.split('#')
     const tokenParam = `access_token=${encodeURIComponent(token)}`
     const hashSuffix = hash ? `#${hash}` : ''
     const nextUrl = baseUrl
@@ -621,10 +621,10 @@ export function saveConnectionToHistory(address: string, token: string, uin?: st
         address,
         token: (settingsStore.sysConfig.save_password &&
             settingsStore.sysConfig.save_password != '') ? token : '',
-        uin,
-        nickname,
         lastConnected: Date.now()
     }
+    if (uin !== undefined) newItem.uin = uin
+    if (nickname !== undefined) newItem.nickname = nickname
 
     if (existingIndex !== -1) {
         // 更新已存在的记录（信息按最新的为准）

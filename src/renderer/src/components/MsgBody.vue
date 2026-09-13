@@ -348,7 +348,7 @@
                                         url: pageViewInfo.data.play_link,
                                         type: 'music163',
                                         cover: pageViewInfo.data.cover,
-                                        free: pageViewInfo.data.info.free,
+                                        ...(pageViewInfo.data.info.free === undefined ? {} : { free: pageViewInfo.data.info.free }),
                                         time: pageViewInfo.data.info.time,
                                         data: pageViewInfo.data.id,
                                     })" />
@@ -980,6 +980,7 @@ function getMsg(message_id: string, filter: boolean = false) {
     })
     if (list.length === 1) {
         const msg = toRaw(list[0])
+        if (!msg) return filter ? null : false
         const textFallbackTypes = new Set([
             'video',
             'record',

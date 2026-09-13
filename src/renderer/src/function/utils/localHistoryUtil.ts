@@ -472,7 +472,7 @@ async function downloadImageViaProxy(url: string): Promise<{ mimeType: string; b
     const buffer = await resp.arrayBuffer()
     const bytes = new Uint8Array(buffer)
     let binary = ''
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i] ?? 0)
     const base64 = btoa(binary)
     return { mimeType, base64 }
 }

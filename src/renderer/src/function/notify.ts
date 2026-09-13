@@ -20,7 +20,7 @@ export class Notify {
     public notify(info: NotifyInfo) {
         const { $t } = app.config.globalProperties
         // 判断当前 userId 是否已存在通知
-        const userId = info.tag.split('/')[0]
+        const [userId = ''] = info.tag.split('/')
         if (Notify.userNotifyList[userId] === undefined) {
             Notify.userNotifyList[userId] = 1
         } else {
@@ -41,15 +41,15 @@ export class Notify {
                     title: info.title,
                     body: info.body,
                     // id 相同的通知会被覆盖，这里使用用户 ID 作为通知 ID 便于覆盖
-                    id: Number(info.tag.split('/')[0]),
+                    id: Number(userId),
                     schedule: {
                         at: new Date(Date.now() + 100)
                     },
                     sound: backend.platform === 'ios' ? 'beep.wav' : 'beep.mp3',
                     actionTypeId: 'msgQuickReply',
                     extra: {
-                        userId: info.tag.split('/')[0],
-                        msgId: info.tag.split('/')[1],
+                        userId,
+                        msgId: info.tag.split('/')[1] ?? '',
                         chatType: info.type
                     }
                 } as LocalNotificationSchema
@@ -181,7 +181,7 @@ export class Notify {
         if (tag !== undefined) {
             if (tag.indexOf('/') > 0) {
                 // MSG 类型的通知
-                const userId = tag.split('/')[0]
+                const [userId = ''] = tag.split('/')
                 const msgId = tag.substring(userId.length + 1, tag.length)
                 delete Notify.userNotifyList[userId]
                 // 跳转到这条消息的发送者页面

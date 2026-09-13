@@ -160,8 +160,8 @@ function normalizeSpectrumBars(samples: number[], count: number) {
         const normalized = Math.min(1, value / maxValue)
         const eased = Math.pow(normalized, 0.82)
         const smoothed = (() => {
-            const prev = merged[Math.max(0, index - 1)] / maxValue
-            const next = merged[Math.min(merged.length - 1, index + 1)] / maxValue
+            const prev = (merged[Math.max(0, index - 1)] ?? 0) / maxValue
+            const next = (merged[Math.min(merged.length - 1, index + 1)] ?? 0) / maxValue
             return (prev * 0.2) + (eased * 0.6) + (next * 0.2)
         })()
 
@@ -177,7 +177,7 @@ function buildWaveFallback(buffer: AudioBuffer, count: number) {
         let energy = 0
 
         for (let i = start; i < end; i += 1) {
-            energy += Math.abs(channelData[i])
+            energy += Math.abs(channelData[i] ?? 0)
         }
 
         return energy / Math.max(1, end - start)

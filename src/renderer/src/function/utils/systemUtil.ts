@@ -61,7 +61,8 @@ export function getPortableFileLang(name: string) {
         const file = files[filePath] as string
         const items = PO.parse(file).items
         for(const item of items) {
-            final[item.msgid] = item.msgstr[0] == '' ? item.msgid : item.msgstr[0]
+            const translated = item.msgstr[0] ?? ''
+            final[item.msgid] = translated == '' ? item.msgid : translated
         }
     }
     return final
@@ -273,12 +274,12 @@ export async function getForegroundToneFromImageUrl(
         let pixelCount = 0
 
         for (let i = 0; i < data.length; i += 4) {
-            const alpha = data[i + 3] / 255
+            const alpha = (data[i + 3] ?? 0) / 255
             if (alpha < 0.1) continue
 
-            const r = srgbToLinear(data[i] / 255)
-            const g = srgbToLinear(data[i + 1] / 255)
-            const b = srgbToLinear(data[i + 2] / 255)
+            const r = srgbToLinear((data[i] ?? 0) / 255)
+            const g = srgbToLinear((data[i + 1] ?? 0) / 255)
+            const b = srgbToLinear((data[i + 2] ?? 0) / 255)
 
             const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
             luminanceSum += luminance
@@ -338,12 +339,12 @@ export async function getForegroundToneGridFromImageUrl(
                 for (let y = startY; y < endY; y++) {
                     for (let x = startX; x < endX; x++) {
                         const index = (y * size + x) * 4
-                        const alpha = data[index + 3] / 255
+                        const alpha = (data[index + 3] ?? 0) / 255
                         if (alpha < 0.1) continue
 
-                        const r = srgbToLinear(data[index] / 255)
-                        const g = srgbToLinear(data[index + 1] / 255)
-                        const b = srgbToLinear(data[index + 2] / 255)
+                        const r = srgbToLinear((data[index] ?? 0) / 255)
+                        const g = srgbToLinear((data[index + 1] ?? 0) / 255)
+                        const b = srgbToLinear((data[index + 2] ?? 0) / 255)
                         const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
                         luminanceSum += luminance
@@ -352,7 +353,7 @@ export async function getForegroundToneGridFromImageUrl(
                 }
 
                 const avgLuminance = pixelCount > 0 ? luminanceSum / pixelCount : 0
-                result[row].push(avgLuminance >= safeThreshold ? 'dark' : 'light')
+                result[row]?.push(avgLuminance >= safeThreshold ? 'dark' : 'light')
             }
         }
 
@@ -393,7 +394,7 @@ function buildFallbackGrid(grid: number): ForegroundTone[][] {
     for (let row = 0; row < grid; row++) {
         result.push([])
         for (let col = 0; col < grid; col++) {
-            result[row].push('light')
+            result[row]?.push('light')
         }
     }
     return result
@@ -471,10 +472,12 @@ export function getRandom(
             min = 0
         }
         const random = parseInt((Math.random() * (max - min)).toString()) + min
-        if (mergeArr1[random] <= 9) {
-            text1 = mergeArr1[random].toString()
-        } else if (mergeArr1[random] > 9) {
-            text1 = String.fromCharCode(mergeArr1[random])
+        const value = mergeArr1[random]
+        if (value == null) continue
+        if (value <= 9) {
+            text1 = value.toString()
+        } else if (value > 9) {
+            text1 = String.fromCharCode(value)
         }
         text += text1
     }
@@ -507,8 +510,9 @@ export function randomNum(minNum: number, maxNum: number) {
  * @returns 随机选择的元素
  */
 export function randomChoice<T>(...args: T[]): T{
+    if (args.length === 0) throw new Error('randomChoice requires at least one argument')
     const id = randomNum(0, args.length - 1)
-    return args[id]
+    return args[id]!
 }
 
 /**

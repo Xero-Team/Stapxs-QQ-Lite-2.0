@@ -178,15 +178,16 @@ export function registerExtraOptionCard(card: {
     const exist = extraOptionCards.find((c) => c.id === card.id)
     if (exist) {
         exist.title = card.title
-        exist.description = card.description
+        if (card.description === undefined) delete exist.description
+        else exist.description = card.description
         return exist
     }
     const created: ExtraOptionCard = {
         id: card.id,
         title: card.title,
-        description: card.description,
         items: [],
     }
+    if (card.description !== undefined) created.description = card.description
     extraOptionCards.push(created)
     return created
 }
@@ -346,11 +347,13 @@ function setLanguage(name: string) {
     // 检查是否设置了备选语言
     let get = false
     for (let i = 0; i < languageConfig.length; i++) {
+        const language = languageConfig[i]
+        if (!language) continue
         if (
-            languageConfig[i].value == name &&
-            typeof (languageConfig[i] as { fallback?: unknown }).fallback === 'string'
+            language.value == name &&
+            typeof (language as { fallback?: unknown }).fallback === 'string'
         ) {
-            const fbname = (languageConfig[i] as { fallback: string }).fallback
+            const fbname = (language as { fallback: string }).fallback
             const fbLang = getPortableFileLang(fbname)
             i18n.global.setLocaleMessage(fbname, fbLang)
             get = true
@@ -438,7 +441,9 @@ function changeColorMode(mode: string) {
     const match_list = ['color-.*.css', 'prism-.*.css', 'append-.*.css']
     const css_list = document.getElementsByTagName('link')
     for (let i = 0; i < css_list.length; i++) {
-        const name = css_list[i].href
+        const link = css_list[i]
+        if (!link) continue
+        const name = link.href
         match_list.forEach((value) => {
             if (name.match(value) != null) {
                 // 检查切换的文件是否可以被访问到
@@ -471,7 +476,7 @@ function changeColorMode(mode: string) {
                 }
                 const head = document.getElementsByTagName('head').item(0)
                 if (head !== null) {
-                    head.replaceChild(newLink, css_list[i])
+                    head.replaceChild(newLink, link)
                 }
             }
         })
@@ -577,11 +582,14 @@ export async function load(): Promise<Record<string, unknown>> {
         const str = localStorage.getItem('options') ?? await getLocalValue<string>('legacy-localstorage', 'options')
         if (str != null) {
             const list = str.split('&')
-            for (let i = 0; i <= list.length; i++) {
-                if (list[i] !== undefined) {
-                    const opt: string[] = list[i].split(':')
+            for (let i = 0; i < list.length; i++) {
+                const entry = list[i]
+                if (entry !== undefined) {
+                    const opt: string[] = entry.split(':')
                     if (opt.length === 2) {
-                        data[opt[0]] = opt[1]
+                        const key = opt[0]
+                        const value = opt[1]
+                        if (key !== undefined && value !== undefined) data[key] = value
                     }
                 }
             }
@@ -614,7 +622,7 @@ function loadOptData(data: OptionRecord) {
                 // ignore
             }
         } else {
-            options[key] = value
+            if (value !== undefined) options[key] = value
         }
         // 执行设置项操作
         run(key, options[key])
@@ -624,7 +632,8 @@ function loadOptData(data: OptionRecord) {
     Object.keys(optDefault).forEach((key) => {
         if (options[key] === undefined) {
             optChanged = true
-            options[key] = optDefault[key]
+            const defaultValue = optDefault[key]
+            if (defaultValue !== undefined) options[key] = defaultValue
         }
     })
     // 删除不存在的设置项
@@ -681,7 +690,10 @@ export function get(name: string): OptionValue {
         const names = Object.keys(cacheConfigs)
         for (let i = 0; i < names.length; i++) {
             if (names[i] === name) {
-                const get = cacheConfigs[names[i]]
+                const cacheKey = names[i]
+                if (cacheKey === undefined) continue
+                const get = cacheConfigs[cacheKey]
+                if (get === undefined) continue
                 try {
                     return typeof get === 'string' ? JSON.parse(get) as OptionValue : get
                 } catch (e: unknown) {
@@ -712,11 +724,12 @@ export function getRaw(name: string) {
         const str = localStorage.getItem('options')
         if (str != null) {
             const list = str.split('&')
-            for (let i = 0; i <= list.length; i++) {
-                if (list[i] !== undefined) {
-                    const opt: string[] = list[i].split(':')
+            for (let i = 0; i < list.length; i++) {
+                const entry = list[i]
+                if (entry !== undefined) {
+                    const opt: string[] = entry.split(':')
                     if (opt.length === 2) {
-                        if (name == opt[0]) {
+                        if (name == opt[0] && opt[1] !== undefined) {
                             return Promise.resolve(opt[1])
                         }
                     }
@@ -789,9 +802,9 @@ export function runASWEvent(event: Event) {
         let value: unknown = null
         switch (type) {
             case 'SELECT': {
-                value = (sender as HTMLSelectElement).options[
-                    (sender as HTMLSelectElement).selectedIndex
-                ].value
+                const select = sender as HTMLSelectElement
+                const option = select.options[select.selectedIndex]
+                value = option?.value ?? null
                 break
             }
             case 'INPUT': {

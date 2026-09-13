@@ -138,10 +138,10 @@ export class Img {
      */
     static fromList(srcList: string[]): Img | undefined {
         if (srcList.length === 0) return undefined
-        const head = new Img(srcList[0])
+        const head = new Img(srcList[0]!)
         let cur = head
         for (let i = 1; i < srcList.length; i++) {
-            const node = new Img(srcList[i])
+            const node = new Img(srcList[i]!)
             cur.insertNext(node)
             cur = node
         }

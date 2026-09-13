@@ -216,7 +216,8 @@ function choiceSession(session: Session) {
  */
 function choiceSessionById(id: number) {
     if (id < 0 || id >= showSessions.value.length) return
-    choiceSession(showSessions.value[id])
+    const session = showSessions.value[id]
+    if (session) choiceSession(session)
 }
 
 /**

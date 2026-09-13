@@ -277,7 +277,7 @@
                     <div v-show="activePopBox.button" class="button">
                         <button v-for="(button, index) in activePopBox.button"
                             :key="'pop-box-btn' + index" :class="'ss-button' + (button.master == true ? ' master' : '')"
-                            @click="button.fun">
+                            @click="runPopupButton(button)">
                             {{ button.text }}
                         </button>
                     </div>
@@ -378,6 +378,16 @@ function sanitizePopupHtml(value: unknown): string {
         stripIgnoreTag: true,
         stripIgnoreTagBody: ['script', 'style'],
     }) : ''
+}
+
+type PopupButton = {
+    master?: boolean
+    fun?: (value: unknown) => void
+    text: string
+}
+
+function runPopupButton(button: PopupButton) {
+    button.fun?.(undefined)
 }
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
@@ -646,18 +656,22 @@ function barMainClick() {
  */
 function waveAnimation(wave: HTMLElement | null) {
     if (wave) {
-        const waves = wave.children[1].children
+        const waveContainer = wave.children[1]
+        if (!waveContainer) return undefined
+        const waves = waveContainer.children
         const min = 20
         const max = 195
         const add = 1
         const timer = setInterval(() => {
             // 遍历波浪体
             for (let i = 0; i < waves.length; i++) {
-                const now = waves[i].getAttribute('x')
+                const waveItem = waves[i]
+                if (!waveItem) continue
+                const now = waveItem.getAttribute('x')
                 if (Number(now) + add > max) {
-                    waves[i].setAttribute('x', min.toString())
+                    waveItem.setAttribute('x', min.toString())
                 } else {
-                    waves[i].setAttribute(
+                    waveItem.setAttribute(
                         'x',
                         (Number(now) + add).toString(),
                     )
@@ -879,9 +893,8 @@ onMounted(() => {
             console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to Xero QQ Lite ]')
         }
         // 初始化波浪动画
-        setLoginWaveTimer(waveAnimation(
-            document.getElementById('login-wave'),
-        ))
+        const waveTimer = waveAnimation(document.getElementById('login-wave'))
+        if (waveTimer !== undefined) setLoginWaveTimer(waveTimer)
         // =============================================================
         // 初始化功能
         App.createMenu() // Electron：创建菜单
@@ -1095,7 +1108,7 @@ onMounted(() => {
             '你好世界！',
             '这只是个普通的彩蛋！'
         ]
-        const title = titleList[Math.floor(Math.random() * titleList.length)]
+        const title = titleList[Math.floor(Math.random() * titleList.length)] ?? ''
         if(backend.platform == 'web') {
             document.title = title + '- Xero QQ Lite'
         } else {

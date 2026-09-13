@@ -87,8 +87,8 @@
     const audoState = ref(null as HTMLAudioElement | null)
     const nowLyricState = ref(undefined as { index: number, text: string } | undefined)
 
-    const lyricTime = (line: LyricLine) => parseFloat(Object.keys(line)[0])
-    const lyricText = (line: LyricLine) => Object.values(line)[0]
+    const lyricTime = (line: LyricLine) => parseFloat(Object.keys(line)[0] ?? '0')
+    const lyricText = (line: LyricLine) => Object.values(line)[0] ?? ''
 
     const parseLyric = (lyricText: string) => {
         return lyricText
@@ -105,7 +105,7 @@
                 }
 
                 return timeMatches.map(match => {
-                    const time = parseFloat(match[1]) * 60 + parseFloat(match[2])
+                    const time = parseFloat(match[1] ?? '0') * 60 + parseFloat(match[2] ?? '0')
                     return {
                         [time]: text,
                     }
@@ -136,7 +136,9 @@
 
         while (left <= right) {
             const mid = Math.floor((left + right) / 2)
-            const midTime = lyricTime(lyrics[mid])
+            const line = lyrics[mid]
+            if (!line) break
+            const midTime = lyricTime(line)
             if (midTime <= currentTime) {
                 ans = mid
                 left = mid + 1
@@ -347,8 +349,11 @@
                 }
                 if(currentIndex.value >= 0) {
                     resetController.value()
-                    audio.value.src = backend.proxyUrl(musicList.value[currentIndex.value].url)
-                    readyToPlay.value = true
+                    const nextMusic = musicList.value[currentIndex.value]
+                    if (nextMusic) {
+                        audio.value.src = backend.proxyUrl(nextMusic.url)
+                        readyToPlay.value = true
+                    }
                 } else {
                     resetController.value()
                     emit('open-panel', false)
@@ -358,7 +363,9 @@
             if(currentMusic.value?.lyric && currentMusic.value.lyric.length > 0) {
                 const lyricIndex = findLyricIndex(currentMusic.value.lyric, audio.value.currentTime)
                 if(lyricIndex >= 0) {
-                    const text = lyricText(currentMusic.value.lyric[lyricIndex])
+                    const lyric = currentMusic.value.lyric[lyricIndex]
+                    if (!lyric) return
+                    const text = lyricText(lyric)
                     if(!nowLyric.value || nowLyric.value.index !== lyricIndex || nowLyric.value.text !== text) {
                         nowLyric.value = {
                             index: lyricIndex,

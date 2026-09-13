@@ -706,7 +706,8 @@ const tags = ref({
     },
     checkNewLineFlag: false,
 })
-const details = ref([
+type DetailState = { open: boolean }
+const details = ref<[DetailState, DetailState, DetailState, DetailState]>([
     { open: false },
     { open: false },
     { open: false },
@@ -1116,11 +1117,14 @@ async function loadMoreHistory() {
 function detectSeqGaps(msgs: MsgItemElem[]): string[] {
     const gaps: string[] = []
     for (let i = 0; i < msgs.length - 1; i++) {
-        const seqA: number | null = msgs[i].message_seq ?? msgs[i].seq ?? null
-        const seqB: number | null = msgs[i + 1].message_seq ?? msgs[i + 1].seq ?? null
+        const current = msgs[i]
+        const next = msgs[i + 1]
+        if (!current || !next) return []
+        const seqA: number | null = current.message_seq ?? current.seq ?? null
+        const seqB: number | null = next.message_seq ?? next.seq ?? null
         if (seqA == null || seqB == null) return []
         if (seqB - seqA > 1) {
-            gaps.push(msgs[i + 1].message_id)
+            gaps.push(next.message_id)
         }
     }
     return gaps
@@ -2139,6 +2143,7 @@ function addImg(event: ClipboardEvent) {
         i++
     ) {
         const item = event.clipboardData.items[i]
+        if (!item) continue
         if (item.kind === 'file') {
             setImg(item.getAsFile())
             event.preventDefault()
@@ -2157,7 +2162,8 @@ function selectImg(event: Event) {
     tags.value.showMoreDetail = false
     const sender = event.target as HTMLInputElement
     if (sender && sender.files) {
-        setImg(sender.files[0])
+        const file = sender.files[0]
+        if (file) setImg(file)
     }
 }
 
@@ -2173,6 +2179,7 @@ function selectFile(event: Event) {
     const sender = event.target as HTMLInputElement
     if (sender.files != null) {
         const file = sender.files[0]
+        if (!file) return
         const fileName = file.name
         const size = file.size
         if (size > 1073741824) {
@@ -2465,7 +2472,7 @@ function updateList(newLength: number, oldLength: number) {
                 scrollToMsgLocal(
                     'chat-' + chatStore.chatInfo.show.jump,
                 )
-                chatStore.chatInfo.show.jump = undefined
+                delete chatStore.chatInfo.show.jump
             }
         })
     }
@@ -2569,8 +2576,9 @@ async function handleInput(event: Event) {
 
     const diff = getDifferencesWithRanges(msg.value, oldMsg.value)
     let { end, str } = { end: 0, str: '' }
-    if(diff.length > 0) {
-        ({ end, str } = diff[0])
+    const firstDiff = diff[0]
+    if(firstDiff) {
+        ({ end, str } = firstDiff)
     }
 
     if(str.indexOf(']') >= 0) {

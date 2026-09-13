@@ -77,14 +77,11 @@ if (!success) {
 
 const getType = (): { type: MusicInfo['type']; data?: string } => {
     switch(parsedContent.name) {
-        case '网易云音乐': return {
-            type: 'music163',
-            data: parsedContent.jumpUrl.match(/id=(\d+)/)?.[1]
+        case '网易云音乐': {
+            const data = parsedContent.jumpUrl.match(/id=(\d+)/)?.[1]
+            return data === undefined ? { type: 'music163' } : { type: 'music163', data }
         }
-        default: return {
-            type: 'default',
-            data: undefined
-        }
+        default: return { type: 'default' }
     }
 }
 
@@ -92,7 +89,7 @@ const lightColor = ref(true)
 if (success) {
     void getForegroundToneGridFromImageUrl(backend.proxyUrl(parsedContent.img), 0.4)
         .then((tone) => {
-            lightColor.value = tone[1][1] === 'light'
+            lightColor.value = tone[1]?.[1] === 'light'
         })
         .catch(() => undefined)
 }

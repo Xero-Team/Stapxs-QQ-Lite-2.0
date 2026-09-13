@@ -886,6 +886,7 @@ function onImgTouchStart(event: TouchEvent) {
     handleEvent(event)
     onImgTouchFlag = true
     const touch = event.touches[0]
+    if (!touch) return
     switch (currentTool.value) {
         case 'hand':
             handMouseDown(touch.clientX, touch.clientY)
@@ -902,6 +903,7 @@ function onImgTouchMove(event: TouchEvent) {
     if (event.touches.length !== 1) return
     handleEvent(event)
     const touch = event.touches[0]
+    if (!touch) return
     switch (currentTool.value) {
         case 'hand':
             handMouseMove(touch.clientX, touch.clientY)
@@ -942,12 +944,18 @@ function onGlobalTouchStart(event: TouchEvent) {
     if (event.touches.length !== 2) return
     handleEvent(event)
     onGlobalTouch = true
-    touchResizeStart(event.touches[0], event.touches[1])
+    const firstTouch = event.touches[0]
+    const secondTouch = event.touches[1]
+    if (!firstTouch || !secondTouch) return
+    touchResizeStart(firstTouch, secondTouch)
 }
 function onGlobalTouchMove(event: TouchEvent) {
     if (event.touches.length !== 2) return
     handleEvent(event)
-    touchResizeKeep(event.touches[0], event.touches[1])
+    const firstTouch = event.touches[0]
+    const secondTouch = event.touches[1]
+    if (!firstTouch || !secondTouch) return
+    touchResizeKeep(firstTouch, secondTouch)
 }
 function onGlobalTouchEnd(event: TouchEvent) {
     if (!onGlobalTouch) return

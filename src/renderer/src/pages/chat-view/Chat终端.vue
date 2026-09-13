@@ -320,6 +320,7 @@
     function showPop(newLength: number, oldLength: number) {
         if (newLength > oldLength) {
             const info = popList[popList.length - 1]
+            if (!info) return
             if (info.svg == PopType.ERR) {
                 addCommandOut('::' + info.text, 'red')
             } else {
@@ -411,8 +412,10 @@
                 LogType.DEBUG,
                 'CMD: ' + msgList.toString(),
             )
-            if (msgList.length > 0 && supportCmd.value[msgList[0]]) {
-                supportCmd.value[msgList[0]].fun(currentMsg, msgList)
+            const command = msgList[0]
+            const commandInfo = command ? supportCmd.value[command] : undefined
+            if (commandInfo) {
+                commandInfo.fun(currentMsg, msgList)
                 msg.value = ''
             } else {
                 addCommandOut(
@@ -487,8 +490,8 @@
                         },
                     )
                 if (back.length === 1) {
-                    backName =
-                        back[0].card === ''? back[0].nickname: back[0].card
+                    const member = back[0]
+                    if (member) backName = member.card === '' ? member.nickname : member.card
                 }
             }
         } else {
@@ -508,6 +511,7 @@
             i++
         ) {
             const item = event.clipboardData.items[i]
+            if (!item) continue
             if (item.kind === 'file') {
                 setImg(item.getAsFile())
                 // 阻止默认行为
@@ -621,7 +625,7 @@
                         }
                         // 寻找联系人
                         case 'list': {
-                            const value = item[2]
+                            const value = item[2] ?? ''
                             searchListCache.value =
                                 contactStore.userList.filter(
                                     (
@@ -699,7 +703,7 @@
                         // 加载历史记录
                         case 'history': {
                             // 移除顶部的首次加载提示
-                            if (chatStore.messageList[0].commandOut) {
+                            if (chatStore.messageList[0]?.commandOut) {
                                 chatStore.messageList.shift()
                                 chatStore.messageList.shift()
                                 chatStore.messageList.shift()
@@ -708,7 +712,7 @@
                             // 加载历史消息
                             // 获取列表第一条消息 ID
                             const firstMsgId =
-                                chatStore.messageList[0].message_id ?? 0
+                                chatStore.messageList[0]?.message_id ?? 0
                             // 发起获取历史消息请求
                             const type = chatStore.chatInfo.show.type
                             const id = chatStore.chatInfo.show.id
@@ -811,11 +815,10 @@
                         itemInfo.length == 1 &&
                         searchListCache.value.length == 1
                     ) {
-                        id = (
-                            searchListCache.value[0].user_id? searchListCache.value[0].user_id: searchListCache.value[0].group_id
-                        ).toString()
+                        const result = searchListCache.value[0]
+                        if (result) id = (result.user_id ? result.user_id : result.group_id).toString()
                     } else {
-                        id = itemInfo[1]
+                        id = itemInfo[1] ?? '0'
                         if (itemInfo[1] == '../') {
                             const pan = document.getElementById('chat-pan')
                             if (pan) {
@@ -825,8 +828,8 @@
                             }
                             return
                         }
-                        if (itemInfo[1].startsWith('#')) {
-                            const index = Number(itemInfo[1].substring(1))
+                        if ((itemInfo[1] ?? '').startsWith('#')) {
+                            const index = Number((itemInfo[1] ?? '').substring(1))
                             if (searchListCache.value[index]) {
                                 id = (
                                     searchListCache.value[index].user_id? searchListCache.value[index]
@@ -845,6 +848,7 @@
                     // 从缓存列表里寻找这个 ID
                     for (let i = 0; i < contactStore.userList.length; i++) {
                         const item = contactStore.userList[i]
+                        if (!item) continue
                         const gid =
                             item.user_id !== undefined? item.user_id: item.group_id
                         if (String(gid) === id) {

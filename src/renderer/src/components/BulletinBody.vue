@@ -24,7 +24,7 @@
             <span
                 style="margin-right: auto;margin-bottom: auto;"
                 @click="textClick"
-                v-html="parseText(data.content[0])" />
+                v-html="parseText(data.content[0] ?? '')" />
             <img v-if="data.img"
                 :src="data.img.src"
                 :class="{
@@ -39,7 +39,7 @@
             <a>{{
                 chatStore.chatInfo.info.group_members.filter((item) => {
                     return Number(item.user_id) === Number(data.sender)
-                })[0].nickname
+                    })[0]?.nickname ?? $t('未知成员')
             }}</a>
             <div />
             <span v-if="data.is_read">{{

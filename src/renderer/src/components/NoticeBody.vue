@@ -106,7 +106,8 @@ interface NoticePayload {
             },
         )
         if (back.length === 1) {
-            return back[0].card === '' || back[0].card == null? back[0].nickname: back[0].card
+            const member = back[0]
+            return member && (member.card === '' || member.card == null) ? member.nickname : member?.card ?? id ?? ''
         }
         return id ?? ''
     }
@@ -157,15 +158,15 @@ interface NoticePayload {
                             (item) => {
                                 return item.user_id === Number(id)
                             },
-                        )
+                    )
                     if (back.length === 1) {
-                        info.value.name =
-                            back[0].card === '' || back[0].card == null? back[0].nickname: back[0].card
+                        const member = back[0]
+                        if (member) info.value.name = member.card === '' || member.card == null ? member.nickname : member.card
                     } else {
-                        info.value.name = id
+                        info.value.name = id ?? ''
                     }
                 } else {
-                    info.value.name = id
+                    info.value.name = id ?? ''
                 }
             } else {
                 info.value.name = chatStore.chatInfo.show.name

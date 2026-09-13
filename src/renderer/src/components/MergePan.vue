@@ -12,9 +12,8 @@
                 <!-- 无内容 -->
             </div>
             <TransitionGroup v-else :name="settingsStore.sysConfig.opt_fast_animation ? '' : 'msglist'" tag="div">
-                <template v-for="(msgIndex, index) in nowData.messageList" :key="'merge-' + nowData.forwardMsg.message[0].id + '-' + index">
-                    <NoticeBody v-if=" isShowTime( nowData.messageList[index - 1] ?
-                                    nowData.messageList[index - 1].time : undefined, msgIndex.time, index == 0)"
+                <template v-for="(msgIndex, index) in nowData.messageList" :key="'merge-' + (nowData.forwardMsg.message[0]?.id ?? index) + '-' + index">
+                    <NoticeBody v-if=" isShowTime(nowData.messageList[index - 1]?.time, msgIndex.time, index == 0)"
                         :id="uuid()"
                         :key="'notice-time-' + index"
                         :data="{ sub_type: 'time', time: msgIndex.time }" />

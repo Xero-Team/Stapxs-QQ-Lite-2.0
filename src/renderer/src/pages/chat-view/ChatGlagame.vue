@@ -538,10 +538,12 @@ onMounted(async () => {
 
     watch(() => props.list.length, async (newVal, oldVal) => {
         if (newVal - oldVal == 1) {
+            const latestMessage = props.list[props.list.length - 1]
+            if (!latestMessage) return
             getCurrentMessages().push({
                 role: 'user',
                 content: '```json\n' + getMessageDetail(
-                    props.list[props.list.length - 1]) + '\n```',
+                    latestMessage) + '\n```',
             })
         }
     })

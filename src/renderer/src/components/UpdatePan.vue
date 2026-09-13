@@ -35,7 +35,7 @@
         <template v-else>
             <div v-for="(release, releaseIndex) in releaseList" :key="'release-' + releaseIndex" class="release-item">
                 <div class="release-header">
-                    <a class="release-version">{{ release.version }} - {{ release.info.title.replace('Release', '') }}</a>
+                    <a class="release-version">{{ (release.info.title ?? '').replace('Release', '') }}</a>
                     <div class="release-meta">
                         <img :src="release.user.avatar">
                         <a href="#" @click.prevent="openLink(release.user.url)">{{ release.user.name }}</a>
@@ -119,7 +119,7 @@ const releaseList = ref<ParsedRelease[]>([])
 function parseMessage(message: string) {
     let msg = message
     // 处理 title，取开头到下一个 "\r\n" 之间的内容
-    const title = msg.split('\r\n')[0].substring(1)
+    const title = (msg.split('\r\n')[0] ?? '').substring(1)
     // 处理 msg，取 "## 更新内容" 到下一个 "##" 之间的内容
     const start = msg.indexOf('## 更新内容\r\n')
     if (start != -1) {
@@ -133,13 +133,13 @@ function parseMessage(message: string) {
 
     const updateInfo = msg.split('\n')
     const result = {
-        title: updateInfo[0],
+        title: updateInfo[0] ?? '',
         content: [] as { [key: string]: string }[],
     }
 
     for (let i = 1; i < updateInfo.length; i++) {
         const item = { text: '' } as { [key: string]: string }
-        let text = updateInfo[i]
+        let text = updateInfo[i] ?? ''
         if (text.startsWith(':')) {
             const end = text.substring(1).indexOf(':')
             const name = text.substring(0, end + 2)
@@ -152,7 +152,7 @@ function parseMessage(message: string) {
         const regexIssue = /<- #(\d+)/
         const matchIssue = text.match(regexIssue)
         if (matchIssue) {
-            const issueId = matchIssue[1]
+            const issueId = matchIssue[1] ?? ''
             text = text.replace(regexIssue, '')
             item.issue = issueId
         }

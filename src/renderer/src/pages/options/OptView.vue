@@ -152,7 +152,7 @@
                     </div>
                 </label>
             </div>
-            <div v-if="settingsStore.sysConfig.chat_more_blur && backend.platform === 'darwin' && Number(backend.release.split(' ')[1].split('.')[0]) >= 26" class="opt-item">
+            <div v-if="settingsStore.sysConfig.chat_more_blur && backend.platform === 'darwin' && Number(backend.release.split(' ')[1]?.split('.')[0] ?? 0) >= 26" class="opt-item">
                 <div :class="checkDefault('glass_effect')" />
                 <font-awesome-icon :icon="['fas', 'wand-sparkles']" />
                 <div>
@@ -567,7 +567,7 @@ function themeColorChange(event: Event) {
                 text: $t('取消'),
                 fun: () => {
                     restoreThemeColor(originThemeColorValue)
-                    uiStore.popBoxList[0].onClose = undefined
+                    if (uiStore.popBoxList[0]) delete uiStore.popBoxList[0].onClose
                     uiStore.popBoxList.shift()
                 },
             },
@@ -578,7 +578,7 @@ function themeColorChange(event: Event) {
                     const saveColor = normalizeHexColor(themeColorDraft.value)
                     themeColorRaw.value = saveColor
                     themeColorHistory.value = saveThemeColorHistory(saveColor)
-                    uiStore.popBoxList[0].onClose = undefined
+                    if (uiStore.popBoxList[0]) delete uiStore.popBoxList[0].onClose
                     runAS('theme_color', parseInt(saveColor.slice(1), 16))
                     uiStore.popBoxList.shift()
                 },
@@ -685,6 +685,7 @@ function normalizeHexColor(color: string | undefined) {
         return '#FFFFFF'
     }
     const hex = match[1]
+    if (!hex) return '#FFFFFF'
     if (hex.length === 3) {
         return '#' + hex.split('').map((item) => item + item).join('').toUpperCase()
     }

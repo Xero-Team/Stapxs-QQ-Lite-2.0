@@ -147,7 +147,9 @@ export default class Emoji {
                 else if (asset.type === 3) {
                     hasSuper = true
                     if (asset.name.startsWith(`${item.emojiId}_`)) {
-                        const suffix = Number(asset.name.split('_')[1].split('.')[0])
+                        const suffixPart = asset.name.split('_')[1]?.split('.')[0]
+                        if (suffixPart == null) continue
+                        const suffix = Number(suffixPart)
                         if (!isNaN(suffix)) suffixes.push(suffix)
                     }
                 }

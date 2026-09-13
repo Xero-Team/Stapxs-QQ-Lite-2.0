@@ -70,7 +70,6 @@
         onChange?: (value: string) => void
         historyColors?: string[]
     }>(), {
-        onChange: undefined,
         historyColors: () => [],
     })
 
@@ -183,6 +182,7 @@
             return '#FFFFFF'
         }
         const hex = match[1]
+        if (!hex) return '#FFFFFF'
         if (hex.length === 3) {
             return '#' + hex.split('').map((item) => item + item).join('').toUpperCase()
         }
