@@ -8,9 +8,23 @@ export const useConnectionStore = defineStore('connection', () => {
     const backTimes = ref(0)
     const metaEventWatchTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined)
     const metaEventTimeoutTriggered = ref(false)
+    const activeRequest = ref<AbortController | undefined>(undefined)
+
+    function beginRequest(): AbortSignal {
+        activeRequest.value?.abort()
+        const controller = new AbortController()
+        activeRequest.value = controller
+        return controller.signal
+    }
+
+    function cancelRequest(): void {
+        activeRequest.value?.abort()
+        activeRequest.value = undefined
+    }
 
     function reset(): void {
         if (metaEventWatchTimer.value) clearTimeout(metaEventWatchTimer.value)
+        cancelRequest()
         metaEventWatchTimer.value = undefined
         metaEventTimeoutTriggered.value = false
         heartbeatTime.value = -1
@@ -26,6 +40,9 @@ export const useConnectionStore = defineStore('connection', () => {
         backTimes,
         metaEventWatchTimer,
         metaEventTimeoutTriggered,
+        activeRequest,
+        beginRequest,
+        cancelRequest,
         reset,
     }
 })

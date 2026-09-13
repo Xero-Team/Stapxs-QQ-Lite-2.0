@@ -11,7 +11,7 @@ export const useSessionHistoryStore = defineStore('session-history', () => {
         record.value = []
     }
 
-    function add(session: Session) {
+    function add(session: Session): void {
         record.value = [
             session,
             ...record.value.filter((i) => (i.user_id !== session.user_id) || (i.group_id !== session.group_id)),
