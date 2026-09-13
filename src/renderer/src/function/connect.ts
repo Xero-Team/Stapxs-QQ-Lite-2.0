@@ -117,6 +117,7 @@ export class Connector {
     ) {
         const { $t } = app.config.globalProperties
         const settingsStore = useSettingsStore()
+        useConnectionStore().resetRetry()
         login.creating = true
 
         // 设置连接超时保护
@@ -341,6 +342,7 @@ export class Connector {
                 break // 正常关闭
             case 1006: {
                 // 非正常关闭，尝试重连
+                connectionStore.markRetry()
                 popInfo.add(PopType.ERR, $t('连接失败') + ': ' + $t('连接异常关闭'), false)
                 break
             }
