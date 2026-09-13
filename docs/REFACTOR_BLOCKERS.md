@@ -14,6 +14,10 @@
   deb/rpm staging artifacts, but AppImage bundling fails in the hosted
   `linuxdeploy` step (`failed to run linuxdeploy`). The native binary and deb/
   rpm files are therefore not treated as a complete release artifact.
+- The Tauri Linux workflow now sets `APPIMAGE_EXTRACT_AND_RUN=1` for
+  linuxdeploy-compatible runners. The same setting was tried locally, but
+  linuxdeploy still exited unsuccessfully; hosted CI remains the authoritative
+  AppImage verification path.
 - A fresh recursive `yarn npm audit --all --recursive` (Yarn 4.12.0 via
   Corepack) completes with the known advisory set: lodash/lodash-es high and
   moderate prototype-pollution/code-injection entries plus deprecated build
