@@ -9,6 +9,7 @@ export const useConnectionStore = defineStore('connection', () => {
     const metaEventWatchTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined)
     const metaEventTimeoutTriggered = ref(false)
     const activeRequest = ref<AbortController | undefined>(undefined)
+    const retryCount = ref(0)
 
     function beginRequest(): AbortSignal {
         activeRequest.value?.abort()
@@ -22,6 +23,15 @@ export const useConnectionStore = defineStore('connection', () => {
         activeRequest.value = undefined
     }
 
+    function markRetry(): number {
+        retryCount.value += 1
+        return retryCount.value
+    }
+
+    function resetRetry(): void {
+        retryCount.value = 0
+    }
+
     function reset(): void {
         if (metaEventWatchTimer.value) clearTimeout(metaEventWatchTimer.value)
         cancelRequest()
@@ -31,6 +41,7 @@ export const useConnectionStore = defineStore('connection', () => {
         oldHeartbeatTime.value = -1
         lastHeartbeatTime.value = -1
         backTimes.value = 0
+        resetRetry()
     }
 
     return {
@@ -43,6 +54,9 @@ export const useConnectionStore = defineStore('connection', () => {
         activeRequest,
         beginRequest,
         cancelRequest,
+        retryCount,
+        markRetry,
+        resetRetry,
         reset,
     }
 })
