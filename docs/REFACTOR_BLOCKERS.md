@@ -10,8 +10,9 @@
   page errors; they remain synthetic browser coverage and do not replace native
   platform validation.
 - Tauri `cargo check`, release metadata/CSP validation, SBOM generation, and
-  94-file artifact checksum verification pass locally. `yarn check` remains
-  unexecutable because this workstation has neither Yarn nor Corepack.
+  94-file artifact checksum verification pass locally. The workstation has no
+  global Yarn/Corepack binary, but `npx --yes corepack@0.31.0 yarn check`
+  executes Yarn 4.12.0 successfully (warning-only legacy formatting output).
 
 ## 2026-09-13 incremental evidence
 
