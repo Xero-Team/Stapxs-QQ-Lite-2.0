@@ -1175,7 +1175,7 @@
     {
       "type": "library",
       "name": "rollup-plugin-visualizer",
-      "version": "5.14.0",
+      "version": "7.1.1",
       "licenses": [
         {
           "license": {
@@ -1183,7 +1183,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/rollup-plugin-visualizer@5.14.0",
+      "purl": "pkg:npm/rollup-plugin-visualizer@7.1.1",
       "properties": [
         {
           "name": "xero:dependency-scope",

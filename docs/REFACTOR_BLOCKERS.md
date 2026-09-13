@@ -111,6 +111,11 @@
   tests, production build, Tauri lint, SBOM/license/CSP metadata, release
   metadata, and 92-file artifact checksums pass. Roll back with `yarn up
   electron-store@^10.0.0`.
+- `rollup-plugin-visualizer` was upgraded independently from 5.14.0 to 7.1.1,
+  which supports the project's Rollup 4 toolchain. Web/Node/core/browser
+  typechecks, contract tests, production and Electron builds, Tauri lint,
+  SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums
+  pass. Roll back with `yarn up rollup-plugin-visualizer@^5.12.0`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
