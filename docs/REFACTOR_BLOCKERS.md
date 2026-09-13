@@ -2,6 +2,11 @@
 
 ## 2026-09-13 verification refresh
 
+- A fresh recursive `yarn npm audit --all --recursive` (Yarn 4.12.0 via
+  Corepack) completes with the known advisory set: lodash/lodash-es high and
+  moderate prototype-pollution/code-injection entries plus deprecated build
+  tooling and the transitive xcode uuid path. No new advisory class was found;
+  these remain release blockers until their upstream dependency paths change.
 - Vue SFC files now enforce `@typescript-eslint/no-explicit-any` as an error in
   the flat ESLint configuration. Renderer lint (quiet), Web typecheck, and all
   80 contract tests pass after the rule was enabled.
