@@ -483,8 +483,9 @@ function changeColorMode(mode: string) {
     }
     // 如果主题色模式是自定，则刷新系统主题色
     getRaw('theme_color').then((themeColor) => {
-        if(themeColor && themeColor > 10) {
-            const colorUpdate = ('000000' + Number(themeColor).toString(16)).slice(-6)
+        const colorValue = Number(themeColor)
+        if (Number.isFinite(colorValue) && colorValue > 10) {
+            const colorUpdate = ('000000' + colorValue.toString(16)).slice(-6)
             updateWinColor(colorUpdate, 'windows')
         }
     })
@@ -556,46 +557,11 @@ function changeChatView(name: string | undefined) {
 // =============== 设置基础功能 ===============
 
 /**
- * 读取并序列化 localStorage 中的设置项（electron 读取 electron-store 存储）
- * @returns 设置项集合
+ * 从 IndexedDB 读取设置项
  */
 export async function load(): Promise<Record<string, unknown>> {
-    let data = {} as OptionRecord
-
-    if ('electron' == backend.type) {
-        data = backend.callSync('opt:getAll')
-    } else if('tauri' == backend.type) {
-        data = await backend.call(undefined, 'opt:getAll', true)
-        // 处理下 json 字符串
-        Object.keys(data).forEach((key) => {
-            const value = data[key]
-            if (typeof value == 'string') {
-                try {
-                    data[key] = JSON.parse(value)
-                } catch (e: unknown) {
-                    // ignore
-                }
-            }
-        })
-    } else {
-        // Prefer the browser store, with the one-time Dexie migration as a rollback-safe fallback.
-        const str = localStorage.getItem('options') ?? await getLocalValue<string>('legacy-localstorage', 'options')
-        if (str != null) {
-            const list = str.split('&')
-            for (let i = 0; i < list.length; i++) {
-                const entry = list[i]
-                if (entry !== undefined) {
-                    const opt: string[] = entry.split(':')
-                    if (opt.length === 2) {
-                        const key = opt[0]
-                        const value = opt[1]
-                        if (key !== undefined && value !== undefined) data[key] = value
-                    }
-                }
-            }
-        }
-    }
-    return loadOptData(data)
+    const stored = await getLocalValue<OptionRecord>('settings', 'options')
+    return loadOptData(stored ?? {})
 }
 
 function loadOptData(data: OptionRecord) {
@@ -710,34 +676,11 @@ export function get(name: string): OptionValue {
  * 获取原始设置项值
  * @param name 设置项名称
  * @returns 设置项值（如果没有则为 null）
- * @description <strong>注意：</strong>
- * 此方法获取原始设置项值，不会对值进行 T/F 转换、JSON 解析、URL 解码等操作；
- * 在 Web 端和 Capacitor 端使用时由于存储在 WebStorage 中，需要特别注意预防上述未转换导致的错误。
+ * @description 读取已加载到内存的设置项，不会再次访问存储。
  */
-export function getRaw(name: string) {
-    if ('electron' == backend.type) {
-        return Promise.resolve(backend.callSync('opt:get', name))
-    } else if('tauri' == backend.type) {
-        return backend.call(undefined, 'opt:get', true, name)
-    } else {
-        // 解析拆分并执行各个设置项的初始化方法
-        const str = localStorage.getItem('options')
-        if (str != null) {
-            const list = str.split('&')
-            for (let i = 0; i < list.length; i++) {
-                const entry = list[i]
-                if (entry !== undefined) {
-                    const opt: string[] = entry.split(':')
-                    if (opt.length === 2) {
-                        if (name == opt[0] && opt[1] !== undefined) {
-                            return Promise.resolve(opt[1])
-                        }
-                    }
-                }
-            }
-        }
-        return Promise.resolve(null)
-    }
+export function getRaw(name: string): Promise<unknown> {
+    const value = cacheConfigs?.[name]
+    return Promise.resolve(value === undefined ? null : value)
 }
 
 /**
@@ -753,31 +696,8 @@ export function saveAll(config: Record<string, unknown> = {}) {
     if (Object.keys(config).length == 0) {
         Object.assign(config, cacheConfigs)
     }
-    let str = ''
-    Object.keys(config).forEach((key) => {
-        const isObject = typeof config[key] == 'object'
-        str +=
-            key +
-            ':' +
-            encodeURIComponent(
-                isObject ? JSON.stringify(config[key]) : String(config[key] ?? ''),
-            ) +
-            '&'
-    })
-    str = str.substring(0, str.length - 1)
-    localStorage.setItem('options', str)
-    void setLocalValue('settings', 'options', str)
-
-    // electron：将配置保存
-    if (backend.isDesktop()) {
-        const saveConfig = config
-        Object.keys(config).forEach((key) => {
-            const isObject = typeof config[key] == 'object'
-            saveConfig[key] = isObject ? JSON.stringify(config[key]): String(config[key] ?? '')
-        })
-        backend.call(undefined, 'opt:saveAll', false,
-            backend.type == 'tauri' ? { data: saveConfig } : saveConfig)
-    }
+    cacheConfigs = config as OptionRecord
+    void setLocalValue('settings', 'options', config)
 }
 
 /**

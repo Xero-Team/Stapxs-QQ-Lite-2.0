@@ -1,4 +1,4 @@
-// Native IndexedDB migration/rollback contracts. All records and contexts are disposable.
+// Native IndexedDB contracts. All records and contexts are disposable.
 async (page) => {
     const context = await page.context().browser().newContext({ serviceWorkers: 'block' })
     try {
@@ -7,20 +7,22 @@ async (page) => {
         const result = await storagePage.evaluate(async () => {
             const db = await import('/storage.ts')
             const assert = (condition, label) => { if (!condition) throw new Error(label) }
+            const countNamespace = async (namespace) =>
+                (await db.exportLocalData()).filter((row) => row.namespace === namespace).length
             const scenarios = []
             await db.clearLocalData()
             await Promise.all(Array.from({ length: 20 }, (_, value) => db.setLocalValue('settings', 'same', value)))
-            assert((await db.exportLocalData()).length === 1, 'Concurrent writes produced duplicate keys')
+            assert(await countNamespace('settings') === 1, 'Concurrent writes produced duplicate keys')
             scenarios.push('concurrent-upsert')
 
             const initial = await db.exportLocalData()
-            const initialRow = initial[0]
+            const initialRow = initial.find((row) => row.namespace === 'settings' && row.key === 'same')
             const newer = { namespace: 'settings', key: 'same', value: 'newer', updatedAt: initialRow.updatedAt + 1 }
             await db.importLocalData([newer])
             await db.importLocalData([newer])
             await db.importLocalData([{ ...newer, value: 'stale', updatedAt: 1 }])
             assert(await db.getLocalValue('settings', 'same') === 'newer', 'Merge replaced new data with stale backup')
-            assert((await db.exportLocalData()).length === 1, 'Repeated import appended duplicate keys')
+            assert(await countNamespace('settings') === 1, 'Repeated import appended duplicate keys')
             scenarios.push('repeat-import', 'newest-merge')
 
             await db.importLocalData([
@@ -47,34 +49,21 @@ async (page) => {
             assert(await db.getLocalValue('settings', 'same') === 'newer', 'Export could not restore data')
             scenarios.push('export-clear-restore')
 
-            localStorage.clear()
-            localStorage.setItem('options', 'raw & values')
-            localStorage.setItem('history', JSON.stringify([{ id: 1, text: 'Synthetic' }]))
-            localStorage.setItem('newer', 'older localStorage value')
-            await db.setLocalValue('migration-test', 'newer', 'existing Dexie value')
-            const beforeMigration = await db.exportLocalDataJson()
-            const simulateFullDisk = (_key, record) => {
-                if (record.key === 'history') throw new Error('Synthetic quota failure')
-            }
-            db.localStoreDb.records.hook('creating', simulateFullDisk)
-            failed = false
-            try { await db.migrateLegacyLocalStorage('migration-test') } catch { failed = true }
-            finally { db.localStoreDb.records.hook('creating').unsubscribe(simulateFullDisk) }
-            assert(failed && await db.exportLocalDataJson() === beforeMigration, 'Failed migration left partial rows or a marker')
-            scenarios.push('migration-rollback')
-            const migrated = await db.migrateLegacyLocalStorage('migration-test')
-            assert(migrated === 3, 'Legacy snapshot was incomplete')
-            assert(await db.getLocalValue('migration-test', 'newer') === 'existing Dexie value', 'Migration overwrote existing Dexie record')
-            assert(await db.getLocalValue('migration-test', 'options') === 'raw & values', 'Legacy strings changed')
-            assert((await db.getLocalValue('migration-test', 'history'))[0].id === 1, 'Legacy JSON was not migrated')
-            assert(await db.migrateLegacyLocalStorage('migration-test') === 0, 'Migration marker did not prevent rerun')
-            assert(localStorage.getItem('options') === 'raw & values' && localStorage.length === 3, 'Rollback source was modified')
-            scenarios.push('legacy-migration')
+            await db.setLocalValue('settings', 'keep', 'value')
+            await db.setLocalValue(db.STORAGE_META_NAMESPACE, db.STORAGE_BUILD_ID_KEY, 'stale-build')
+            const wiped = await db.prepareLocalStore()
+            assert(wiped === true, 'Mismatched build id did not reset')
+            assert(await db.getLocalValue('settings', 'keep') === undefined, 'Stale records survived a build-id reset')
+            assert(await db.getLocalValue(db.STORAGE_META_NAMESPACE, db.STORAGE_BUILD_ID_KEY) === db.currentStorageBuildId(), 'Build id was not rewritten')
+            assert(await db.prepareLocalStore() === false, 'Matching build id still reset the store')
+            scenarios.push('build-id-reset')
+
+            await db.setLocalValue('settings', 'same', 'newer')
             db.localStoreDb.close()
             await db.localStoreDb.open()
-            assert(await db.getLocalValue('migration-test', 'options') === 'raw & values', 'Data did not survive database reopen')
-            await db.clearLocalData('migration-test')
-            assert(await db.getLocalValue('settings', 'same') === 'newer', 'Namespace clear removed unrelated data')
+            assert(await db.getLocalValue('settings', 'same') === 'newer', 'Data did not survive database reopen')
+            await db.clearLocalData('settings')
+            assert(await db.getLocalValue(db.STORAGE_META_NAMESPACE, db.STORAGE_BUILD_ID_KEY) === db.currentStorageBuildId(), 'Namespace clear removed metadata')
             scenarios.push('reopen-namespace-clear')
             await db.localStoreDb.records.bulkAdd([
                 { namespace: 'old-duplicates', key: 'x', value: 'latest', updatedAt: 20 },

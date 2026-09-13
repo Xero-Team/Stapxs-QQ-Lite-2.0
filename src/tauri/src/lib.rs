@@ -16,7 +16,7 @@ use liquid_glass_rs::{GlassOptions, GlassMaterialVariant, GlassViewManager};
 use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
 use once_cell::sync::OnceCell;
 use tauri::{ async_runtime::handle, menu::{Menu, MenuEvent, MenuItem}, tray::{TrayIcon, TrayIconBuilder, TrayIconEvent}, AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder };
-use tauri_plugin_store::StoreBuilder;
+
 use user_notify::{get_notification_manager, NotificationCategory, NotificationCategoryAction};
 
 pub static PROXY_PORT: OnceCell<u16> = OnceCell::new();
@@ -37,16 +37,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
-            let store =
-                StoreBuilder::new(app, ".settings.dat").build().map_err(|e| e.to_string())?;
-            let log_level = store.get("log_level").unwrap_or_default();
-            let final_log_level = match log_level.as_str() {
-                Some("err") => log::LevelFilter::Error,
-                Some("debug") => log::LevelFilter::Debug,
-                Some("info") => log::LevelFilter::Info,
-                Some("all") => log::LevelFilter::Debug,
-                _ => log::LevelFilter::Info,
-            };
+            let final_log_level = log::LevelFilter::Info;
             // 初始化 log4rs
             let stdout = ConsoleAppender::builder()
                 .encoder(Box::new(commands::utils::colored_encoder::ColoredPrefixEncoder))
@@ -72,7 +63,7 @@ pub fn run() {
             println!("|__   | | | |     |   __|-   -|");
             println!("|_____| |_| |__|__|__|  |__|__| CopyRight © Xero-Team");
             println!("=======================================================");
-            println!("日志等级:{}", log_level);
+            println!("日志等级:info");
 
             if PROXY_PORT.get().is_some() {
                 info!("代理服务器已启动，端口：{}", PROXY_PORT.get().unwrap());
@@ -83,12 +74,7 @@ pub fn run() {
             info!("应用数据目录: {:?}", data_dir);
 
             // 按开关初始化 SQLite：关闭本地历史时跳过数据库和密钥初始化
-            let enable_local_history = store
-                .get("enable_local_history")
-                .map(|v| v.as_bool().unwrap_or_else(|| v.as_str() == Some("true")))
-                .unwrap_or(false);
-
-            app.manage(DbState::new(data_dir, enable_local_history));
+            app.manage(DbState::new(data_dir, false));
 
             // 初始化全局通知管理器 ============
             let app_id = app.config().identifier.clone();
@@ -328,15 +314,9 @@ fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
         .maximizable(true)
         .transparent(true);
     #[cfg(target_os = "macos")]
-    let store = StoreBuilder::new(app, ".settings.dat").build()
-        .map_err(|e| tauri::Error::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("failed to open settings store: {}", e),
-        )))?;
+    let chat_more_blur = false;
     #[cfg(target_os = "macos")]
-    let chat_more_blur = store.get("chat_more_blur").and_then(|v| v.as_bool()).unwrap_or(false);
-    #[cfg(target_os = "macos")]
-    let glass_effect = store.get("glass_effect").and_then(|v| v.as_bool()).unwrap_or(false);
+    let glass_effect = false;
     #[cfg(target_os = "macos")]
     let window_effect = if chat_more_blur {
         tauri::window::Effect::Menu

@@ -314,10 +314,25 @@ async (page) => {
                 }
 
                 // Validate the persisted account type through the public settings format.
-                const historyIsNormalized = await smokePage.evaluate(() => {
-                    const options = localStorage.getItem('options') ?? ''
-                    const entry = options.split('&').find((item) => item.startsWith('connection_history:'))
-                    const history = JSON.parse(decodeURIComponent(entry?.slice('connection_history:'.length) ?? '[]'))
+                const historyIsNormalized = await smokePage.evaluate(async () => {
+                    const options = await new Promise((resolve, reject) => {
+                        const request = indexedDB.open('xero-qq-lite-local')
+                        request.onerror = () => reject(request.error)
+                        request.onsuccess = () => {
+                            const db = request.result
+                            const tx = db.transaction('records', 'readonly')
+                            const store = tx.objectStore('records')
+                            const all = store.getAll()
+                            all.onerror = () => reject(all.error)
+                            all.onsuccess = () => {
+                                const rows = all.result
+                                    .filter((row) => row.namespace === 'settings' && row.key === 'options')
+                                    .sort((left, right) => left.updatedAt - right.updatedAt)
+                                resolve(rows.at(-1)?.value ?? {})
+                            }
+                        }
+                    })
+                    const history = Array.isArray(options.connection_history) ? options.connection_history : []
                     return history.length === 1 && history[0].uin === '10001'
                         && history[0].nickname === 'Mock Login' && history[0].token === ''
                 })

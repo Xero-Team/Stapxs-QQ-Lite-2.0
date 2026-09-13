@@ -9,6 +9,10 @@ export interface LocalStoreRecord {
     updatedAt: number
 }
 
+export const STORAGE_META_NAMESPACE = '_meta'
+export const STORAGE_BUILD_ID_KEY = 'buildId'
+export const STORAGE_ASSET_DB_NAME = 'ssqq-local-assets'
+
 class LocalStoreDatabase extends Dexie {
     records!: Table<LocalStoreRecord, number>
 
@@ -20,9 +24,26 @@ class LocalStoreDatabase extends Dexie {
 
 export const localStoreDb = new LocalStoreDatabase()
 
+export function currentStorageBuildId(): string {
+    const buildId = (import.meta as { env?: { VITE_STORAGE_BUILD_ID?: string } }).env?.VITE_STORAGE_BUILD_ID
+    return typeof buildId === 'string' && buildId.length > 0 ? buildId : 'dev'
+}
+
+export function shouldResetLocalStore(storedBuildId: unknown, buildId: string): boolean {
+    return storedBuildId !== buildId
+}
+
+function deleteIndexedDb(name: string): Promise<void> {
+    if (typeof indexedDB === 'undefined') return Promise.resolve()
+    return new Promise((resolve) => {
+        const request = indexedDB.deleteDatabase(name)
+        request.onsuccess = () => resolve()
+        request.onerror = () => resolve()
+        request.onblocked = () => resolve()
+    })
+}
+
 async function latestRecord(namespace: string, key: string): Promise<LocalStoreRecord | undefined> {
-    // Older releases could create duplicate compound keys. Keep those rows exportable,
-    // but always read the newest value instead of whichever primary key sorts first.
     const records = await localStoreDb.records.where('[namespace+key]').equals([namespace, key]).sortBy('updatedAt')
     return records.at(-1)
 }
@@ -46,6 +67,24 @@ export async function getLocalValue<T>(namespace: string, key: string): Promise<
     return record?.value as T | undefined
 }
 
+export async function prepareLocalStore(): Promise<boolean> {
+    const buildId = currentStorageBuildId()
+    let stored: unknown
+    try {
+        stored = await getLocalValue<string>(STORAGE_META_NAMESPACE, STORAGE_BUILD_ID_KEY)
+    } catch {
+        localStoreDb.close()
+        await deleteIndexedDb(localStoreDb.name)
+        await localStoreDb.open()
+        stored = undefined
+    }
+    if (!shouldResetLocalStore(stored, buildId)) return false
+    await localStoreDb.records.clear()
+    await deleteIndexedDb(STORAGE_ASSET_DB_NAME)
+    await setLocalValue(STORAGE_META_NAMESPACE, STORAGE_BUILD_ID_KEY, buildId)
+    return true
+}
+
 export async function exportLocalData(): Promise<LocalStoreRecord[]> {
     return localStoreDb.records.toArray()
 }
@@ -58,11 +97,6 @@ const ImportRecordSchema = z.object({
 })
 const ImportSchema = z.array(ImportRecordSchema)
 
-/**
- * Restore an export created by exportLocalData/exportLocalDataJson.
- * Invalid records are rejected before the transaction starts so a partial
- * restore cannot leave the database in an unknown state.
- */
 export async function importLocalData(input: unknown, replace = false): Promise<number> {
     const parsed = ImportSchema.safeParse(input)
     if (!parsed.success) {
@@ -70,6 +104,7 @@ export async function importLocalData(input: unknown, replace = false): Promise<
     }
     const records = new Map<string, LocalStoreRecord>()
     for (const record of parsed.data) {
+        if (record.namespace === STORAGE_META_NAMESPACE && record.key === STORAGE_BUILD_ID_KEY) continue
         const key = JSON.stringify([record.namespace, record.key])
         const previous = records.get(key)
         if (!previous || record.updatedAt >= previous.updatedAt) {
@@ -82,6 +117,12 @@ export async function importLocalData(input: unknown, replace = false): Promise<
             const existing = await latestRecord(record.namespace, record.key)
             if (!existing || record.updatedAt >= existing.updatedAt) await putRecord(record)
         }
+        await putRecord({
+            namespace: STORAGE_META_NAMESPACE,
+            key: STORAGE_BUILD_ID_KEY,
+            value: currentStorageBuildId(),
+            updatedAt: Date.now(),
+        })
     })
     return records.size
 }
@@ -89,38 +130,11 @@ export async function importLocalData(input: unknown, replace = false): Promise<
 export async function clearLocalData(namespace?: string): Promise<void> {
     if (namespace === undefined) {
         await localStoreDb.records.clear()
+        await deleteIndexedDb(STORAGE_ASSET_DB_NAME)
+        await setLocalValue(STORAGE_META_NAMESPACE, STORAGE_BUILD_ID_KEY, currentStorageBuildId())
         return
     }
     await localStoreDb.records.where('namespace').equals(namespace).delete()
-}
-
-/** Copy legacy localStorage values once; source data is retained for rollback. */
-export async function migrateLegacyLocalStorage(namespace = 'legacy-localstorage'): Promise<number> {
-    if (typeof globalThis.localStorage === 'undefined') return 0
-    const marker = `${namespace}:migration-v1`
-    if (await getLocalValue<boolean>(namespace, marker)) return 0
-    const snapshot: Array<{ key: string; value: unknown }> = []
-    for (let index = 0; index < globalThis.localStorage.length; index++) {
-        const key = globalThis.localStorage.key(index)
-        if (key === null || key === marker) continue
-        const raw = globalThis.localStorage.getItem(key)
-        if (raw === null) continue
-        let value: unknown = raw
-        try { value = JSON.parse(raw) as unknown } catch { /* retain string values */ }
-        snapshot.push({ key, value })
-    }
-    return localStoreDb.transaction('rw', localStoreDb.records, async () => {
-        // Another tab may have completed migration while the snapshot was read.
-        if (await getLocalValue<boolean>(namespace, marker)) return 0
-        for (const { key, value } of snapshot) {
-            // A resumed migration must not overwrite newer data already in Dexie.
-            if (!await latestRecord(namespace, key)) {
-                await putRecord({ namespace, key, value, updatedAt: Date.now() })
-            }
-        }
-        await putRecord({ namespace, key: marker, value: true, updatedAt: Date.now() })
-        return snapshot.length
-    })
 }
 
 export async function exportLocalDataJson(): Promise<string> {

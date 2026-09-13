@@ -1,4 +1,3 @@
-import Store from 'electron-store'
 import path from 'path'
 import os from 'os'
 import log4js from 'log4js'
@@ -23,7 +22,6 @@ import { execSync } from 'child_process'
 import { parseExternalUrl } from './urlPolicy.ts'
 
 let connector = undefined as Connector | undefined
-const store = new Store()
 const logger = log4js.getLogger('ipc')
 let template: MenuItemConstructorOptions[] = []
 
@@ -150,25 +148,7 @@ export function regIpcListener() {
             win.setPosition(point.x, point.y)
         }
     })
-    // 保存信息
-    ipcMain.on('opt:store', (_, arg) => {
-        store.set(arg.key, arg.value)
-    })
-    // 保存设置
-    // PS：升级至 electron 27 后 cookie 已完全无法持久化，只能进行保存
-    ipcMain.on('opt:saveAll', (_, arg) => {
-        store.store = arg
-    })
-    // 获取设置
-    ipcMain.on('opt:getAll', (event) => {
-        event.returnValue = store.store
-    })
-    ipcMain.on('opt:get', (event, arg) => {
-        event.returnValue = store.get(arg)
-    })
-    // 重置设置
     ipcMain.on('opt:clearAll', (event) => {
-        store.clear()
         event.returnValue = true
     })
     // 获取补充的调试信息

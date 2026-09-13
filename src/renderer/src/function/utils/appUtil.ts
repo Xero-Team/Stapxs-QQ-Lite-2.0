@@ -48,6 +48,7 @@ import { createEmptyJsonPathMap, normalizeJsonPathMap } from '@renderer/protocol
 import { useStayEvent } from './stayEvent'
 export { useStayEvent } from './stayEvent'
 import { ONEBOT_NATIVE_COMMANDS } from '@renderer/runtime/onebotNative'
+import { getLocalValue, setLocalValue } from '@renderer/storage'
 
 export interface SafeAreaInsets { top: number; right: number; bottom: number; left: number }
 export function asSafeAreaInsets(value: unknown): SafeAreaInsets | undefined {
@@ -894,39 +895,37 @@ function setQuickLogin(address: string, port: number) {
 /**
 * 检查更新
 */
-export function checkUpdate() {
+export async function checkUpdate() {
     if (option.get('enable_external_services') !== true) return
     const repoName = import.meta.env.VITE_APP_REPO_NAME
-    // 获取最新的 release 信息
     const packageUrl =
         `https://api.github.com/repos/${repoName}/releases/latest`
     if (!isExternalRequestAllowed(packageUrl, option.get('enable_external_services'))) return
     auditExternalRequest(packageUrl, 'release-check')
+    const cacheVersion = await getLocalValue<string>('ui', 'version')
     fetch(packageUrl).then((response) => {
         if (response.ok) {
             response.json().then((data: unknown) => {
                 const release = parseRelease(data)
-                if (release) showUpadteLog(release)
+                if (release) showUpadteLog(release, cacheVersion)
             })
         }
     })
-    localStorage.setItem('version', appInfo.version)
+    void setLocalValue('ui', 'version', appInfo.version)
 }
 
 /**
 * 展示更新弹窗
 * @param data 更新数据
 */
-function showUpadteLog(data: ReleaseInfo) {
-    const appVersion = appInfo.version // 当前版本
-    const cacheVersion = localStorage.getItem('version') // 缓存版本
+function showUpadteLog(data: ReleaseInfo, cacheVersion: string | undefined) {
+    const appVersion = appInfo.version
     // 这儿有两种情况：
     //    如果当前版本小于获取到的版本就是有更新
     //    如果缓存版本小于获取到的版本但是当前版本等于获取到的版本就是更新完成首次启动
     const latestVersion = data.tag_name.substring(1)
 
     if (semver.lt(appVersion, latestVersion)) {
-        // 有更新
         showReleaseLog(data, false)
     }
     if (
@@ -934,11 +933,10 @@ function showUpadteLog(data: ReleaseInfo) {
         semver.eq(appVersion, latestVersion) &&
         semver.lt(cacheVersion, latestVersion)
     ) {
-        // 更新完成首次启动
-        showReleaseLog(data, true)
+        showReleaseLog(data, true, cacheVersion)
     }
 }
-function showReleaseLog(data: ReleaseInfo, isUpdated: boolean) {
+function showReleaseLog(data: ReleaseInfo, isUpdated: boolean, previousVersion?: string) {
     const uiStore = useUIStore()
     const { $t } = app.config.globalProperties
     let msg = data.body
@@ -956,7 +954,7 @@ function showReleaseLog(data: ReleaseInfo, isUpdated: boolean) {
     msg = title + '\r\n' + msg
     const info = {
         version:
-            (isUpdated ? localStorage.getItem('version') + ' -> ' : '') +
+            (isUpdated ? (previousVersion ?? '') + ' -> ' : '') +
             data.tag_name.substring(1),
         date: data.published_at,
         user: {
@@ -1088,20 +1086,18 @@ export function showReleaseHistory() {
  * Show the first-run guide without tracking launch counts or linking to
  * project sponsors and upstream pages.
  */
-export function checkFirstRunGuide() {
+export async function checkFirstRunGuide() {
     const uiStore = useUIStore()
-    // 使用引导
-    const guide = localStorage.getItem('guide')
     const guideVersion = 1
+    const guide = await getLocalValue<string>('ui', 'guide')
     if (guide != guideVersion.toString()) {
-        // 首次打开，显示首次打开引导信息
         const popInfo = {
             template: markRaw(WelPan),
             allowClose: false,
             button: [],
         }
         uiStore.popBoxList.push(popInfo)
-        localStorage.setItem('guide', guideVersion.toString())
+        void setLocalValue('ui', 'guide', guideVersion.toString())
     }
 }
 
@@ -1124,11 +1120,10 @@ export function checkNotice() {
     } as Record<string, string>
     fetch(url + '?' + new URLSearchParams(fetchData).toString())
         .then((response) => response.json())
-        .then((data: unknown) => {
+        .then(async (data: unknown) => {
             if (!Array.isArray(data)) return
-            // 获取已显示过的公告 ID
             let noticeShow = [] as number[]
-            const showId = localStorage.getItem('notice_show')
+            const showId = await getLocalValue<string>('ui', 'notice_show')
             if (showId) {
                 noticeShow = showId.split(',').map((id: string) => parseInt(id))
             }
@@ -1176,10 +1171,7 @@ export function checkNotice() {
                                         if (noticeShow.indexOf(noticeBody.id) < 0 && !noticeBody.is_important) {
                                             noticeShow.push(noticeBody.id)
                                         }
-                                        localStorage.setItem(
-                                            'notice_show',
-                                            noticeShow.toString(),
-                                        )
+                                        void setLocalValue('ui', 'notice_show', noticeShow.toString())
                                         // 关闭弹窗
                                         uiStore.popBoxList.shift()
                                     },
@@ -1451,47 +1443,19 @@ export function useKeyboard(...args: [string, ...string[], () => boolean | undef
 }
 
 
-function localStorageGetItem(key: string): string | null {
-    if (backend.type === 'electron') {
-        return backend.callSync('opt:get', key)
-    } else {
-        // eslint-disable-next-line no-restricted-globals
-        return localStorage.getItem(key)
-    }
-}
-
-function localStorageSetItem(key: string, value: string): void {
-    if (backend.type === 'electron') {
-        backend.callSync('opt:store', { key, value })
-    } else {
-        // eslint-disable-next-line no-restricted-globals
-        localStorage.setItem(key, value)
-    }
-}
-
-/**
- * 使用 localStorage
- * @param key 保存的键值
- * @param defaultValue 默认值
- * @returns
- */
 export function useLocalStorage<T>(key: string, defaultValue: T): Ref<T> {
-    const parser = (data: string) => {
-        return JSON.parse(data).value as T
-    }
-    const serializer = (data: T) => {
-        return JSON.stringify({ value: data })
-    }
-    const storageData = localStorageGetItem(key)
-    const data = ref<T>(storageData ? parser(storageData) : defaultValue)
+    const data = ref<T>(defaultValue) as Ref<T>
+    void getLocalValue<T>('ui', key).then((value) => {
+        if (value !== undefined) data.value = value
+    })
     watch(
         data,
         (newValue) => {
-            localStorageSetItem(key, serializer(newValue))
+            void setLocalValue('ui', key, newValue)
         },
         { deep: true },
     )
-    return data as Ref<T>
+    return data
 }
 //#endregion
 

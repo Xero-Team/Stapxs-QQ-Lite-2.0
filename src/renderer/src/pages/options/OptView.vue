@@ -462,6 +462,7 @@ import {
     type LocalImageInfo,
 } from '@renderer/function/utils/backgroundUtil'
 import { i18n } from '@renderer/main'
+import { getLocalValue, setLocalValue } from '@renderer/storage'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useUIStore } from '@renderer/state/ui'
 import ThemeColorPickerPan from '@renderer/components/ThemeColorPickerPan.vue'
@@ -498,7 +499,9 @@ const choiceImgRef = useTemplateRef<HTMLInputElement>('choiceImgRef')
 
 onMounted(() => {
     themeColorRaw.value = getThemeColorRawValue()
-    themeColorHistory.value = loadThemeColorHistory()
+    void loadThemeColorHistory().then((history) => {
+        themeColorHistory.value = history
+    })
     // 一次性初始化一次缩放级别
     const unwatch = watch(
         () => settingsStore.sysConfig,
@@ -604,30 +607,13 @@ function restoreThemeColor(themeColorValue: number) {
     themeColorRaw.value = getThemeColorRawValue()
 }
 
-function loadThemeColorHistory() {
-    const cookieValue = getCookie(THEME_COLOR_HISTORY_KEY)
-    let storageValue = null as string | null
-    try {
-        storageValue = globalThis.localStorage?.getItem(THEME_COLOR_HISTORY_KEY) ?? null
-    } catch {
-        // ignore
-    }
-    const source = cookieValue ?? storageValue
-    if (!source) {
-        return []
-    }
-    try {
-        const parsed = JSON.parse(source)
-        if (!Array.isArray(parsed)) {
-            return []
-        }
-        return parsed
-            .map((item) => normalizeHexColor(String(item)))
-            .filter((item, index, list) => list.indexOf(item) === index)
-            .slice(0, THEME_COLOR_HISTORY_LIMIT)
-    } catch {
-        return []
-    }
+async function loadThemeColorHistory() {
+    const stored = await getLocalValue<unknown>('ui', THEME_COLOR_HISTORY_KEY)
+    if (!Array.isArray(stored)) return []
+    return stored
+        .map((item) => normalizeHexColor(String(item)))
+        .filter((item, index, list) => list.indexOf(item) === index)
+        .slice(0, THEME_COLOR_HISTORY_LIMIT)
 }
 
 function saveThemeColorHistory(color: string) {
@@ -636,34 +622,8 @@ function saveThemeColorHistory(color: string) {
         normalized,
         ...themeColorHistory.value.filter((item) => item !== normalized),
     ].slice(0, THEME_COLOR_HISTORY_LIMIT)
-    const serialized = JSON.stringify(nextHistory)
-    setCookie(THEME_COLOR_HISTORY_KEY, serialized, 3650)
-    try {
-        globalThis.localStorage?.setItem(THEME_COLOR_HISTORY_KEY, serialized)
-    } catch {
-        // ignore
-    }
+    void setLocalValue('ui', THEME_COLOR_HISTORY_KEY, nextHistory)
     return nextHistory
-}
-
-function getCookie(name: string) {
-    if (typeof document === 'undefined') {
-        return null
-    }
-    const prefix = `${name}=`
-    const cookie = document.cookie
-        .split('; ')
-        .find((item) => item.startsWith(prefix))
-    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null
-}
-
-function setCookie(name: string, value: string, days: number) {
-    if (typeof document === 'undefined') {
-        return
-    }
-    const expires = new Date()
-    expires.setDate(expires.getDate() + days)
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
 }
 
 function cssColorToHex(color: string) {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
     auditExternalRequest,
     clearNetworkAudit,
@@ -23,16 +23,11 @@ describe('network policy', () => {
     })
 
     it('stores only bounded origin audit entries locally', () => {
-        const values = new Map<string, string>()
-        vi.stubGlobal('localStorage', {
-            getItem: (key: string) => values.get(key) ?? null,
-            setItem: (key: string, value: string) => values.set(key, value),
-            removeItem: (key: string) => values.delete(key),
-        })
         clearNetworkAudit()
         auditExternalRequest('https://example.test/path?token=secret', 'test')
-        expect(readNetworkAudit()).toEqual([{ at: expect.any(Number), purpose: 'test', origin: 'https://example.test' }])
-        expect(values.get('xero-qq-lite:network-audit')).not.toContain('secret')
+        const audit = readNetworkAudit()
+        expect(audit).toEqual([{ at: expect.any(Number), purpose: 'test', origin: 'https://example.test' }])
+        expect(JSON.stringify(audit)).not.toContain('secret')
         clearNetworkAudit()
         expect(readNetworkAudit()).toEqual([])
     })

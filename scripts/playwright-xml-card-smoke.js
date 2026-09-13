@@ -32,7 +32,25 @@ async (page) => {
             return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0
         })
         assert(external.length === 1 && !external[0].referer, 'Image request count or referrer policy incorrect')
-        const audit = await cardPage.evaluate(() => JSON.parse(localStorage.getItem('xero-qq-lite:network-audit') ?? '[]'))
+        const audit = await cardPage.evaluate(async () => {
+            const request = indexedDB.open('xero-qq-lite-local')
+            const rows = await new Promise((resolve, reject) => {
+                request.onerror = () => reject(request.error)
+                request.onsuccess = () => {
+                    const db = request.result
+                    const tx = db.transaction('records', 'readonly')
+                    const store = tx.objectStore('records')
+                    const all = store.getAll()
+                    all.onerror = () => reject(all.error)
+                    all.onsuccess = () => resolve(all.result)
+                }
+            })
+            const latest = rows
+                .filter((row) => row.namespace === 'network' && row.key === 'audit')
+                .sort((left, right) => left.updatedAt - right.updatedAt)
+                .at(-1)
+            return Array.isArray(latest?.value) ? latest.value : []
+        })
         assert(audit.length === 1 && audit[0].origin === 'https://images.test' && !JSON.stringify(audit).includes('synthetic'), 'Image audit missing or contains query data')
         await cardPage.getByRole('checkbox', { name: 'External services' }).uncheck()
         assert(await card.locator('img').count() === 0, 'Image remained after opt-out')

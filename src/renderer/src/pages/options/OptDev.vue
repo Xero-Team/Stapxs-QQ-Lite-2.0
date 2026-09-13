@@ -306,6 +306,7 @@
     import { uptime } from '@renderer/main'
     import { getSafeAreaInsets, loadJsonMap } from '@renderer/function/utils/appUtil'
     import { backend } from '@renderer/runtime/backend'
+    import { clearLocalData } from '@renderer/storage'
     import RawMsgRenderPreviewPan from '@renderer/components/RawMsgRenderPreviewPan.vue'
     import { useSettingsStore } from '@renderer/state/settings'
     import { useAuthStore } from '@renderer/state/auth'
@@ -626,13 +627,9 @@
                 {
                     text: $t('确定'),
                     fun: () => {
-                        localStorage.clear()
-                        document.cookie.split(';').forEach((c) => {
-                            document.cookie = c.replace(/^ +/, '')
-                                .replace(/=.*/,'=;expires=' + new Date().toUTCString() + ';path=/')
+                        void clearLocalData().then(() => {
+                            location.reload()
                         })
-                        backend.call(undefined, 'opt:clearAll', false)
-                        location.reload()
                     },
                 },
                 {
@@ -721,10 +718,10 @@
     // 自定义 CSS 相关方法
     async function updateCustomCssStatus() {
         const customCss = await getRaw('custom_css')
-        customCssLoaded.value = customCss && customCss.trim().indexOf('null') < 0
+        const cssText = typeof customCss === 'string' ? customCss : ''
+        customCssLoaded.value = cssText.trim().indexOf('null') < 0 && cssText.length > 0
         if (customCssLoaded.value) {
-            // 计算 CSS 大小
-            const sizeInBytes = new Blob([customCss]).size
+            const sizeInBytes = new Blob([cssText]).size
             if (sizeInBytes < 1024) {
                 customCssSize.value = sizeInBytes + ' B'
             } else if (sizeInBytes < 1024 * 1024) {

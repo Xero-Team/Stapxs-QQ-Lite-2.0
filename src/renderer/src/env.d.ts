@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
+interface ImportMetaEnv {
+    readonly VITE_STORAGE_BUILD_ID: string
+}
+
 declare module 'vue3-danmaku'
 
 // Border Card UI currently ships an in-repository Vue SFC that is not strict-mode safe.

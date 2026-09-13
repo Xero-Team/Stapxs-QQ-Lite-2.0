@@ -1,5 +1,4 @@
 import path from 'path'
-import Store from 'electron-store'
 import fs from 'fs'
 import log4js from 'log4js'
 
@@ -27,12 +26,7 @@ export let touchBarInstance = undefined as touchBar | undefined
 const isDev = import.meta.env.DEV
 
 async function createWindow() {
-    const store = new Store()
-    const storedGlass = store.get('glass_effect')
-    const glassEffect = storedGlass === true || storedGlass === 'true'
-    if (store.get('opt_log_level')) {
-        logLevel = (store.get('opt_log_level') ?? 'info') as string
-    }
+    const glassEffect = false
     logger.level = logLevel
 
     /* eslint-disable no-console */

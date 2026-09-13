@@ -2,6 +2,7 @@ import ViteYaml from '@modyfi/vite-plugin-yaml'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
+import { randomUUID } from 'node:crypto'
 import { resolve } from 'path'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig, loadEnv, UserConfigFnObject, type PluginOption } from 'vite'
@@ -18,6 +19,17 @@ export function configFactory(outPath: string): UserConfigFnObject {
         const basePath = env.VITE_APP_BASE_PATH || './'
 
         const plugins: PluginOption[] = [
+            {
+                name: 'storage-build-id',
+                config(_userConfig, { command }) {
+                    const id = command === 'build' ? randomUUID() : 'dev'
+                    return {
+                        define: {
+                            'import.meta.env.VITE_STORAGE_BUILD_ID': JSON.stringify(id),
+                        },
+                    }
+                },
+            },
             vue(),
             vueDevTools(),
             ViteYaml(),
