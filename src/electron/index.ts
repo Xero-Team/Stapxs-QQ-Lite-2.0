@@ -7,7 +7,8 @@ import windowStateKeeper from 'electron-window-state'
 import packageInfo from '../../package.json' with { type: 'json' }
 
 import { regIpcListener } from './function/ipc.ts'
-import { Menu, session, app, protocol, BrowserWindow, Tray, nativeImage, type BrowserWindowConstructorOptions } from 'electron'
+import { Menu, session, app, protocol, BrowserWindow, Tray, nativeImage, screen, type BrowserWindowConstructorOptions } from 'electron'
+import { computeDefaultWindowSize, isLegacyDefaultWindowSize, minWindowSize, resolveWindowBounds, type RestoredWindowBounds } from './function/windowBounds.ts'
 import { touchBar } from './function/touchbar.ts'
 import { join } from 'path'
 import trayIconPath from './assets/tray@2x.png?asset&asarUnpack'
@@ -48,24 +49,46 @@ async function createWindow() {
     logger.info('启动平台架构：' + process.platform)
     logger.info('正在创建窗体 ……')
     Menu.setApplicationMenu(null)
-    // 创建窗口
+    const cursorDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+    const defaultSize = computeDefaultWindowSize(cursorDisplay.workArea)
     const mainWindowState = windowStateKeeper({
-        defaultWidth: 850,
-        defaultHeight: 530
+        defaultWidth: defaultSize.width,
+        defaultHeight: defaultSize.height,
     })
-    let windowConfig = {
-        x: mainWindowState.x,
-        y: mainWindowState.y,
+    const restoredBounds: RestoredWindowBounds = {
         width: mainWindowState.width,
         height: mainWindowState.height,
-        minWidth: 350,
-        minHeight: 450,
+    }
+    if (Number.isInteger(mainWindowState.x)) restoredBounds.x = mainWindowState.x
+    if (Number.isInteger(mainWindowState.y)) restoredBounds.y = mainWindowState.y
+    const restoredX = restoredBounds.x
+    const restoredY = restoredBounds.y
+    const workArea = (!isLegacyDefaultWindowSize(restoredBounds)
+        && restoredX !== undefined
+        && restoredY !== undefined)
+        ? screen.getDisplayMatching({
+            x: restoredX,
+            y: restoredY,
+            width: restoredBounds.width,
+            height: restoredBounds.height,
+        }).workArea
+        : cursorDisplay.workArea
+    const windowBounds = resolveWindowBounds(restoredBounds, workArea)
+    const minSize = minWindowSize(workArea)
+    logger.info(`窗口尺寸: ${windowBounds.width}x${windowBounds.height}`)
+    let windowConfig = {
+        x: windowBounds.x,
+        y: windowBounds.y,
+        width: windowBounds.width,
+        height: windowBounds.height,
+        minWidth: minSize.width,
+        minHeight: minSize.height,
         icon: path.join(__dirname, '/public/img/icons/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.mjs'),
             sandbox: false,
         },
-        maximizable: false,
+        maximizable: true,
         fullscreen: false
     } as BrowserWindowConstructorOptions
     if (process.platform === 'darwin') {

@@ -1,4 +1,5 @@
 mod commands;
+mod window_bounds;
 
 use commands::db::DbState;
 use std::collections::HashMap;
@@ -14,7 +15,7 @@ use liquid_glass_rs::{GlassOptions, GlassMaterialVariant, GlassViewManager};
 #[cfg(target_os = "macos")]
 use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
 use once_cell::sync::OnceCell;
-use tauri::{ async_runtime::handle, menu::{Menu, MenuEvent, MenuItem}, tray::{TrayIcon, TrayIconBuilder, TrayIconEvent}, AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder };
+use tauri::{ async_runtime::handle, menu::{Menu, MenuEvent, MenuItem}, tray::{TrayIcon, TrayIconBuilder, TrayIconEvent}, AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder };
 use tauri_plugin_store::StoreBuilder;
 use user_notify::{get_notification_manager, NotificationCategory, NotificationCategoryAction};
 
@@ -268,11 +269,63 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
+fn target_monitor(app: &tauri::App) -> Option<tauri::Monitor> {
+    if let Ok(pos) = app.cursor_position() {
+        if let Ok(Some(monitor)) = app.monitor_from_point(pos.x, pos.y) {
+            return Some(monitor);
+        }
+    }
+    app.primary_monitor().ok().flatten()
+}
+
+fn logical_work_area(monitor: &tauri::Monitor) -> (f64, f64, f64, f64) {
+    let scale = monitor.scale_factor();
+    let work = monitor.work_area();
+    (
+        f64::from(work.position.x) / scale,
+        f64::from(work.position.y) / scale,
+        f64::from(work.size.width) / scale,
+        f64::from(work.size.height) / scale,
+    )
+}
+
+fn apply_desktop_window_bounds(window: &tauri::WebviewWindow, app: &tauri::App) {
+    let Some(monitor) = target_monitor(app) else { return };
+    let (work_x, work_y, work_width, work_height) = logical_work_area(&monitor);
+    let scale = window.scale_factor().unwrap_or_else(|_| monitor.scale_factor());
+    let Ok(size) = window.inner_size() else { return };
+    let position = window.outer_position().ok();
+    let bounds = window_bounds::resolve_window_bounds(
+        position.map(|pos| f64::from(pos.x) / scale),
+        position.map(|pos| f64::from(pos.y) / scale),
+        f64::from(size.width) / scale,
+        f64::from(size.height) / scale,
+        work_x,
+        work_y,
+        work_width,
+        work_height,
+    );
+    info!("窗口尺寸: {}x{}", bounds.width, bounds.height);
+    let _ = window.set_size(LogicalSize::new(bounds.width, bounds.height));
+    let _ = window.set_position(LogicalPosition::new(bounds.x, bounds.y));
+}
+
 /// 创建主窗体配置
 fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
+    let (work_width, work_height) = target_monitor(app)
+        .map(|monitor| {
+            let (_, _, width, height) = logical_work_area(&monitor);
+            (width, height)
+        })
+        .unwrap_or((1920.0, 1080.0));
+    let (width, height) = window_bounds::compute_default_window_size(work_width, work_height);
+    let (min_width, min_height) = window_bounds::min_window_size(work_width, work_height);
     let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/".into()))
         .title("Xero QQ Lite")
-        .inner_size(850.0, 530.0)
+        .inner_size(width, height)
+        .min_inner_size(min_width, min_height)
+        .center()
+        .maximizable(true)
         .transparent(true);
     #[cfg(target_os = "macos")]
     let store = StoreBuilder::new(app, ".settings.dat").build()
@@ -318,6 +371,7 @@ fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
         .decorations(false)
         .disable_drag_drop_handler();
     let window = win_builder.build()?;
+    apply_desktop_window_bounds(&window, app);
 
     // macOS: 应用玻璃效果
     #[cfg(target_os = "macos")]
