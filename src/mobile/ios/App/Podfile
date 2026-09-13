@@ -16,8 +16,8 @@ def capacitor_pods
   pod 'CapacitorLocalNotifications', :path => '../../../../node_modules/@capacitor/local-notifications'
   pod 'CapacitorStatusBar', :path => '../../../../node_modules/@capacitor/status-bar'
   pod 'CapgoCapacitorNavigationBar', :path => '../../../../node_modules/@capgo/capacitor-navigation-bar'
-  pod 'CapacitorPluginSafeArea', :path => '../../../../node_modules/capacitor-plugin-safe-area'
   pod 'CapacitorOnebotConnctor', :path => '../../../../ssqq.capacitor-onebot-connector'
+  pod 'CapacitorPluginSafeArea', :path => '../../../../node_modules/capacitor-plugin-safe-area'
 end
 
 target 'App' do

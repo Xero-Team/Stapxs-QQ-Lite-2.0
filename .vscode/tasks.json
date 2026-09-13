@@ -5,13 +5,13 @@
       "label": "ui:dev",
       "type": "shell",
       "isBackground": true,
-      "command": "yarn",
+      "command": "pnpm",
       "args": ["dev"]
     },
     {
       "label": "ui:build",
       "type": "shell",
-      "command": "yarn",
+      "command": "pnpm",
       "args": ["build"]
     }
   ]

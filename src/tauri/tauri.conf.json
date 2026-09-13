@@ -4,9 +4,9 @@
     "version": "../../package.json",
     "identifier": "team.xero.qqlite",
     "build": {
-        "beforeDevCommand": "yarn dev",
+        "beforeDevCommand": "pnpm dev",
         "devUrl": "http://localhost:8080",
-        "beforeBuildCommand": "yarn build",
+        "beforeBuildCommand": "pnpm build",
         "frontendDist": "../../dist"
     },
     "app": {
