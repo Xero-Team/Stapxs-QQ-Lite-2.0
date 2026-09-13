@@ -947,7 +947,7 @@
     {
       "type": "library",
       "name": "electron-store",
-      "version": "10.1.0",
+      "version": "11.0.2",
       "licenses": [
         {
           "license": {
@@ -955,7 +955,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/electron-store@10.1.0",
+      "purl": "pkg:npm/electron-store@11.0.2",
       "properties": [
         {
           "name": "xero:dependency-scope",

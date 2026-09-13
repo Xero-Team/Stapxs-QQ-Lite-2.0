@@ -105,6 +105,12 @@
   @electron-toolkit/eslint-config-ts@^2.0.0`. The connector's legacy
   `@ionic/eslint-config` still emits an ESLint 7/8 peer warning and remains a
   separate workspace compatibility item.
+- `electron-store` was upgraded independently from 10.1.0 to 11.0.2. Its
+  existing `new Store()` usage remains compatible under the project's Node 22
+  baseline; Web/Node/core/browser typechecks, Electron Vite build, contract
+  tests, production build, Tauri lint, SBOM/license/CSP metadata, release
+  metadata, and 92-file artifact checksums pass. Roll back with `yarn up
+  electron-store@^10.0.0`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
