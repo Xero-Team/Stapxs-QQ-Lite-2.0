@@ -491,7 +491,7 @@
     {
       "type": "library",
       "name": "@tauri-apps/plugin-clipboard-manager",
-      "version": "2.3.2",
+      "version": "2.3.3",
       "licenses": [
         {
           "license": {
@@ -499,7 +499,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@tauri-apps/plugin-clipboard-manager@2.3.2",
+      "purl": "pkg:npm/@tauri-apps/plugin-clipboard-manager@2.3.3",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -510,7 +510,7 @@
     {
       "type": "library",
       "name": "@tauri-apps/plugin-opener",
-      "version": "2.5.2",
+      "version": "2.5.5",
       "licenses": [
         {
           "license": {
@@ -518,7 +518,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@tauri-apps/plugin-opener@2.5.2",
+      "purl": "pkg:npm/@tauri-apps/plugin-opener@2.5.5",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -529,7 +529,7 @@
     {
       "type": "library",
       "name": "@tauri-apps/plugin-shell",
-      "version": "2.3.3",
+      "version": "2.3.6",
       "licenses": [
         {
           "license": {
@@ -537,7 +537,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@tauri-apps/plugin-shell@2.3.3",
+      "purl": "pkg:npm/@tauri-apps/plugin-shell@2.3.6",
       "properties": [
         {
           "name": "xero:dependency-scope",

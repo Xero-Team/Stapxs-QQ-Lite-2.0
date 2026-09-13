@@ -3415,14 +3415,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:^2.8.0":
-  version: 2.9.1
-  resolution: "@tauri-apps/api@npm:2.9.1"
-  checksum: 10c0/18c76ec58b579860bfde5cd5b5ea6c3b13019d356c17d436bf395cafdf15dd1f277364cacd24cc94e5d4aa3816f39698f231773d2a18625e98702295ab0c2c8f
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/api@npm:~2.11.1":
+"@tauri-apps/api@npm:^2.11.0, @tauri-apps/api@npm:~2.11.1":
   version: 2.11.1
   resolution: "@tauri-apps/api@npm:2.11.1"
   checksum: 10c0/78a08a64ee7eab9d34bd4ba1bdc3a2440c7e9cc5737b3f1d77bd80fa38b0cb5e9601efe04da40c947c5da2ca38dc702bec21b4ae96b18ee5f3e82980d1f0b325
@@ -3550,30 +3543,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-clipboard-manager@npm:^2.3.0":
-  version: 2.3.2
-  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.3.2"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10c0/26ba8814bdd51c35d80fd0911643eee3862eac241352c70203c9f7fcc3d2dcf68e5efed63315f0d80b8446c16b0e9f80aa040da340461614034c00881ec246d6
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-opener@npm:^2":
-  version: 2.5.2
-  resolution: "@tauri-apps/plugin-opener@npm:2.5.2"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10c0/b10c39063c59ca71e5a5c43bb93da34387a7e707d1baf65a53110141f1a973ce2b73f19be9f63d9312c030760ba2b876ad3069b9a123abb4883e025059a15c3f
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-shell@npm:~2":
+"@tauri-apps/plugin-clipboard-manager@npm:^2.3.3":
   version: 2.3.3
-  resolution: "@tauri-apps/plugin-shell@npm:2.3.3"
+  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.3.3"
   dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10c0/6aad1ebbf1fe9ce81606583ca851a86d9abc30e0a6289fa61d91f35f3a007c756d388ff7a10e71b62d43035b9702757a970c544033cb04779402034bd892e4a2
+    "@tauri-apps/api": "npm:^2.11.0"
+  checksum: 10c0/fcc276db3102e19e2e40c4679ffa5cfd73ab0d36d03befe27dce9d8d9723acbcc0e6a465aafd081a60881a5c941f789ff5ae11dfb1808fb787564d6150bf92f1
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-opener@npm:^2.5.5":
+  version: 2.5.5
+  resolution: "@tauri-apps/plugin-opener@npm:2.5.5"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.11.0"
+  checksum: 10c0/2ad09fc3831758785b4c3d291e3c04a9b7949694bce9867e0e2e7f14f6b7d8d04efc4152369b08845f115bbe33c34a85e2bb5a28e0206314ad92130e431c1e95
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-shell@npm:^2.3.6":
+  version: 2.3.6
+  resolution: "@tauri-apps/plugin-shell@npm:2.3.6"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.11.0"
+  checksum: 10c0/0180a18c0c7dc032895b7ca1efb8fa34e2196786fa339eec251c8a8278ab7b4b4bca7c36da2700673943bad93f23af74529c9995bafa4ea454c52d99fd2bc1b7
   languageName: node
   linkType: hard
 
@@ -14509,9 +14502,9 @@ __metadata:
     "@stapxs/capacitor-sync-version": "npm:^1.0.10"
     "@tauri-apps/api": "npm:~2.11.1"
     "@tauri-apps/cli": "npm:~2.11.4"
-    "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.0"
-    "@tauri-apps/plugin-opener": "npm:^2"
-    "@tauri-apps/plugin-shell": "npm:~2"
+    "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.3"
+    "@tauri-apps/plugin-opener": "npm:^2.5.5"
+    "@tauri-apps/plugin-shell": "npm:^2.3.6"
     "@types/jsonpath": "npm:^0.2.4"
     "@types/node": "npm:22.20.2"
     "@types/semver": "npm:^7.5.8"

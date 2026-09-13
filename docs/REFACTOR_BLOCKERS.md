@@ -121,6 +121,13 @@
   Web/Node/core/browser typechecks, contract tests, production and Electron
   builds, Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file
   artifact checksums pass. Roll back with `yarn up vue-echarts@^7.0.3`.
+- Tauri renderer plugins were refreshed independently within the 2.x line:
+  clipboard-manager 2.3.3, opener 2.5.5, and shell 2.3.6. Web/Node/core/browser
+  typechecks, contract tests, production and Electron builds, `lint:tauri`,
+  SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums
+  pass. Roll back to the prior ranges with `yarn up
+  @tauri-apps/plugin-clipboard-manager@^2.3.0 @tauri-apps/plugin-opener@^2
+  @tauri-apps/plugin-shell@~2`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
