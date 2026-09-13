@@ -330,7 +330,7 @@ export function regIpcListener() {
         Object.keys(noticeList).forEach((key) => {
             logger.level = logLevel
             logger.info('清空通知')
-            noticeList[key].close()
+            noticeList[key]?.close()
             delete noticeList[key]
         })
     })
@@ -340,7 +340,7 @@ export function regIpcListener() {
             if(key.startsWith(id)) {
                 logger.level = logLevel
                 logger.info('关闭所有通知：' + id)
-                noticeList[key].close()
+                noticeList[key]?.close()
                 delete noticeList[key]
                 // macOS: 刷新 TouchBar
                 if(touchBarInstance) {
@@ -397,7 +397,7 @@ export function regIpcListener() {
                 const lines = str.split('\n').slice(1)
                 lines.forEach((line) => {
                     const [key, value] = line.split('=')
-                    if (key != '') data[key] = value
+                    if (key && value !== undefined) data[key] = value
                 })
             }
             return data
@@ -520,7 +520,7 @@ export function regIpcListener() {
             let itemIndex = -1
             for (let i = 0; i < template.length; i++) {
                 const menuItem = template[i]
-                if (menuItem.id == id) {
+                if (menuItem?.id == id) {
                     menuIndex = i
                     break
                 }
@@ -528,12 +528,13 @@ export function regIpcListener() {
             if (menuIndex == -1) {
                 for (let i = 0; i < template.length; i++) {
                     const menuItem = template[i]
+                    if (!menuItem) continue
                     const submenu =
                         menuItem.submenu as MenuItemConstructorOptions[]
                     if (submenu && submenu.length > 0) {
                         for (let j = 0; j < submenu.length; j++) {
                             const subMenuItem = submenu[j]
-                            if (subMenuItem.id == id) {
+                            if (subMenuItem?.id == id) {
                                 menuIndex = i
                                 itemIndex = j
                                 break
@@ -612,6 +613,7 @@ export function regIpcListener() {
 
         if (!result.canceled && result.filePaths.length > 0) {
             const filePath = result.filePaths[0]
+            if (!filePath) return null
             return {
                 path: filePath,
                 url: pathToFileURL(filePath).href,

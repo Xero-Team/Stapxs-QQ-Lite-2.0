@@ -25,7 +25,9 @@ export class touchBar {
         mode: 'free',
         items: [],
         select: (index) => {
-            const id = this.itemList[index].id
+            const item = this.itemList[index]
+            if (!item) return
+            const id = item.id
             this.win.webContents.send('app:jumpChat', {
                 userId: id,
                 messageId: 0
@@ -99,7 +101,9 @@ export class touchBar {
                         }
                     }),
                     select: (index) => {
-                        const id = nameList[index].id
+                        const item = nameList[index]
+                        if (!item) return
+                        const id = item.id
                         this.win.webContents.send('app:jumpChat', {
                             userId: id,
                             messageId: 0
@@ -160,6 +164,7 @@ export class touchBar {
         const count = Object.keys(this.msgList).length
         if(count > 0) {
             const data = Object.values(this.msgList)[0]
+            if (!data) return
             const id = data.tag.split('/')[0]
 
             // 创建 poper
@@ -168,7 +173,7 @@ export class touchBar {
                 label: count.toString(),
                 items: new TouchBar({
                     items: [
-                        new TouchBarButton({ icon: data.image, iconPosition: 'right', enabled: false, backgroundColor: '#000'}),
+                        ...(data.image ? [new TouchBarButton({ icon: data.image, iconPosition: 'right', enabled: false, backgroundColor: '#000'})] : []),
                         new TouchBarButton({ label: data.title, click: () => {
                             this.win.webContents.focus()
                             this.win.webContents.send('app:jumpChat', {

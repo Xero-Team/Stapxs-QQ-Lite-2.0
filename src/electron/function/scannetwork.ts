@@ -34,7 +34,8 @@ class ScanNetwork {
 
                         for (let i = 1; i <= 254; i++) {
                             const possibleIP = subnetParts.map((part, index) => {
-                                return (part & netmaskParts[index]) | ((i & ~netmaskParts[index]) & 0xff)
+                                const mask = netmaskParts[index] ?? 0
+                                return (part & mask) | ((i & ~mask) & 0xff)
                             }).join('.')
                             ips.push(possibleIP === address ? '127.0.0.1' : possibleIP)
                         }

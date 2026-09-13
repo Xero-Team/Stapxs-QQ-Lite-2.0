@@ -178,7 +178,9 @@ async function createWindow() {
                 details.responseHeaders['cache-control'] = ['max-age=259200']
             }
         }
-        callback({ cancel: false, responseHeaders: details.responseHeaders })
+        callback(details.responseHeaders
+            ? { cancel: false, responseHeaders: details.responseHeaders }
+            : { cancel: false })
     })
 }
 
