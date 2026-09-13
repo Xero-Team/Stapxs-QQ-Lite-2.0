@@ -100,9 +100,7 @@ jobs:
                                           xdg-utils \
                                           build-essential \
                                           librsvg2-dev \
-                                          libwebkit2gtk-4.0-dev \
                                           libwebkit2gtk-4.1-dev \
-                                          libjavascriptcoregtk-4.0-dev \
                                           libayatana-appindicator3-dev
             - name: Rust check
               run: pnpm lint:tauri
