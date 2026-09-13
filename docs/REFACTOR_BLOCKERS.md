@@ -2,6 +2,10 @@
 
 ## 2026-09-13 verification refresh
 
+- OneBot Playwright smoke passes all four synthetic scenarios (Lagrange/NapCat
+  with numeric and string account IDs), including the message/media/reply/
+  recall/reconnect flow implemented by the runner. No live credentials or
+  native WebView behavior are implied by this result.
 - A fresh recursive `yarn npm audit --all --recursive` (Yarn 4.12.0 via
   Corepack) completes with the known advisory set: lodash/lodash-es high and
   moderate prototype-pollution/code-injection entries plus deprecated build
