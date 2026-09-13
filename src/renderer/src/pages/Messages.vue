@@ -322,7 +322,13 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
      * 系统通知菜单长按开始
      */
     function systemNoticeMenuStart(event: TouchEvent) {
-        showMenuStart(event, { user_id: -10000 } as any)
+        showMenuStart(event, {
+            user_id: -10000,
+            group_id: 0,
+            group_name: $t('系统通知'),
+            nickname: $t('系统通知'),
+            remark: $t('系统通知'),
+        })
     }
 
     /**
