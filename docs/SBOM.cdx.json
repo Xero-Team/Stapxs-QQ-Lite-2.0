@@ -700,7 +700,7 @@
     {
       "type": "library",
       "name": "@vue/eslint-config-typescript",
-      "version": "13.0.0",
+      "version": "14.9.0",
       "licenses": [
         {
           "license": {
@@ -708,7 +708,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@vue/eslint-config-typescript@13.0.0",
+      "purl": "pkg:npm/@vue/eslint-config-typescript@14.9.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1023,7 +1023,7 @@
     {
       "type": "library",
       "name": "eslint-plugin-vue",
-      "version": "9.33.0",
+      "version": "10.11.0",
       "licenses": [
         {
           "license": {
@@ -1031,7 +1031,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/eslint-plugin-vue@9.33.0",
+      "purl": "pkg:npm/eslint-plugin-vue@10.11.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -1431,6 +1431,25 @@
         }
       ],
       "purl": "pkg:npm/vue-echarts@7.0.3",
+      "properties": [
+        {
+          "name": "xero:dependency-scope",
+          "value": "devDependencies"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vue-eslint-parser",
+      "version": "10.4.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/vue-eslint-parser@10.4.1",
       "properties": [
         {
           "name": "xero:dependency-scope",

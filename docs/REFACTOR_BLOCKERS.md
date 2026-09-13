@@ -46,6 +46,14 @@
   metadata, release metadata, and 92-file artifact checksums pass. Roll back
   with `yarn up @modyfi/vite-plugin-yaml@^1.1.0`; the local `sharp` postinstall
   failure is unchanged.
+- The Vue ESLint toolchain was upgraded as one peer-compatible change:
+  `eslint-plugin-vue` 9.33.0 to 10.11.0, `@vue/eslint-config-typescript`
+  13.0.0 to 14.9.0, and the directly imported `vue-eslint-parser` to 10.4.1.
+  `yarn check` reports zero errors (legacy warning-only output), while Web/core
+  typecheck, browser harness typecheck, contract tests, production build,
+  Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file artifact
+  checksums pass. Roll back with `yarn up eslint-plugin-vue@^9.33.0
+  @vue/eslint-config-typescript@^13.0.0 vue-eslint-parser@^9.4.3`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
@@ -182,9 +190,10 @@ current result are recorded below.
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
 `markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, Vitest 5.0.0, the AI SDK
-pair, and `vite-plugin-vue-devtools` 8.2.1. A fresh recursive audit using the
-repository Yarn 4.12.0 entrypoint exits 1 with 126 advisory paths across the
-current dependency graph: 2 critical, 77 high, 42 moderate, and 5 low. The
+pair, `vite-plugin-vue-devtools` 8.2.1, and the Vue ESLint toolchain above. A
+fresh recursive audit using the repository Yarn 4.12.0 entrypoint exits 1 with
+125 advisory paths across the current dependency graph: 2 critical, 77 high,
+42 moderate, and 4 low. The
 report includes repeated package/version paths, so
 the count is an advisory-path count rather than a unique CVE count. Remaining
 exposure is primarily transitive build tooling (`sharp`, `tar`, `postcss`,
