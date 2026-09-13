@@ -56,6 +56,7 @@ export default [
         plugins: { '@typescript-eslint': tseslint },
         rules: {
             'no-unused-vars': 'off',
+            '@typescript-eslint/no-explicit-any': 'error',
             '@typescript-eslint/no-unused-vars': ['error', {
                 argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none',
             }],
