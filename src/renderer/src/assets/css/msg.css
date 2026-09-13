@@ -784,7 +784,7 @@ span.user-title.robot {
     width: 100%;
 }
 .file-view > span.txt {
-    font-family: monospace;
+    font-family: var(--font-mono, 'Noto Sans Mono', ui-monospace, monospace);
     white-space: pre-wrap;
     font-size: 0.9rem;
     opacity: 0.6;

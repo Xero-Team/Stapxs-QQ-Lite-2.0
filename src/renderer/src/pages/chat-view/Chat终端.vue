@@ -324,7 +324,7 @@
             )
             addCommandLineF('[screen is terminating]')
             addCommandOutF(
-                '* Xero QQ Lite Shell requires "FiraCode Nerd Font" to display complete command line symbols, please ensure the device has installed this font.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n* 使用 "help" 命令查看所有可用命令。\n\n\n',
+                '* Xero QQ Lite Shell uses Noto Sans Mono. CJK glyphs fall back to Noto Sans Mono CJK SC.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n* 使用 "help" 命令查看所有可用命令。\n\n\n',
                 'var(--color-font)',
             )
             addCommandOutF(
@@ -945,8 +945,7 @@
     }
     .shell-pan a,
     .shell-pan span {
-        font-family: 'FiraCode Nerd Font', Helvetica, Arial,
-             Verdana, Tahoma, sans-serif;
+        font-family: var(--font-mono);
         color: var(--color-font);
         white-space: pre-wrap;
     }
@@ -1023,8 +1022,7 @@
         opacity: 0;
     }
     .shell-msg pre {
-        font-family: 'FiraCode Nerd Font', Helvetica, Arial,
-            Verdana, Tahoma, sans-serif;
+        font-family: var(--font-mono);
         line-height: 7px;
         font-size: 6px;
     }
@@ -1033,8 +1031,7 @@
         margin-bottom: 40px;
     }
     .shell-input > input {
-        font-family: 'FiraCode Nerd Font', Helvetica, Arial,
-             Verdana, Tahoma, sans-serif;
+        font-family: var(--font-mono);
         caret-color: var(--color-main);
         width: calc(100% - 2rem);
         background: transparent;

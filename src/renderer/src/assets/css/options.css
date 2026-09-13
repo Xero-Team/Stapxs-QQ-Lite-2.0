@@ -676,7 +676,7 @@
 }
 
 .debug-info {
-    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    font-family: var(--font-mono, 'Noto Sans Mono', ui-monospace, monospace);
     margin: -10px -10px 0 -10px;
     width: 100%;
     min-height: 150px;

@@ -822,7 +822,7 @@
         const customCss = get('custom_css')
         const popInfo = {
             svg: 'eye',
-            html: '<textarea style="width: calc(100% - 40px);min-height: 300px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;font-family: monospace;font-size: 0.9rem;" readonly>' +
+            html: '<textarea style="width: calc(100% - 40px);min-height: 300px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;font-family: var(--font-mono);font-size: 0.9rem;" readonly>' +
                 (customCss || '') +
                 '</textarea>',
             title: $t('查看自定义样式'),

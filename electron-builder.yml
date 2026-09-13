@@ -22,6 +22,7 @@ files:
 asarUnpack:
     - resources/**
     - out/main/**/*.png
+    - out/renderer/fonts/**
 
 # Windows 配置
 win:

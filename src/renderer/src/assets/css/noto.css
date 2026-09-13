@@ -1,0 +1,19 @@
+html,
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--font-sans, 'Noto Sans', 'Noto Sans CJK SC', 'Noto Sans SC',
+        'Noto Sans CJK TC', 'Noto Sans CJK JP', 'Noto Sans CJK KR', 'Noto Sans CJK HK',
+        'Noto Color Emoji', 'Noto Sans Symbols 2', sans-serif);
+}
+
+code,
+kbd,
+pre,
+samp,
+pre > code {
+    font-family: var(--font-mono, 'Noto Sans Mono', 'Noto Sans Mono CJK SC',
+        'Noto Sans CJK SC', ui-monospace, monospace) !important;
+}

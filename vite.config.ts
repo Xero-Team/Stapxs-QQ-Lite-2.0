@@ -9,8 +9,11 @@ import { defineConfig, loadEnv, UserConfigFnObject, type PluginOption } from 'vi
 import { VitePWA } from 'vite-plugin-pwa'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import qfaceInfo from './src/renderer/src/assets/img/qq-face/public/assets/qq_emoji/_index.json' with { type: 'json' }
+import { resolveFontProfile } from './scripts/noto-fonts.mjs'
+import { prepareNotoFonts } from './scripts/prepare-noto-fonts.mjs'
 
 const isDesktop = !!process.env.DESKTOP
+const fontProfile = resolveFontProfile()
 
 export function configFactory(outPath: string): UserConfigFnObject {
     return ({ mode }) => {
@@ -33,7 +36,37 @@ export function configFactory(outPath: string): UserConfigFnObject {
             vue(),
             vueDevTools(),
             ViteYaml(),
-            !isDesktop && VitePWA({ registerType: 'autoUpdate' }),
+            {
+                name: 'prepare-noto-fonts',
+                async config() {
+                    if (fontProfile !== 'system') await prepareNotoFonts()
+                    return {}
+                },
+                transformIndexHtml(html) {
+                    if (fontProfile === 'system') return html
+                    return html.replace(
+                        '</head>',
+                        '        <link rel="stylesheet" href="/fonts/faces.css">\n    </head>',
+                    )
+                },
+            },
+            !isDesktop && VitePWA({
+                registerType: 'autoUpdate',
+                workbox: {
+                    globIgnores: ['**/fonts/**'],
+                    runtimeCaching: [{
+                        urlPattern: /\/fonts\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'noto-fonts',
+                            expiration: {
+                                maxEntries: 120,
+                                maxAgeSeconds: 60 * 60 * 24 * 365,
+                            },
+                        },
+                    }],
+                },
+            }),
             visualizer() as unknown as PluginOption,
             {
                 name: 'dev-csp',
@@ -76,6 +109,15 @@ export function configFactory(outPath: string): UserConfigFnObject {
 
             plugins.push(viteStaticCopy({
                 targets: targets
+            }))
+        }
+
+        if (fontProfile !== 'system') {
+            plugins.push(viteStaticCopy({
+                targets: [{
+                    src: resolve(__dirname, `resources/fonts/${fontProfile}/*`),
+                    dest: 'fonts',
+                }],
             }))
         }
 

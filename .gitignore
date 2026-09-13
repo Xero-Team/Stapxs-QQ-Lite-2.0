@@ -18,3 +18,7 @@ notice_local.json
 .playwright-cli/
 output/playwright/
 .codex/
+resources/fonts/web/
+resources/fonts/desktop/
+resources/fonts/_cache/
+resources/fonts/_source/

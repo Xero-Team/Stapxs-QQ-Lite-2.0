@@ -158,7 +158,7 @@
         background: var(--color-bg);
         color: var(--color-font);
         resize: vertical;
-        font-family: monospace;
+        font-family: var(--font-mono);
         font-size: 0.85rem;
         line-height: 1.6;
     }

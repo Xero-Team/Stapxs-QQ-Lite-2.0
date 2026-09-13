@@ -294,7 +294,7 @@
         border-bottom: 1px solid var(--color-font-2);
         background: var(--color-card-1);
         box-sizing: border-box;
-        font-family: monospace;
+        font-family: var(--font-mono);
         letter-spacing: 0.08em;
         text-transform: uppercase;
         height: 30px;

@@ -1,6 +1,6 @@
 html,
 body {
-    font-family: Helvetica, Arial, Verdana, Tahoma, sans-serif;
+    font-family: var(--font-sans, 'Noto Sans', 'Noto Sans CJK SC', 'Noto Color Emoji', sans-serif);
     background: var(--color-main);
     position: relative;
     text-autospace: normal;
