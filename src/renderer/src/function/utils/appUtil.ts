@@ -162,7 +162,7 @@ export async function loadHistory(info: BaseChatInfoElem) {
     const authStore = useAuthStore()
     const chatStore = useChatStore()
     const settingsStore = useSettingsStore()
-    chatStore.messageList = []
+    chatStore.clearMessages()
     // 本地有数据时立即显示，同时仍发网络请求以获取最新消息（避免遗漏）
     if (
         settingsStore.sysConfig.enable_local_history &&
@@ -174,7 +174,7 @@ export async function loadHistory(info: BaseChatInfoElem) {
             20,
         )
         if (localMsgs.length > 0) {
-            chatStore.messageList = localMsgs as unknown as MsgItemElem[]
+            chatStore.setMessages(localMsgs as unknown as MsgItemElem[])
         }
     }
     if (!loadHistoryMessage(info.id, info.type)) {

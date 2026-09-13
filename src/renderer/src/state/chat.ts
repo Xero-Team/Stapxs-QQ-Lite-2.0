@@ -28,9 +28,17 @@ export const useChatStore = defineStore('chat', () => {
     const mergeMessageList = ref<MsgItemElem[] | undefined>(undefined)
     const mergeMessageImgList = ref<Array<{ img_url: string }> | undefined>(undefined)
 
+    function clearMessages(): void {
+        messageList.value.splice(0, messageList.value.length)
+    }
+
+    function setMessages(messages: MsgItemElem[]): void {
+        messageList.value.splice(0, messageList.value.length, ...messages)
+    }
+
     function reset(show?: BaseChatInfoElem): void {
         chatInfo.value = createEmptyChatInfo(show)
-        messageList.value = []
+        clearMessages()
         mergeMsgStack.value = []
         mergeMessageList.value = undefined
         mergeMessageImgList.value = undefined
@@ -39,6 +47,8 @@ export const useChatStore = defineStore('chat', () => {
     return {
         chatInfo,
         messageList,
+        clearMessages,
+        setMessages,
         mergeMsgStack,
         mergeMessageList,
         mergeMessageImgList,

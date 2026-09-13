@@ -2386,7 +2386,7 @@ function updateList(newLength: number, oldLength: number) {
         !uiStore.nowGetHistory &&
         !tags.value.showBottomButton
     ) {
-        chatStore.messageList = []
+        chatStore.clearMessages()
         const info = {
             type: chat.show.type,
             id: chat.show.id,

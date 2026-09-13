@@ -814,7 +814,7 @@
             clear: {
                 info: 'clear message list.',
                 fun: () => {
-                    chatStore.messageList = []
+                    chatStore.clearMessages()
                     // PS：让消息列表不是空的防止输出首次进入信息
                     addCommandOut('')
                 },
