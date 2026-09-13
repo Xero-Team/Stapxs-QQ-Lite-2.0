@@ -22,6 +22,15 @@ export enum LogType {
     SYSTEM
 }
 
+/** Stable logging boundary shared by renderer and platform adapters. */
+export interface LoggerLike {
+    add(type: LogType, message: string, data?: unknown, hidden?: boolean): void
+    info(message: string, hidden?: boolean): void
+    error(error: Error | null, message: string, hidden?: boolean): void
+    debug(message: string, hidden?: boolean): void
+    system(message: string): void
+}
+
 export { redactLogValue } from './logging'
 
 function field(data: unknown, key: string): string | undefined {
@@ -30,7 +39,7 @@ function field(data: unknown, key: string): string | undefined {
     return typeof value === 'string' ? value : undefined
 }
 
-export class Logger {
+export class Logger implements LoggerLike {
     private logTypeInfo: [string, string][]
 
     constructor() {
@@ -50,7 +59,7 @@ export class Logger {
      * @param mode 日志类型
      * @param args 日志内容
      */
-    add(type: LogType, args: string, data: unknown = '', hidden = false) {
+    add(type: LogType, args: string, data: unknown = '', hidden = false): void {
         const logLevel = Option.get('log_level')
         // PS：WS, UI, ERR, INFO, DEBUG
         // all 将会输出以上全部类型，debug 将会输出 DEBUG、UI，info 将会输出 INFO，err 将会输出 ERR
@@ -69,10 +78,10 @@ export class Logger {
             this.print(type, args, data, hidden)
         }
     }
-    info(args: string, hidden = false) {
+    info(args: string, hidden = false): void {
         this.add(LogType.INFO, args, undefined, hidden)
     }
-    error(e: Error | null, args: string, hidden = false) {
+    error(e: Error | null, args: string, hidden = false): void {
         if (e) {
             // this.add(LogType.ERR, args + '\n' + e.stack?.replaceAll('webpack-internal:///./', 'webpack-internal:///'), undefined, hidden)
             this.add(LogType.ERR, args + '\n', e, hidden)
@@ -80,10 +89,10 @@ export class Logger {
             this.add(LogType.ERR, args, undefined, hidden)
         }
     }
-    debug(args: string, hidden = false) {
+    debug(args: string, hidden = false): void {
         this.add(LogType.DEBUG, args, undefined, hidden)
     }
-    system(args: string) {
+    system(args: string): void {
         this.add(LogType.SYSTEM, args, undefined, true)
     }
     /**
