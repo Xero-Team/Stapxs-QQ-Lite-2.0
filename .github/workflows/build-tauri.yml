@@ -83,6 +83,9 @@ jobs:
                   test -n "$(find upload -type f -print -quit)"
                   find upload -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > upload/SHA256SUMS
 
+            - name: 记录 Tauri 产物指标
+              run: node scripts/measure-artifact-metrics.mjs upload
+
             - name: 上传构建产物
               uses: actions/upload-artifact@v4
               with:
