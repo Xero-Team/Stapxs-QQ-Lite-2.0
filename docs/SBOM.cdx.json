@@ -985,7 +985,7 @@
     {
       "type": "library",
       "name": "eslint",
-      "version": "9.39.5",
+      "version": "10.10.0",
       "licenses": [
         {
           "license": {
@@ -993,7 +993,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/eslint@9.39.5",
+      "purl": "pkg:npm/eslint@10.10.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
