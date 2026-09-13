@@ -195,11 +195,13 @@ export const backend = {
             }
             this.release = `${os} ${version} (Web)`
         }
-        const proxyValue = await this.call(undefined, 'sys:runProxy', true)
-        this.proxy = typeof proxyValue === 'number' ? proxyValue : undefined
-        if(this.type == 'tauri' && !this.proxy) {
-            logger.error(null, 'Tauri 代理服务似乎没有正常启动，此服务异常将会影响应用内的大部分外部资源的加载。')
-            popInfo.add(PopType.ERR, $t('Tauri 代理服务似乎没有正常启动'), false)
+        if (this.type == 'tauri') {
+            const proxyValue = await this.call(undefined, 'sys:runProxy', true)
+            this.proxy = typeof proxyValue === 'number' ? proxyValue : undefined
+            if (!this.proxy) {
+                logger.error(null, 'Tauri 代理服务似乎没有正常启动，此服务异常将会影响应用内的大部分外部资源的加载。')
+                popInfo.add(PopType.ERR, $t('Tauri 代理服务似乎没有正常启动'), false)
+            }
         }
     },
 
