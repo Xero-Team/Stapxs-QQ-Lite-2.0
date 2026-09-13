@@ -513,10 +513,12 @@ onMounted(() => {
         },
     )
     // 获取当前使用的图标
-    const capacitor = window.Capacitor as unknown as {
-        Plugins?: { Onebot?: { addListener: (event: string, cb: (data: unknown) => void) => void, getUsedIcon: () => void } }
-    }
-    const Onebot = capacitor.Plugins?.Onebot
+    const capacitor = typeof window.Capacitor === 'object' && window.Capacitor !== null
+        ? window.Capacitor as unknown as {
+            Plugins?: { Onebot?: { addListener: (event: string, cb: (data: unknown) => void) => void, getUsedIcon: () => void } }
+        }
+        : undefined
+    const Onebot = capacitor?.Plugins?.Onebot
     if (Onebot) {
         Onebot.addListener('onebot:icon', (data: unknown) => {
             if (typeof data === 'object' && data !== null && 'name' in data && typeof data.name === 'string') {

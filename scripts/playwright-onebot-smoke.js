@@ -19,8 +19,15 @@ async (page) => {
                 let externalRequests = 0
                 let unexpectedRequests = 0
                 let pageErrors = 0
-                smokePage.on('pageerror', () => { pageErrors++ })
+                const pageErrorMessages = []
+                smokePage.on('pageerror', (error) => {
+                    pageErrors++
+                    pageErrorMessages.push(String(error))
+                })
                 await context.route('**/*', (route) => {
+                    if (route.request().url() === `${baseOrigin}/received.txt`) {
+                        return route.fulfill({ status: 200, contentType: 'text/plain', body: 'received file' })
+                    }
                     if (route.request().url().startsWith(`${baseOrigin}/`)) {
                         return route.continue()
                     }
@@ -40,12 +47,15 @@ async (page) => {
                     get_group_msg_history: { messages: [] },
                     send_private_msg: { message_id: 'mock-send-1' },
                     get_msg: { message_id: 'mock-send-1', user_id: 10001, message: [{ type: 'text', data: { text: 'hello from Playwright' } }] },
+                    get_group_file_url: { url: `${baseOrigin}/received.txt` },
+                    get_private_file_url: { url: `${baseOrigin}/received.txt` },
                     delete_msg: null,
                     fetch_custom_face: [],
                     ...(backend === 'NapCat.Onebot' ? { get_recent_contact: [] } : {}),
                 }
                 const initializationActions = Object.keys(responses).filter((action) => ![
                     'send_private_msg', 'get_msg', 'delete_msg', 'fetch_custom_face',
+                    'get_group_file_url', 'get_private_file_url',
                     'get_friend_msg_history', 'get_group_msg_history',
                 ].includes(action))
                 let activeSocket
@@ -145,6 +155,33 @@ async (page) => {
                     }))
                     await smokePage.getByText('hello from OneBot', { exact: true }).first().waitFor()
                     messageFlow.received = true
+
+                    // Receive media from the server and exercise the file
+                    // download path through the same mocked OneBot socket.
+                    activeSocket?.send(JSON.stringify({
+                        post_type: 'message',
+                        message_type: 'private',
+                        sub_type: 'friend',
+                        time: Math.floor(Date.now() / 1000),
+                        self_id: 10001,
+                        user_id: 20002,
+                        sender: { user_id: 20002, nickname: 'Mock Friend' },
+                        message_id: 30003002,
+                        message: [
+                            { type: 'image', data: { url: 'data:image/png;base64,iVBORw0KGgo=', file: 'received.png' } },
+                            { type: 'file', data: { file: 'received.txt', name: 'received.txt', file_id: 'received-file', size: 14 } },
+                        ],
+                        raw_message: '[图片][文件: received.txt]',
+                    }))
+                    const receivedFile = smokePage.locator('.msg-file').filter({ hasText: 'received.txt' }).first()
+                    await receivedFile.waitFor({ state: 'visible' })
+                    messageFlow.mediaReceived = await receivedFile.isVisible()
+                    await receivedFile.locator('svg').last().click()
+                    for (let attempt = 0; attempt < 100; attempt++) {
+                        if (requests.includes('get_private_file_url') || requests.includes('get_group_file_url')) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.mediaDownloaded = requests.includes('get_private_file_url') || requests.includes('get_group_file_url')
 
                     // Reply is selected from the rendered incoming message.
                     // Run it before later messages can replace the current
@@ -272,6 +309,7 @@ async (page) => {
                     externalRequests,
                     unexpectedRequests,
                     requests,
+                    pageErrorMessages,
                     sendPayloads: requestPayloads.filter((request) => request.action === 'send_private_msg').map((request) => request.params?.message),
                     pageErrors,
                     messageFlow,
@@ -281,7 +319,8 @@ async (page) => {
                     || (backend === 'Lagrange.OneBot' && accountId === 10001
                         && (!messageFlow.sent || !messageFlow.received
                             || !messageFlow.imageSent || !messageFlow.fileSent
-                            || !messageFlow.replySent || !messageFlow.recalled))) {
+                            || !messageFlow.replySent || !messageFlow.recalled
+                            || !messageFlow.mediaReceived || !messageFlow.mediaDownloaded))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })
