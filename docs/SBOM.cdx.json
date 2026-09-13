@@ -72,25 +72,6 @@
     },
     {
       "type": "library",
-      "name": "@capacitor/assets",
-      "version": "3.0.5",
-      "licenses": [
-        {
-          "license": {
-            "name": "MIT"
-          }
-        }
-      ],
-      "purl": "pkg:npm/@capacitor/assets@3.0.5",
-      "properties": [
-        {
-          "name": "xero:dependency-scope",
-          "value": "devDependencies"
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "@capacitor/cli",
       "version": "8.5.2",
       "licenses": [
