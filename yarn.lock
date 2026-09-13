@@ -1675,7 +1675,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-toolkit/preload@npm:^3.0.0":
+"@electron-toolkit/preload@npm:^3.0.2":
   version: 3.0.2
   resolution: "@electron-toolkit/preload@npm:3.0.2"
   peerDependencies:
@@ -14553,7 +14553,7 @@ __metadata:
     "@capgo/capacitor-navigation-bar": "npm:^8.2.7"
     "@electron-toolkit/eslint-config": "npm:^1.0.2"
     "@electron-toolkit/eslint-config-ts": "npm:^2.0.0"
-    "@electron-toolkit/preload": "npm:^3.0.0"
+    "@electron-toolkit/preload": "npm:^3.0.2"
     "@electron-toolkit/tsconfig": "npm:^2.0.0"
     "@electron-toolkit/utils": "npm:^4.0.0"
     "@fortawesome/fontawesome-svg-core": "npm:^6.7.0"

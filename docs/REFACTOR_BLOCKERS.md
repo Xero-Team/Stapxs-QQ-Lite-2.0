@@ -85,6 +85,12 @@
   contract tests, production build, Tauri lint, SBOM/license/CSP metadata,
   release metadata, and 92-file artifact checksums pass. Roll back with
   `yarn up @electron-toolkit/tsconfig@^1.0.1`.
+- `@electron-toolkit/preload` was upgraded independently from 3.0.0 to
+  3.0.2. Electron main/preload/renderer builds, Web/Node/core/browser
+  typechecks, contract tests, production build, Tauri lint, SBOM/license/CSP
+  metadata, release metadata, and 92-file artifact checksums pass. Roll back
+  with `yarn up @electron-toolkit/preload@^3.0.0`; the optional `sharp`
+  postinstall failure remains environment-specific.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
