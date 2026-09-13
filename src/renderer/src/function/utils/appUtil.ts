@@ -734,7 +734,11 @@ export async function loadMobile() {
             }
         })
         // 状态栏（Android）
-        backend.call('NavigationBar', 'setTransparency', false, { isTransparent: true })
+        // Capacitor 8 navigation-bar adapter uses the maintained setNavigationBarColor API.
+        backend.call('NavigationBar', 'setNavigationBarColor', false, {
+            color: '#00000000',
+            darkButtons: false
+        })
         backend.call('StatusBar', 'setOverlaysWebView', false, { overlay: true })
         backend.call('StatusBar', 'setBackgroundColor', false, { color: '#ffffff00' })
     }

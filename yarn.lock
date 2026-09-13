@@ -1587,6 +1587,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@capgo/capacitor-navigation-bar@npm:^8.2.7":
+  version: 8.2.7
+  resolution: "@capgo/capacitor-navigation-bar@npm:8.2.7"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10c0/93e196209efb89e434a4df2a10c1ec7db0cd59ec259755fb240635a19caab67074e7ac6d87cfcd51b2fbf2273296bf11aef1c5ece478e4dbe333957a36df68e2
+  languageName: node
+  linkType: hard
+
 "@chevrotain/cst-dts-gen@npm:11.0.3":
   version: 11.0.3
   resolution: "@chevrotain/cst-dts-gen@npm:11.0.3"
@@ -2333,15 +2342,6 @@ __metadata:
     "@fortawesome/fontawesome-svg-core": ~1 || ~6 || ~7
     vue: ">= 3.0.0 < 4"
   checksum: 10c0/bce79543821d0cdd966b10a1003a0080418340cfa894c02a275c85a2fd8a2fa908eab908e937e6b4977bf0394162f62f4b39c7522930f63a41fc47a9d75fe3b4
-  languageName: node
-  linkType: hard
-
-"@hugotomazi/capacitor-navigation-bar@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@hugotomazi/capacitor-navigation-bar@npm:4.0.1"
-  peerDependencies:
-    "@capacitor/core": ^4.0.1 || ^5.0.0 || ^6.0.0
-  checksum: 10c0/d1cb3f24a2d88f0d17f55cb979f57eae8f710a1189551c04511126a7a1506bec14f96236fb097dd20bc6523b5605c640463837f2f6cb685b2d25884676285429
   languageName: node
   linkType: hard
 
@@ -14743,6 +14743,7 @@ __metadata:
     "@capacitor/keyboard": "npm:^8.0.0"
     "@capacitor/local-notifications": "npm:^8.0.0"
     "@capacitor/status-bar": "npm:^8.0.0"
+    "@capgo/capacitor-navigation-bar": "npm:^8.2.7"
     "@electron-toolkit/eslint-config": "npm:^1.0.2"
     "@electron-toolkit/eslint-config-ts": "npm:^2.0.0"
     "@electron-toolkit/preload": "npm:^3.0.0"
@@ -14752,7 +14753,6 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:^6.7.0"
     "@fortawesome/free-solid-svg-icons": "npm:^6.7.0"
     "@fortawesome/vue-fontawesome": "npm:^3.0.8"
-    "@hugotomazi/capacitor-navigation-bar": "npm:^4.0.1"
     "@modyfi/vite-plugin-yaml": "npm:^1.1.0"
     "@rushstack/eslint-patch": "npm:^1.10.3"
     "@stapxs/capacitor-sync-version": "npm:^1.0.10"

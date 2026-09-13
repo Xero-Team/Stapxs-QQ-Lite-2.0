@@ -12,7 +12,7 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (8.0.2):
     - Capacitor
-  - HugotomaziCapacitorNavigationBar (4.0.1):
+  - CapgoCapacitorNavigationBar (4.0.1):
     - Capacitor
   - UntinyCapacitorSafeArea (1.0.3):
     - Capacitor
@@ -25,7 +25,7 @@ DEPENDENCIES:
   - "CapacitorLocalNotifications (from `../../../../node_modules/@capacitor/local-notifications`)"
   - CapacitorOnebotConnctor (from `../../../../ssqq.capacitor-onebot-connector`)
   - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
-  - "HugotomaziCapacitorNavigationBar (from `../../../../node_modules/@hugotomazi/capacitor-navigation-bar`)"
+  - "CapgoCapacitorNavigationBar (from `../../../../node_modules/@capgo/capacitor-navigation-bar`)"
   - "UntinyCapacitorSafeArea (from `../../../../node_modules/@untiny/capacitor-safe-area`)"
 
 EXTERNAL SOURCES:
@@ -43,8 +43,8 @@ EXTERNAL SOURCES:
     :path: "../../../../ssqq.capacitor-onebot-connector"
   CapacitorStatusBar:
     :path: "../../../../node_modules/@capacitor/status-bar"
-  HugotomaziCapacitorNavigationBar:
-    :path: "../../../../node_modules/@hugotomazi/capacitor-navigation-bar"
+  CapgoCapacitorNavigationBar:
+    :path: "../../../../node_modules/@capgo/capacitor-navigation-bar"
   UntinyCapacitorSafeArea:
     :path: "../../../../node_modules/@untiny/capacitor-safe-area"
 
@@ -56,7 +56,7 @@ SPEC CHECKSUMS:
   CapacitorLocalNotifications: 4db83a7f6bdd2f30dcedf5c6f92c415065467a24
   CapacitorOnebotConnctor: 6f9f82cae00c8fe1f1838456d079802613d5732b
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
-  HugotomaziCapacitorNavigationBar: d56bded81461cc38cd071727126e7298002ff2b5
+  CapgoCapacitorNavigationBar: d56bded81461cc38cd071727126e7298002ff2b5
   UntinyCapacitorSafeArea: bbfa1040710d042e8da47a45f3105f2364ac8681
 
 PODFILE CHECKSUM: 47bacbe07e3c7d3416fbac62c009018a222d6411
