@@ -12,6 +12,13 @@
   the active JDK is Temurin 17 while the Capacitor 8 toolchain requires Java
   21 (`error: invalid source release: 21`). No APK/AAB artifact is claimed;
   CI already provisions Java 21.
+- mise now pins Temurin 21 in the repository `.tool-versions`; with
+  `mise exec java -- ./gradlew assembleRelease --no-daemon`, the Android
+  release APK compiles successfully as
+  `app-release-unsigned.apk` (6,502,943 bytes). The higher-level
+  `yarn build:android` packaging step still stops at the required signing
+  options (keystore path/password/alias/key password), so a signed artifact is
+  not claimed.
 - Linux Tauri release compilation reaches the optimized Rust binary and emits
   deb/rpm staging artifacts, but AppImage bundling fails in the hosted
   `linuxdeploy` step (`failed to run linuxdeploy`). The native binary and deb/
