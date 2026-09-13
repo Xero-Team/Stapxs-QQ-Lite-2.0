@@ -316,7 +316,7 @@ import { computed, watch, onMounted, onUnmounted, shallowReactive, shallowRef, p
 import { Connector, login as loginInfo, loadConnectionHistory, loadConnectionFromHistory, deleteConnectionHistory, decodeStoredToken } from '@renderer/function/connect'
 import { Logger, popList, PopInfo, LogType } from '@renderer/function/base'
 import { setLoginWaveTimer } from '@renderer/function/msg'
-import { BaseChatInfoElem, JinMessageElem } from '@renderer/function/elements/information'
+import { BaseChatInfoElem } from '@renderer/function/elements/information'
 import { useConnectionStore } from '@renderer/state/connection'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
@@ -707,22 +707,7 @@ function rafLoop() {
  */
 function changeChat(data: BaseChatInfoElem) {
     // 设置聊天信息
-    chatStore.chatInfo = {
-        show: data,
-        info: {
-            group_info: {},
-            user_info: {},
-            me_info: {},
-            group_members: [],
-            group_files: [],
-            group_sub_files: {},
-            jin_info: {
-                list: [] as JinMessageElem[],
-                pages: 0,
-            },
-        },
-    }
-    chatStore.mergeMessageList = undefined // 清空合并转发缓存
+    chatStore.reset(data)
     uiStore.canLoadHistory = true // 重置终止加载标志
     uiStore.loadHistoryFail = false // 重置加载失败标志
     if (data.type == 'group') {

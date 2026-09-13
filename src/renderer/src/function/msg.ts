@@ -48,7 +48,6 @@ import {
     UserFriendElem,
     UserGroupElem,
     MsgItemElem,
-    JinMessageElem,
     type Session,
 } from './elements/information'
 import { NotifyInfo } from './elements/system'
@@ -2510,19 +2509,7 @@ export function resetRimtime(resetAll = false) {
         contactStore.groupAssistList = reactive([])
         // Reset chat store
         const chatStore = useChatStore()
-        chatStore.chatInfo = reactive({
-            show: { type: '', id: 0, name: '', avatar: '' },
-            info: {
-                group_info: {},
-                user_info: {},
-                me_info: {},
-                group_members: [],
-                group_files: [],
-                group_sub_files: {},
-                jin_info: { list: [] as JinMessageElem[], pages: 0 },
-            },
-        })
-        chatStore.messageList = []
+        chatStore.reset()
         // Reset connection store
         const connectionStore = useConnectionStore()
         connectionStore.heartbeatTime = -1
