@@ -28,6 +28,12 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null ? value as Record<string, unknown> : undefined
 }
 
+function asRuntimePlatform(value: unknown): PlatformBackend['platform'] {
+    return value === 'win32' || value === 'darwin' || value === 'linux' || value === 'android' || value === 'ios' || value === 'web'
+        ? value
+        : undefined
+}
+
 export const backend = {
     type: 'web' as 'electron' | 'tauri' | 'capacitor' | 'web',
     platform: undefined as 'win32' | 'darwin' | 'linux' | 'android' | 'ios' | 'web' | undefined,
@@ -137,10 +143,11 @@ export const backend = {
         }
 
 
-        this.platform = await this.call(undefined, 'sys:getPlatform', true)
+        this.platform = asRuntimePlatform(await this.call(undefined, 'sys:getPlatform', true))
         const releaseData = await this.call('Onebot', 'sys:getRelease', true)
-        this.release = releaseData?.release || ''
-        this.arch = releaseData?.arch || undefined
+        const releaseRecord = asRecord(releaseData)
+        this.release = typeof releaseRecord?.release === 'string' ? releaseRecord.release : ''
+        this.arch = typeof releaseRecord?.arch === 'string' ? releaseRecord.arch : undefined
 
         if(this.type == 'web' && !this.platform) {
             this.platform = 'web'
@@ -188,7 +195,8 @@ export const backend = {
             }
             this.release = `${os} ${version} (Web)`
         }
-        this.proxy  = await this.call(undefined, 'sys:runProxy', true)
+        const proxyValue = await this.call(undefined, 'sys:runProxy', true)
+        this.proxy = typeof proxyValue === 'number' ? proxyValue : undefined
         if(this.type == 'tauri' && !this.proxy) {
             logger.error(null, 'Tauri 代理服务似乎没有正常启动，此服务异常将会影响应用内的大部分外部资源的加载。')
             popInfo.add(PopType.ERR, $t('Tauri 代理服务似乎没有正常启动'), false)
