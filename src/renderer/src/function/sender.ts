@@ -15,7 +15,7 @@
 // CQ Code 参考
 // https://docs.go-cqhttp.org/cqcode/#%E8%BD%AC%E4%B9%89
 
-import { BotMsgType, MsgItemElem } from './elements/information'
+import { BotMsgType, MessageSegmentElem } from './elements/information'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
 
@@ -26,7 +26,7 @@ import { useSettingsStore } from '@renderer/state/settings'
  * @param img 图片缓存列表
  * @returns 用于发送的纯文本消息（根据 Bot 类型可能是 CQ 码或者 JSON 对象等）
  */
-export function parseMsg(msg: string, cache: MsgItemElem[], img: string[]) {
+export function parseMsg(msg: string, cache: MessageSegmentElem[], img: string[]) {
     const uiStore = useUIStore()
     // 如果消息发送框功能是启用的，则先将 cache 的图片插入到最前面
     // 将图片插入 cache 列表并在消息文本前插入 SQCode
@@ -42,7 +42,7 @@ export function parseMsg(msg: string, cache: MsgItemElem[], img: string[]) {
         })
     }
     // 处理消息
-    let back: string | MsgItemElem[] | undefined
+    let back: string | MessageSegmentElem[] | undefined
     if (uiStore.msgType == BotMsgType.Array) {
         back = parseMsgToJSON(msg, cache)
     } else if (uiStore.msgType == BotMsgType.CQCode) {
@@ -74,7 +74,7 @@ export default {
  * @param cache
  * @returns
  */
-function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
+function parseMsgToJSON(msg: string, cache: MessageSegmentElem[]) {
     const settingsStore = useSettingsStore()
     // 处理消息文本
     const back = parserSqToMsg(msg, cache)
@@ -108,7 +108,7 @@ function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
     return back
 }
 
-function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
+function parseMsgToCQ(msg: string, cache: MessageSegmentElem[]) {
     const settingsStore = useSettingsStore()
     let back = ''
     // 处理消息文本
@@ -162,8 +162,8 @@ function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
  * @param cache 特殊消息段缓存
  * @returns 消息段列表
  */
-function parserSqToMsg(msg: string, cache: MsgItemElem[]): MsgItemElem[] {
-    const re: MsgItemElem[] = []
+function parserSqToMsg(msg: string, cache: MessageSegmentElem[]): MessageSegmentElem[] {
+    const re: MessageSegmentElem[] = []
 
     let cacheTxt: string = ''
 

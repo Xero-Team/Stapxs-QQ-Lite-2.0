@@ -142,7 +142,17 @@ export interface GroupMemberInfoElem {
 export interface SQCodeElem {
     addText: boolean
     addTop?: boolean
-    msgObj: MsgItemElem
+    msgObj: MessageSegmentElem
+}
+
+/** OneBot message segment used by the composer before it becomes an event. */
+export interface MessageSegmentElem extends Record<string, unknown> {
+    type?: string
+    text?: string
+    id?: string | number
+    file?: string
+    url?: string
+    qq?: string | number
 }
 
 export interface MsgItemElem {

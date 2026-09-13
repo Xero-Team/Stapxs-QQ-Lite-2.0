@@ -571,6 +571,7 @@ import { Connector } from '@renderer/function/connect'
 import {
     BaseChatInfoElem,
     ChatInfoElem,
+    MessageSegmentElem,
     MsgItemElem,
     SQCodeElem,
     GroupMemberInfoElem,
@@ -688,7 +689,7 @@ const NewMsgNum = ref(0)
 const msg = ref('')
 const oldMsg = ref('')
 const imgCache = ref(new Map<number, string>())
-const sendCache = ref<MsgItemElem[]>([])
+const sendCache = ref<MessageSegmentElem[]>([])
 const selectedMsg = ref<MsgItemElem | null>(null)
 const selectCache = ref('')
 const atFindList = ref<GroupMemberInfoElem[] | null>(null)

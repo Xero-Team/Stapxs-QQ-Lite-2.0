@@ -338,6 +338,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     import { parseMsg } from '@renderer/function/sender'
     import {
         MsgItemElem,
+        MessageSegmentElem,
         SQCodeElem,
     } from '@renderer/function/elements/information'
     import { PopInfo, PopType } from '@renderer/function/base'
@@ -377,7 +378,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     const trueLang = getTrueLang()
     const danmus = ref<{ text: string, id: number }[]>([])
     const imgCache = ref<string[]>([])
-    const sendCache = ref<MsgItemElem[]>([])
+    const sendCache = ref<MessageSegmentElem[]>([])
     const msg = ref('')
     const parseIndex = ref(-1)
     const operaParse = ref(false)

@@ -172,6 +172,7 @@
     import {
         BaseChatInfoElem,
         MsgItemElem,
+        MessageSegmentElem,
         SQCodeElem,
         UserFriendElem,
         UserGroupElem,
@@ -245,7 +246,7 @@
     const msg = ref('')
     const supportCmd = ref<Record<string, CommandHandler>>({})
     const imgCache = ref<string[]>([])
-    const sendCache = ref<MsgItemElem[]>([])
+    const sendCache = ref<MessageSegmentElem[]>([])
     const searchListCache = ref<(UserFriendElem & UserGroupElem)[]>([])
 
     // --- watchers ---
