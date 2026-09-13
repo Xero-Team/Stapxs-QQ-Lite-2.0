@@ -44,7 +44,7 @@
                                 msgItem.sender.card
                                     ? msgItem.sender.card
                                     : msgItem.sender.nickname
-                            }}{{ hasReply(msg) ?? ''
+                            }}{{ hasReply(msgItem) ?? ''
                             }}{{
                                 msgItem.sub_type == 'friend'
                                     ? authStore.loginInfo.uin ==
@@ -170,6 +170,7 @@
     import { useSettingsStore } from '@renderer/state/settings'
     import { getTrueLang } from '@renderer/function/utils/systemUtil'
     import {
+        BaseChatInfoElem,
         MsgItemElem,
         SQCodeElem,
         UserFriendElem,
@@ -214,17 +215,26 @@
     const $t = i18n.global.t
     const { URL } = globalThis
 
+    type TerminalChat = {
+        show: BaseChatInfoElem & { temp?: string | number }
+    }
+    type CommandTag = boolean | string | number | null
+    type CommandHandler = {
+        info: string
+        fun: (raw: string, args: string[]) => void
+    }
+
     const { chat, list } = defineProps<{
-        chat: any
-        list: any
-        mumberInfo: any
+        chat: TerminalChat
+        list: MsgItemElem[]
+        mumberInfo: unknown
     }>()
 
     // --- data ---
     const tags = ref({
         fullscreen: false,
         fistget: true,
-        cmdTags: {} as { [key: string]: any },
+        cmdTags: {} as Record<string, CommandTag>,
         newMsg: 0,
         replyName: null as string | null,
         replyId: null as string | null,
@@ -233,7 +243,7 @@
     const timeShow = ref('')
     let timeSetter: ReturnType<typeof setInterval> | undefined = undefined
     const msg = ref('')
-    const supportCmd = ref<{ [key: string]: any }>({})
+    const supportCmd = ref<Record<string, CommandHandler>>({})
     const imgCache = ref<string[]>([])
     const sendCache = ref<MsgItemElem[]>([])
     const searchListCache = ref<(UserFriendElem & UserGroupElem)[]>([])
@@ -245,9 +255,9 @@
     })
 
     // --- methods ---
-    function hasReply(msg: any) {
+    function hasReply(msg: MsgItemElem) {
         if (msg.message) {
-            const repItem = msg.message.filter((item: any) => {
+            const repItem = msg.message.filter((item: MsgItemElem) => {
                 return item.type == 'reply'
             })
             if (repItem[0]) {
@@ -558,7 +568,7 @@
                                 '<span style="color: var(--color-font-2);"><span style="width: 13ch;display: inline-block;">' +
                                 name +
                                 '</span>: ' +
-                                supportCmd.value[name].info +
+                                (supportCmd.value[name]?.info ?? '') +
                                 '</span><br>'
                     })
                     addCommandOut('', '', back)
@@ -610,7 +620,7 @@
                                 )
                             } else {
                                 sendMsgRaw(
-                                    chat.show.id,
+                                    String(chat.show.id),
                                     chat.show.type,
                                     parsedMsg,
                                 )
@@ -691,8 +701,9 @@
                                 tags.value.replyName = null
                                 tags.value.replyId = null
                             }
-                            if (item[3]) {
-                                supportCmd.value['ssqq'].fun(
+                            const ssqqCommand = supportCmd.value['ssqq']
+                            if (item[3] && ssqqCommand) {
+                                ssqqCommand.fun(
                                     'ssqq send ' + item[3],
                                     ['ssqq', 'send', item[3]],
                                 )

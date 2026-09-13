@@ -63,6 +63,10 @@ import type { MsgItemElem } from '@renderer/function/elements/information'
 
 defineOptions({ name: 'ChatGlagame' })
 
+function asStreamRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : {}
+}
+
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 
@@ -217,21 +221,22 @@ async function summarizeMessages(messages: { role: 'user' | 'assistant' | 'syste
     const response = streamText({
         model: openaiCompatible(get('openai_model') || 'gpt-4o'),
         messages: summaryMessages,
-    } as any)
+    })
 
     let fullResponse = ''
     let jsonErrorMessage = ''
 
-    for await (const part of response.fullStream as any) {
-        const curPart = part as any
-        if (curPart?.text) {
-            fullResponse += curPart.text
+    for await (const curPart of response.fullStream) {
+        const part = asStreamRecord(curPart)
+        if (typeof part.text === 'string') {
+            fullResponse += part.text
         }
-        if (!jsonErrorMessage && curPart?.error) {
-            if (typeof curPart.error === 'string') {
-                jsonErrorMessage = curPart.error
+        if (!jsonErrorMessage && part.error) {
+            if (typeof part.error === 'string') {
+                jsonErrorMessage = part.error
             } else {
-                jsonErrorMessage = curPart.error?.message || JSON.stringify(curPart.error)
+                const error = asStreamRecord(part.error)
+                jsonErrorMessage = typeof error.message === 'string' ? error.message : JSON.stringify(part.error)
             }
         }
     }
@@ -373,17 +378,17 @@ async function sendMessage() {
                     }
                 })
             }
-        } as any
+        }
 
         const response = streamText(data)
         let jsonErrorMessage = ''
-        for await (const part of response.fullStream) {
-            const curPart = part as any
-            if(curPart) {
-                switch(curPart.type) {
+        for await (const curPart of response.fullStream) {
+            const part = asStreamRecord(curPart)
+            if(Object.keys(part).length > 0) {
+                switch(part.type) {
                     case 'reasoning-delta':
                     case 'text-delta':
-                        chatHistory.value += curPart.text
+                        if (typeof part.text === 'string') chatHistory.value += part.text
                         if(debug) {
                             const chatHistoryEl = document.getElementById('chatHistory')
                             if(chatHistoryEl) {
@@ -392,19 +397,21 @@ async function sendMessage() {
                         }
                         break
                     case 'finish':
-                        if (curPart.totalUsage?.totalTokens) {
-                            sessionTokenUsage.value[chatId] = curPart.totalUsage.totalTokens
-                            new Logger().info('消息分析（' + sessionId + '）完成，token 消耗：' +  curPart.totalUsage.totalTokens)
+                        const usage = asStreamRecord(part.totalUsage)
+                        if (typeof usage.totalTokens === 'number') {
+                            sessionTokenUsage.value[chatId] = usage.totalTokens
+                            new Logger().info('消息分析（' + sessionId + '）完成，token 消耗：' +  usage.totalTokens)
                         } else {
                             new Logger().info('消息分析（' + sessionId + '）完成，但未返回 token 统计')
                         }
                 }
             }
-            if(!jsonErrorMessage && curPart?.error) {
-                if(typeof curPart.error === 'string') {
-                    jsonErrorMessage = curPart.error
+            if(!jsonErrorMessage && part.error) {
+                if(typeof part.error === 'string') {
+                    jsonErrorMessage = part.error
                 } else {
-                    jsonErrorMessage = curPart.error?.message || JSON.stringify(curPart.error)
+                    const error = asStreamRecord(part.error)
+                    jsonErrorMessage = typeof error.message === 'string' ? error.message : JSON.stringify(part.error)
                 }
             }
         }

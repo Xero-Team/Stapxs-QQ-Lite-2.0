@@ -613,6 +613,13 @@ function moreConfig(info: Record<string, unknown>) {
     }
 }
 
+function openMoreConfig(userId: number) {
+    const member = props.chat.info.group_members.find((item) => item.user_id === userId)
+    if (member) moreConfig({ ...member })
+}
+
+defineExpose({ openMoreConfig })
+
 function searchList(event: Event) {
     const value = (event.target as HTMLInputElement).value
     if (value !== '') {

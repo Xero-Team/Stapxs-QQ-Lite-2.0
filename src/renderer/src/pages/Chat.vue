@@ -496,9 +496,7 @@
                         <a>{{ $t('移出群聊') }}</a>
                     </div>
                     <div v-show="tags.menuDisplay.config"
-                        @click="openChatInfoPan();
-                                ($refs.infoRef as any).openMoreConfig(selectedMsg?.sender.user_id);
-                                closeMsgMenu();">
+                        @click="openChatInfoPan(); openSelectedMemberConfig(); closeMsgMenu();">
                         <div><font-awesome-icon :icon="['fas', 'cog']" /></div>
                         <a>{{ $t('成员设置') }}</a>
                     </div>
@@ -648,6 +646,13 @@ const { chat, list } = defineProps<{
     imgView?: any
 }>()
 
+function normalizeHistoryMessages(value: unknown): MsgItemElem[] {
+    if (!Array.isArray(value)) return []
+    return value.filter((item): item is Record<string, unknown> =>
+        typeof item === 'object' && item !== null,
+    ) as MsgItemElem[]
+}
+
 const connectionStore = useConnectionStore()
 const uiStore = useUIStore()
 const settingsStore = useSettingsStore()
@@ -655,6 +660,7 @@ const authStore = useAuthStore()
 const chatStore = useChatStore()
 const contactStore = useContactStore()
 const mergePan = useTemplateRef<InstanceType<typeof MergePan>>('mergePan')
+const infoRef = useTemplateRef<InstanceType<typeof Info>>('infoRef')
 const msgPan = useTemplateRef<HTMLDivElement>('msgPan')
 const chatPadding = useTemplateRef<HTMLSpanElement>('chatPadding')
 const sendMore = useTemplateRef<HTMLDivElement>('sendMore')
@@ -729,6 +735,11 @@ const searchRequestId = ref(0)
 const forwardList = ref(contactStore.userList)
 const chatImg = shallowRef<Img | undefined>(undefined)
 const trueLang = getTrueLang()
+
+function openSelectedMemberConfig() {
+    const userId = selectedMsg.value?.sender?.user_id
+    if (typeof userId === 'number') infoRef.value?.openMoreConfig(userId)
+}
 
 //#region == 窗口移动相关 ==================================================
 const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
@@ -1058,21 +1069,21 @@ async function loadMoreHistory() {
         uiStore.loadHistoryFail = false
 
         if (useMixedHistory) {
-            let localMsgs = [] as any[]
+            let localMsgs: MsgItemElem[] = []
             if (Number.isFinite(firstMsgTime)) {
-                localMsgs = await dbGetBeforeByTime(
+                localMsgs = normalizeHistoryMessages(await dbGetBeforeByTime(
                     authStore.loginInfo.uin,
                     chatStore.chatInfo.show.id,
                     firstMsgTime,
                     20,
-                )
+                ))
             } else {
-                localMsgs = await dbGetBefore(
+                localMsgs = normalizeHistoryMessages(await dbGetBefore(
                     authStore.loginInfo.uin,
                     chatStore.chatInfo.show.id,
                     firstMsgId,
                     20,
-                )
+                ))
             }
             if (localMsgs.length > 0) {
                 const existingIds = new Set(chatStore.messageList.map((m) => String(m.message_id ?? '')))
