@@ -4,7 +4,6 @@ import anime from 'animejs'
 import option from '@renderer/function/option'
 
 import { Logger, PopInfo, PopType } from '@renderer/function/base'
-import { useSettingsStore } from '@renderer/state/settings'
 import { v4 as uuid } from 'uuid'
 import { Connector } from '@renderer/function/connect'
 import {
@@ -23,8 +22,7 @@ import {
     resolveMediaUrl,
     serializeCqSegments,
 } from '@renderer/protocol/message'
-import { getShowName } from './displayFormat'
-import { updateBaseOnMsgList, updateLastestHistory } from './sessionList'
+import { updateBaseOnMsgList } from './sessionList'
 export {
     getShowName,
     isShowTime,
