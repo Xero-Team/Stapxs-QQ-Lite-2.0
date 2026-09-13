@@ -26,7 +26,7 @@
 
 ## 3. 破坏性技术栈升级
 
-- [ ] 评估并升级 Vue、Vite、TypeScript、ESLint、Pinia、Electron、Tauri、Capacitor、Node 类型和所有插件到当时最新稳定版。已完成一组可回滚的 Web/Electron 构建兼容升级（Vue 3.5.42、Vite 7.3.6、plugin-vue 6.0.8、PWA 1.3.0、electron-vite 5.0.0、vue-tsc 3.3.11）；其余栈和残留 peer 警告见 `REFACTOR_BLOCKERS.md`。
+- [ ] 评估并升级 Vue、Vite、TypeScript、ESLint、Pinia、Electron、Tauri、Capacitor、Node 类型和所有插件到当时最新稳定版。已完成一组可回滚的 Web/Electron 构建兼容升级（Vue 3.5.42、Vite 7.3.6、plugin-vue 6.0.8、PWA 1.3.0、electron-vite 5.0.0、vue-tsc 3.3.11），并将导航栏插件替换为 Capacitor 8 兼容的 `@capgo/capacitor-navigation-bar` 8.2.7；其余栈和残留 peer 警告见 `REFACTOR_BLOCKERS.md`。
 - [ ] 每次大版本升级单独提交，记录阻塞项（例如 TypeScript 与 vue-tsc/Vue 兼容性）和替代方案。Web/Electron 构建升级已拆为独立提交；Capacitor 核心升级被导航栏插件的旧 peer 范围阻塞，详见 `REFACTOR_BLOCKERS.md`。
 - [x] 用维护中的库替换弃用或自研实现：Zod 做运行时校验，Dexie/idb 做 IndexedDB，标准 Web Crypto/系统 keychain 做密钥，成熟 Markdown/XSS 库做内容处理。
 - [ ] 移除重复跨端实现，统一平台适配接口；明确主桌面运行时，其他运行时保持兼容。
