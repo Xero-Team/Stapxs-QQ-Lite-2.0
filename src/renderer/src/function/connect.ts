@@ -22,7 +22,7 @@ import { backend } from '@renderer/runtime/backend'
 import { useSettingsStore } from '@renderer/state/settings'
 import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
-import { HttpTransport, ReconnectingTransport, SseTransport, WebSocketTransport } from '@renderer/transport/transport'
+import { HttpTransport, ReconnectingTransport, SseTransport, TransportError, WebSocketTransport } from '@renderer/transport/transport'
 import { getJsonPathEntry } from '@renderer/protocol/json-map'
 import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
 
@@ -102,14 +102,6 @@ function normalizeConnectionHistory(history: unknown[]) {
 
 function withWebSocketProtocol(address: string, secure: boolean) {
     return `${secure ? WSS_PROTOCOL : WS_PROTOCOL}${address}`
-}
-
-class TimeoutError extends Error {
-    echo: string
-    constructor(echo: string) {
-        super()
-        this.echo = echo
-    }
 }
 
 export class Connector {
@@ -313,7 +305,7 @@ export class Connector {
 
                 if (Date.now() - startTime > timeout) {
                     this.ReMap.delete(echo)
-                    reject(new TimeoutError(echo))
+                    reject(new TransportError('API request timed out', 'timeout', { echo }))
                     return
                 }
 
@@ -460,7 +452,7 @@ export class Connector {
             }
             return getMsgData(api, response, apiMap as unknown as Parameters<typeof getMsgData>[2])
         }catch (e) {
-            if (e instanceof TimeoutError) {
+            if (e instanceof TransportError && e.code === 'timeout') {
                 logger.error(e, `API ${api} 请求超时`)
             }else {
                 logger.error(e as Error, `API ${api} 请求失败`)

@@ -78,6 +78,12 @@ describe('transport contracts', () => {
         await expect(transport.connect({ timeoutMs: 1 })).rejects.toMatchObject({ code: 'timeout' })
     })
 
+    it('keeps request context on the shared transport error model', () => {
+        const error = new TransportError('request timed out', 'timeout', { echo: 'send_42' })
+        expect(error).toMatchObject({ code: 'timeout', echo: 'send_42' })
+        expect(error).toBeInstanceOf(Error)
+    })
+
     it('propagates caller cancellation through the shared timeout wrapper', async () => {
         const controller = new AbortController()
         const operation = withTimeout(async (signal) => new Promise<void>((_, reject) => {

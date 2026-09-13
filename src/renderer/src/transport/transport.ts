@@ -22,9 +22,17 @@ export interface ReconnectingTransportOptions {
 }
 
 export class TransportError extends Error {
-    constructor(message: string, readonly code: 'timeout' | 'aborted' | 'network' | 'protocol') {
+    constructor(
+        message: string,
+        readonly code: 'timeout' | 'aborted' | 'network' | 'protocol',
+        readonly context: { echo?: string } = {},
+    ) {
         super(message)
         this.name = 'TransportError'
+    }
+
+    get echo(): string | undefined {
+        return this.context.echo
     }
 }
 
