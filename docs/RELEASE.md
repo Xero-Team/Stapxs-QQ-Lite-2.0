@@ -20,6 +20,7 @@ have not been executed locally on this Linux workstation; the GitHub Actions mat
 authoritative cross-platform verification path.
 
 Each Web build also publishes `build-metrics.json`, containing artifact count, raw and gzip sizes,
-the ten largest files, and the build runner's Node/platform identity. Its runtime fields remain
-`null` until a browser or native platform job measures startup time and resident memory; a release
-must not treat missing runtime measurements as passing performance evidence.
+the ten largest files, and the build runner's Node/platform identity. The Playwright quality job
+publishes `runtime-metrics.json` with browser DOM-content-loaded time and JS heap usage when the
+browser exposes it; native startup time, resident memory, and signed artifact evidence still
+require the corresponding hosted platform environments.
