@@ -1422,7 +1422,7 @@
     {
       "type": "library",
       "name": "vue-i18n",
-      "version": "10.0.8",
+      "version": "11.4.10",
       "licenses": [
         {
           "license": {
@@ -1430,7 +1430,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vue-i18n@10.0.8",
+      "purl": "pkg:npm/vue-i18n@11.4.10",
       "properties": [
         {
           "name": "xero:dependency-scope",
