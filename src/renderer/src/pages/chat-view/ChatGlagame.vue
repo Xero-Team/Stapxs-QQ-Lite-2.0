@@ -396,7 +396,7 @@ async function sendMessage() {
                             }
                         }
                         break
-                    case 'finish':
+                    case 'finish': {
                         const usage = asStreamRecord(part.totalUsage)
                         if (typeof usage.totalTokens === 'number') {
                             sessionTokenUsage.value[chatId] = usage.totalTokens
@@ -404,6 +404,8 @@ async function sendMessage() {
                         } else {
                             new Logger().info('消息分析（' + sessionId + '）完成，但未返回 token 统计')
                         }
+                        break
+                    }
                 }
             }
             if(!jsonErrorMessage && part.error) {
