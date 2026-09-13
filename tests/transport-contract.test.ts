@@ -149,6 +149,29 @@ describe('transport contracts', () => {
         await transport.close()
     })
 
+    it('reports authentication failures as protocol transport errors', async () => {
+        class RejectingAuthSocket {
+            binaryType = ''
+            readyState = 0
+            onopen: (() => void) | null = null
+            onmessage: ((event: { data: unknown }) => void) | null = null
+            onclose: (() => void) | null = null
+            onerror: (() => void) | null = null
+            close = vi.fn()
+            send = vi.fn()
+            constructor() { queueMicrotask(() => { this.readyState = 1; this.onopen?.() }) }
+        }
+        vi.stubGlobal('WebSocket', RejectingAuthSocket)
+        const transport = new WebSocketTransport('ws://auth-rejected', undefined, {
+            authenticate: async () => { throw new Error('invalid credentials') },
+        })
+        await expect(transport.connect({ timeoutMs: 100 })).rejects.toMatchObject({
+            code: 'protocol',
+            message: 'WebSocket authentication failed',
+        })
+        expect(transport.state).toBe('error')
+    })
+
     it('parses SSE events and exposes receive-only semantics', async () => {
         class FakeSource {
             onopen: (() => void) | null = null

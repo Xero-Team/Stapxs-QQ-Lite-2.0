@@ -6,6 +6,7 @@
 - Settings migration UI smoke is now reproducible through `scripts/playwright-settings-migration-smoke.sh`: a synthetic legacy serialized option is copied into the rollback-safe store, the legacy key is removed, and the Settings checkbox remains enabled after a fresh reload. The local Chromium run passed against the production preview; live reconnect, authentication failure, and native UI flows remain open.
 - OneBot Playwright smoke now also pushes a synthetic image and file event, verifies the rendered received file, and clicks its download control against a local fixture URL. It drops the established socket and verifies a fresh connection repeats the initialization handshake. The four Lagrange/NapCat numeric/string scenarios pass with no external requests or page errors; authentication-failure UI remains open.
 - The renderer now exposes a shared `PlatformBackend` contract and a typed `platformBackend` view over the existing Electron/Tauri/Capacitor adapter. New platform services can depend on `unknown` command results and shared lifecycle/proxy methods; legacy call sites still use the compatibility object while command-specific result schemas are migrated.
+- Transport contract coverage now verifies a rejected WebSocket authentication handshake becomes a `TransportError` with `protocol` code and leaves the transport in `error`. A browser-level authentication-failure UI flow is still not claimed.
 
 ## 2026-09-12
 
