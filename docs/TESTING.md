@@ -76,6 +76,10 @@ The Web project's effective config currently only enables `strict`; the remainin
 full-project migration is tracked in `REFACTOR_BLOCKERS.md`. Root project
 references do not propagate compiler options to the referenced projects.
 
+`yarn verify:repository-policy` enforces the current source-file size ceiling
+(3000 lines) and Conventional Commits subject format. It is included in the
+quality workflow and runs before typechecking.
+
 ## Native IndexedDB browser contracts
 
 With the same isolated harness running on port 4174, execute
