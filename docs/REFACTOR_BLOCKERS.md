@@ -1,5 +1,18 @@
 # Refactor blockers
 
+## 2026-09-13 verification refresh
+
+- Vue SFC files now enforce `@typescript-eslint/no-explicit-any` as an error in
+  the flat ESLint configuration. Renderer lint (quiet), Web typecheck, and all
+  80 contract tests pass after the rule was enabled.
+- Playwright authentication-failure and settings-migration smokes pass against
+  the production preview. The checks report zero external requests and zero
+  page errors; they remain synthetic browser coverage and do not replace native
+  platform validation.
+- Tauri `cargo check`, release metadata/CSP validation, SBOM generation, and
+  94-file artifact checksum verification pass locally. `yarn check` remains
+  unexecutable because this workstation has neither Yarn nor Corepack.
+
 ## 2026-09-13 incremental evidence
 
 - Vitest was upgraded independently from 3.2.6 to 5.0.0 (commit-local
