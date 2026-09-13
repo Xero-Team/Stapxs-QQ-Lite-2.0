@@ -97,6 +97,14 @@
   builds, Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file
   artifact checksums pass. Roll back with `yarn up
   @electron-toolkit/eslint-config@^1.0.2`.
+- `@electron-toolkit/eslint-config-ts` was upgraded independently from 2.0.0
+  to 3.1.0. Its ESLint 9/TypeScript integration passes repository check with
+  zero errors, Web/Node/core/browser typechecks, contract tests, production
+  and Electron builds, Tauri lint, SBOM/license/CSP metadata, release metadata,
+  and 92-file artifact checksums. Roll back with `yarn up
+  @electron-toolkit/eslint-config-ts@^2.0.0`. The connector's legacy
+  `@ionic/eslint-config` still emits an ESLint 7/8 peer warning and remains a
+  separate workspace compatibility item.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item

@@ -244,7 +244,7 @@
     {
       "type": "library",
       "name": "@electron-toolkit/eslint-config-ts",
-      "version": "2.0.0",
+      "version": "3.1.0",
       "licenses": [
         {
           "license": {
@@ -252,7 +252,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@electron-toolkit/eslint-config-ts@2.0.0",
+      "purl": "pkg:npm/@electron-toolkit/eslint-config-ts@3.1.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
