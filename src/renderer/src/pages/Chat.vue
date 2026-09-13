@@ -33,77 +33,23 @@
         <div id="msgPan" ref="msgPan" class="chat"
             style="scroll-behavior: smooth"
             @scroll="chatScroll($event, details[3].open)">
-            <template v-if="!details[3].open">
-                <div v-if="!uiStore.canLoadHistory" class="note note-nomsg">
-                    <hr>
-                    <a>{{ $t('没有更多消息了') }}</a>
-                </div>
-                <div v-if="uiStore.loadHistoryFail" class="note note-nomsg">
-                    <hr>
-                    <a>{{ $t('获取历史记录失败') }}</a>
-                </div>
-                <!-- 时间戳，在下滑加载的时候会显示，方便在大段的相连消息上让用户知道消息时间 -->
-                <NoticeBody v-if="uiStore.nowGetHistory && list.length > 0"
-                    :data="{ sub_type: 'time', ...(list[0] ? { time: list[0].time } : {}) }" />
-                <TransitionGroup :name="settingsStore.sysConfig.opt_fast_animation ? '' : 'msglist'" tag="div">
-                    <template v-for="(msgIndex, index) in list">
-                        <!-- 时间戳 -->
-                        <NoticeBody
-                            v-if="isShowTime(list[Number(index) - 1]?.time, msgIndex.time)"
-                            :key="'notice-time-' + (msgIndex.time / ( 4 * 60 )).toFixed(0)"
-                            :data="{ sub_type: 'time', time: msgIndex.time }" />
-                        <!-- [已删除]消息 -->
-                        <NoticeBody
-                            v-if="isDeleteMsg(msgIndex)"
-                            :key="'delete-' + msgIndex.message_id"
-                            :data="{ sub_type: 'delete' }" />
-                        <!-- 消息体 -->
-                        <MsgBody v-else-if="(msgIndex.post_type === 'message' ||
-                                     msgIndex.post_type === 'message_sent') &&
-                                     msgIndex.message.length > 0"
-                            :key="msgIndex.fake_message_id ?? msgIndex.message_id"
-                            :selected="multipleSelectList.includes(msgIndex.message_id) || tags.menuDisplay.menuSelectedMsgId == msgIndex.message_id"
-                            :data="msgIndex"
-                            :image-list-header="chatImg"
-                            @click="msgClick($event, msgIndex)"
-                            @show-menu="showMsgMeun"
-                            @scroll-to-msg="scrollToMsg"
-                            @image-loaded="imgLoadedScroll"
-                            @left-move="replyMsg"
-                            @send-poke="sendPoke" />
-                        <!-- 其他通知消息 -->
-                        <NoticeBody v-else-if="msgIndex.post_type === 'notice'"
-                            :id="uuid()"
-                            :key="'notice-' + index"
-                            :data="msgIndex" />
-                    </template>
-                </TransitionGroup>
-            </template>
-            <template v-else>
-                <!-- 搜索消息结果显示 -->
-                <TransitionGroup
-                    :name="settingsStore.sysConfig.opt_fast_animation ? '' : 'msglist'"
-                    tag="div">
-                    <template v-for="(msgIndex, index) in tags.search.list">
-                        <!-- 时间戳 -->
-                        <NoticeBody
-                            v-if="isShowTime(list[Number(index) - 1]?.time, msgIndex.time)"
-                            :key="'notice-time-' + index"
-                            :data="{ sub_type: 'time', time: msgIndex.time }" />
-                        <!-- 消息体 -->
-                        <MsgBody v-if=" (msgIndex.post_type === 'message' ||
-                                     msgIndex.post_type === 'message_sent') &&
-                                     msgIndex.message.length > 0"
-                            :key="msgIndex.fake_message_id ?? msgIndex.message_id"
-                            :selected="multipleSelectList.includes(msgIndex.message_id) || tags.menuDisplay.menuSelectedMsgId == msgIndex.message_id"
-                            :data="msgIndex"
-                            @scroll-to-msg="scrollToMsg"
-                            @show-menu="showMsgMeun"
-                            @image-loaded="imgLoadedScroll"
-                            @left-move="replyMsg" />
-                    </template>
-                </TransitionGroup>
-            </template>
+            <ChatMessageList
+                :list="list"
+                :search-list="tags.search.list"
+                :search-open="details[3].open"
+                :can-load-history="uiStore.canLoadHistory"
+                :load-history-fail="uiStore.loadHistoryFail"
+                :now-get-history="uiStore.nowGetHistory"
+                :fast-animation="settingsStore.sysConfig.opt_fast_animation"
+                :multiple-select-list="multipleSelectList"
+                :menu-selected-msg-id="tags.menuDisplay.menuSelectedMsgId"
+                :chat-img="chatImg"
+                @message-click="msgClick"
+                @show-menu="showMsgMeun"
+                @scroll-to-msg="scrollToMsg"
+                @image-loaded="imgLoadedScroll"
+                @left-move="replyMsg"
+                @send-poke="sendPoke" />
             <span ref="chatPadding" class="chat-padding">&nbsp;</span>
         </div>
         <!-- 滚动到底部悬浮标志 -->
@@ -523,7 +469,7 @@ import SendUtil from '@renderer/function/sender'
 import Option, { get } from '@renderer/function/option'
 import Info from '@renderer/pages/Info.vue'
 import MsgBody from '@renderer/components/MsgBody.vue'
-import NoticeBody from '@renderer/components/NoticeBody.vue'
+import ChatMessageList from '@renderer/components/ChatMessageList.vue'
 import FacePan from '@renderer/components/FacePan.vue'
 import MergePan from '@renderer/components/MergePan.vue'
 import imageCompression from 'browser-image-compression'
@@ -541,7 +487,6 @@ import {
     toRaw,
     useTemplateRef,
 } from 'vue'
-import { v4 as uuid } from 'uuid'
 import {
 	scrollToMsg,
     downloadFile,
@@ -561,8 +506,6 @@ import {
     getMsgRawTxt,
     sendMsgRaw,
     getShowName,
-    isShowTime,
-    isDeleteMsg,
     getImageUrlData,
     getDifferencesWithRanges
 } from '@renderer/function/utils/msgUtil'
@@ -697,6 +640,7 @@ const atSelectedIndex = ref(0)
 const atScrollTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const atScrollInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const searchDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const menuResetTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const searchRequestId = ref(0)
 const forwardList = ref(contactStore.userList)
 const chatImg = shallowRef<Img | undefined>(undefined)
@@ -1411,6 +1355,10 @@ function selectSQIn() {
 }
 
 function showMsgMeun(event: MenuEventData, data: RenderedMessage) {
+    if (menuResetTimer.value !== null) {
+        clearTimeout(menuResetTimer.value)
+        menuResetTimer.value = null
+    }
     selectedMsg.value = data
     tags.value.menuDisplay.menuSelectedMsgId = data.message_id
 
@@ -2001,8 +1949,12 @@ function removeUser() {
 function closeMsgMenu() {
     tags.value.showMsgMenu = false
     tags.value.menuDisplay.menuSelectedMsgId = null
-    setTimeout(() => {
+    if (menuResetTimer.value !== null) {
+        clearTimeout(menuResetTimer.value)
+    }
+    menuResetTimer.value = setTimeout(() => {
         initMenuDisplay()
+        menuResetTimer.value = null
     }, 300)
 }
 

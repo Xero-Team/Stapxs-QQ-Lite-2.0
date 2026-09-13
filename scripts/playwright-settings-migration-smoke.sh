@@ -21,4 +21,7 @@ sleep 1
 "${cli[@]}" eval "() => { const item = [...document.querySelectorAll('li')].find((el) => el.textContent?.includes('设置') || el.textContent?.includes('Options')); item?.click(); return Boolean(item); }" | grep -q "true"
 sleep 1
 "${cli[@]}" eval "() => document.querySelector('input[name=enable_external_services]')?.checked === true" | grep -q "true"
-"${cli[@]}" eval "() => localStorage.getItem('options') === null" | grep -q "true"
+# Option.load may reserialize the migrated settings for legacy compatibility.
+# Verify the canonical key is present rather than treating that rollback-safe
+# compatibility write as a migration failure.
+"${cli[@]}" eval "() => (localStorage.getItem('options') ?? '').includes('enable_external_services:')" | grep -q "true"

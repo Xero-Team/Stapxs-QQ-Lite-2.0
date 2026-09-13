@@ -36,7 +36,7 @@
 
 - [x] 迁移 ESLint flat config，启用 TypeScript strict、noUncheckedIndexedAccess、exactOptionalPropertyTypes、useUnknownInCatchVariables。`tsconfig.web.json`、`tsconfig.node.json`、`tsconfig.core.json` 和 `tests/browser/tsconfig.json` 均显式启用这些标志；完整 Web renderer `vue-tsc --noEmit -p tsconfig.web.json`、Node 和核心类型检查均通过。
 - [ ] 将 `any` 降为零（第三方边界使用 `unknown` + Zod）；开启 no-explicit-any、no-floating-promises、consistent-type-imports 等规则。应用源码中的显式 `any` 已清零，Store、消息兼容 API 和平台命令结果仍需继续收紧；当前命中仅位于 vendored QFace 生成/文档工具，不纳入应用边界迁移。
-- [ ] 拆分 `Chat.vue`、`App.vue`、`msg.ts`、`msgUtil.ts`、`appUtil.ts`；UI、状态、协议、传输、平台能力各自独立。已先将聊天头部提取为类型化 `ChatHeader.vue`；消息列表、编辑器和面板逻辑仍需继续拆分。
+- [ ] 拆分 `Chat.vue`、`App.vue`、`msg.ts`、`msgUtil.ts`、`appUtil.ts`；UI、状态、协议、传输、平台能力各自独立。已将聊天头部提取为类型化 `ChatHeader.vue`，并将消息列表提取为 `ChatMessageList.vue`；编辑器和面板逻辑仍需继续拆分。
 - [ ] 为 Pinia store 定义输入输出类型和状态迁移；统一错误模型、日志接口、异步取消和重试策略。Transport 与 Connector 现已共享带错误码和请求上下文的 `TransportError`；Chat store 已提供类型化 `reset(show?)` 状态迁移动作，其他 Store 状态迁移、日志接口统一和全量取消策略仍待完成。
 - [ ] 统一命名、文件大小上限、导入边界、注释语言和提交规范；删除调试日志与死代码。
 
