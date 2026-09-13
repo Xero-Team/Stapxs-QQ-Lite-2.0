@@ -156,7 +156,7 @@
                     </div>
                 </div>
             </BcTab>
-            <div :class="'ss-card user-config' + (Object.keys(showUserConfig).length > 0 ? ' show' : '')">
+            <div :class="'ss-card user-config' + (showUserConfig.user_id > 0 ? ' show' : '')">
                 <div>
                     <img alt="nk" :src="avatarUrl(showUserConfig.user_id)">
                     <div>
@@ -167,7 +167,7 @@
                         style="margin-right: 20px;"
                         :icon="['fas', 'copy']"
                         @click="copyText(showUserConfig.user_id)" />
-                    <font-awesome-icon :icon="['fas', 'angle-down']" @click="showUserConfig = {}" />
+                    <font-awesome-icon :icon="['fas', 'angle-down']" @click="showUserConfig = emptyMemberConfig()" />
                 </div>
                 <div>
                     <header>{{ $t('成员信息') }}</header>
@@ -231,6 +231,7 @@
 import { avatarUrl } from '@renderer/function/utils/avatar'
 import app, { i18n } from '@renderer/main'
 import BulletinBody from '@renderer/components/BulletinBody.vue'
+import type { BulletinData } from '@renderer/components/BulletinBody.vue'
 import FileBody from '@renderer/components/FileBody.vue'
 import OptInfo from './options/OptInfo.vue'
 import BcTab from 'vue3-bcui/packages/bc-tab'
@@ -248,11 +249,40 @@ import { useUIStore } from '@renderer/state/ui'
 import {
     UserFriendElem,
     UserGroupElem,
+    GroupMemberInfoElem,
+    ChatInfoElem,
 } from '@renderer/function/elements/information'
 import { qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
 import xss from 'xss'
 
 defineOptions({ name: 'ViewInfo' })
+
+interface InfoGroupInfo extends Record<string, unknown> {
+    gIntro?: unknown
+    tags?: Array<{ md: string; tag: string }>
+}
+
+interface InfoUserInfo extends Record<string, unknown> {
+    qid?: string
+    qqLevel?: number
+    regTime?: number
+    longNick?: string
+    birthday_year?: number
+    birthday_month?: number
+    birthday_day?: number
+    country?: string
+    province?: string
+    city?: string
+}
+
+type InfoChat = Omit<ChatInfoElem, 'info'> & {
+    info: Omit<ChatInfoElem['info'], 'group_info' | 'user_info' | 'me_info' | 'group_notices'> & {
+        group_info: InfoGroupInfo
+        user_info: InfoUserInfo
+        me_info: { role: string }
+        group_notices?: BulletinData[]
+    }
+}
 
 const authStore = useAuthStore()
 const contactStore = useContactStore()
@@ -260,8 +290,8 @@ const chatStore = useChatStore()
 const uiStore = useUIStore()
 
 const props = defineProps<{
-    tags: any
-    chat: any
+    tags: { openChatInfo: boolean }
+    chat: InfoChat
 }>()
 
 const emit = defineEmits<{
@@ -282,9 +312,33 @@ const safeGroupIntro = computed(() => {
 const trueLang = getTrueLang()
 
 // Reactive state
-const number_cache = ref<any[]>([])
-const showUserConfig = ref<any>({})
-const showUserConfigRaw = ref<any>({})
+const number_cache = ref<GroupMemberInfoElem[]>([])
+interface MemberConfig {
+    user_id: number
+    nickname: string
+    card: string
+    role: string
+    title: string
+    shut_up_timestamp: number
+}
+
+function emptyMemberConfig(): MemberConfig {
+    return { user_id: 0, nickname: '', card: '', role: 'member', title: '', shut_up_timestamp: 0 }
+}
+
+function toMemberConfig(value: Record<string, unknown>): MemberConfig {
+    return {
+        user_id: Number(value.user_id ?? 0),
+        nickname: typeof value.nickname === 'string' ? value.nickname : '',
+        card: typeof value.card === 'string' ? value.card : '',
+        role: typeof value.role === 'string' ? value.role : 'member',
+        title: typeof value.title === 'string' ? value.title : '',
+        shut_up_timestamp: Number(value.shut_up_timestamp ?? 0),
+    }
+}
+
+const showUserConfig = ref<MemberConfig>(emptyMemberConfig())
+const showUserConfigRaw = ref<MemberConfig>(emptyMemberConfig())
 const mumberInfo = ref({
     banMin: 0,
 })
@@ -309,7 +363,7 @@ function removeUser(nickname: string, group_id: number, user_id: number) {
                         'setGroupKick',
                     )
                     uiStore.popBoxList.shift()
-                    showUserConfig.value = {}
+                    showUserConfig.value = emptyMemberConfig()
                     const popInfo = {
                         title: $t('操作'),
                         html: `<span>${$t('正在确认操作……')}</span>`
@@ -357,7 +411,9 @@ function copyText(text: unknown) {
     )
 }
 
-function banMumber(event: Event, info: any) {
+function banMumber(event: Event, info: Record<string, unknown>) {
+    const userId = Number(info.user_id)
+    if (!Number.isFinite(userId)) return
     const value = (event.target as HTMLInputElement).value
     if (value !== '') {
         const num = parseInt(value)
@@ -373,7 +429,7 @@ function banMumber(event: Event, info: any) {
                             if (name)
                                 Connector.send(name, {
                                     group_id: chatStore.chatInfo.show.id,
-                                    user_id: info.user_id,
+                                    user_id: userId,
                                     duration: num * 60,
                                 }, 'banMumber')
                             uiStore.popBoxList.shift()
@@ -384,7 +440,7 @@ function banMumber(event: Event, info: any) {
                         text: $t('取消'),
                         master: true,
                         fun: () => {
-                            showUserConfigRaw.value = JSON.parse(JSON.stringify(info))
+                            showUserConfigRaw.value = toMemberConfig(JSON.parse(JSON.stringify(info)) as Record<string, unknown>)
                             uiStore.popBoxList.shift()
                         },
                     },
@@ -395,7 +451,9 @@ function banMumber(event: Event, info: any) {
     }
 }
 
-function updateMumberCard(event: Event, info: any) {
+function updateMumberCard(event: Event, info: Record<string, unknown>) {
+    const userId = Number(info.user_id)
+    if (!Number.isFinite(userId)) return
     const value = (event.target as HTMLInputElement).value
     if (showUserConfig.value.card !== value) {
         const popInfo = {
@@ -409,7 +467,7 @@ function updateMumberCard(event: Event, info: any) {
                         if(name)
                             Connector.send(name, {
                                 group_id: chatStore.chatInfo.show.id,
-                                user_id: info.user_id,
+                                user_id: userId,
                                 card: value,
                             }, 'updateGroupMemberInfo')
                         uiStore.popBoxList.shift()
@@ -420,7 +478,7 @@ function updateMumberCard(event: Event, info: any) {
                     text: $t('取消'),
                     master: true,
                     fun: () => {
-                        showUserConfigRaw.value = JSON.parse(JSON.stringify(info))
+                        showUserConfigRaw.value = toMemberConfig(JSON.parse(JSON.stringify(info)) as Record<string, unknown>)
                         uiStore.popBoxList.shift()
                     },
                 },
@@ -430,7 +488,9 @@ function updateMumberCard(event: Event, info: any) {
     }
 }
 
-function updateMumberTitle(event: Event, info: any) {
+function updateMumberTitle(event: Event, info: Record<string, unknown>) {
+    const userId = Number(info.user_id)
+    if (!Number.isFinite(userId)) return
     const value = (event.target as HTMLInputElement).value
     if (showUserConfig.value.card !== value) {
         const popInfo = {
@@ -444,7 +504,7 @@ function updateMumberTitle(event: Event, info: any) {
                         if(name)
                             Connector.send(name, {
                                 group_id: chatStore.chatInfo.show.id,
-                                user_id: info.user_id,
+                                user_id: userId,
                                 special_title: value,
                             }, 'updateGroupMemberInfo')
                         uiStore.popBoxList.shift()
@@ -455,7 +515,7 @@ function updateMumberTitle(event: Event, info: any) {
                     text: $t('取消'),
                     master: true,
                     fun: () => {
-                        showUserConfigRaw.value = JSON.parse(JSON.stringify(info))
+                        showUserConfigRaw.value = toMemberConfig(JSON.parse(JSON.stringify(info)) as Record<string, unknown>)
                         uiStore.popBoxList.shift()
                     },
                 },
@@ -495,16 +555,16 @@ function checkNumber(event: Event) {
  * 关闭面板
  */
 function closeChatInfoPan() {
-    showUserConfig.value = {}
+    showUserConfig.value = emptyMemberConfig()
     emit('close')
 }
 
 /**
  * 发起聊天
  */
-function startChat(info: any) {
+function startChat(info: GroupMemberInfoElem & { group_id?: number }) {
     // 如果是自己的话就忽略
-    if (info.user_id != authStore.loginInfo.uin) {
+    if (String(info.user_id) !== String(authStore.loginInfo.uin)) {
 
         // 检查这个人是不是好友
         let chat = contactStore.userList.find(
@@ -519,7 +579,7 @@ function startChat(info: any) {
                 // 因为临时消息没有返回昵称
                 nickname:
                     $t('临时会话'),
-                remark: info.user_id,
+                remark: String(info.user_id),
                 group_id: info.group_id,
                 group_name: '',
             } as UserFriendElem & UserGroupElem
@@ -540,12 +600,14 @@ function startChat(info: any) {
     }
 }
 
-function moreConfig(info: any) {
-    if(canEditMember(info.role)) {
-        showUserConfig.value = info
-        showUserConfigRaw.value = JSON.parse(JSON.stringify(info))
+function moreConfig(info: Record<string, unknown>) {
+    const role = typeof info.role === 'string' ? info.role : 'member'
+    if(canEditMember(role)) {
+        const member = toMemberConfig(info)
+        showUserConfig.value = member
+        showUserConfigRaw.value = { ...member }
         // 初始化一些内容
-        mumberInfo.value.banMin = getBanTimeMin(info.shut_up_timestamp)
+        mumberInfo.value.banMin = getBanTimeMin(Number(info.shut_up_timestamp ?? 0))
     } else {
         copyText(info.user_id)
     }
@@ -555,7 +617,7 @@ function searchList(event: Event) {
     const value = (event.target as HTMLInputElement).value
     if (value !== '') {
         number_cache.value = toRaw(props.chat.info.group_members)
-        number_cache.value = number_cache.value.filter((item: any) => {
+        number_cache.value = number_cache.value.filter((item) => {
             const name =
                 item.card.toLowerCase() +
                 '(' +
@@ -568,7 +630,7 @@ function searchList(event: Event) {
             )
         })
     } else {
-        number_cache.value = [] as any[]
+        number_cache.value = []
     }
 }
 
