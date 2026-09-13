@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose, Engine as _};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
-use log::{debug, error, info};
+use log::{debug, info};
 use rand::RngCore;
 use std::fs;
 use std::path::PathBuf;

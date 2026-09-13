@@ -1,18 +1,22 @@
-use std::{collections::HashMap, ffi::CStr, fs::{self, File}, io::{self, Write}, path::PathBuf, process::Command, str::FromStr, sync::Arc, time::Duration};
+use std::{collections::HashMap, fs::{self, File}, io::{self, Write}, process::Command, sync::Arc, time::Duration};
+#[cfg(target_os = "macos")]
+use std::ffi::CStr;
 use crate::{PROXY_PORT};
 
 use log::{debug, error, info};
 use reqwest::Client;
 use rfd::MessageLevel;
 use serde_json::Value;
-use tauri::{command, menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder}, AppHandle, Emitter, Manager, State};
+use tauri::{command, AppHandle, Emitter, Manager, State};
+#[cfg(target_os = "macos")]
+use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_opener::OpenerExt;
 use futures_util::StreamExt;
 use user_notify::NotificationManager;
 
 #[command]
 pub async fn sys_front_loaded(
-    app: AppHandle,
+    _app: AppHandle,
     notifications: State<'_, Arc<dyn NotificationManager>>) -> Result<String, String> {
     match notifications.first_time_ask_for_notification_permission().await {
         Err(err) => {
@@ -78,11 +82,6 @@ pub fn sys_get_release() -> Option<SystemInfo> {
 }
 
 #[command]
-pub fn sys_find_service() -> String {
-    return "".to_string();
-}
-
-#[command]
 pub async fn sys_get_final_redirect_url(data: String) -> Result<String, String> {
     let client = Client::builder()
         .redirect(reqwest::redirect::Policy::custom(|attempt| {
@@ -143,8 +142,8 @@ pub async fn sys_get_api(data: String) -> Result<Value, String> {
 }
 
 #[command]
-pub async fn sys_download(app_handle: AppHandle, downloadPath: String, fileName: String) -> Result<(), String> {
-    info!("下载文件：{:?}", downloadPath);
+pub async fn sys_download(app_handle: AppHandle, download_path: String, file_name: String) -> Result<(), String> {
+    info!("开始下载文件");
 
     let folder = rfd::FileDialog::new()
         .pick_folder();
@@ -158,8 +157,7 @@ pub async fn sys_download(app_handle: AppHandle, downloadPath: String, fileName:
         }
     };
 
-    let filepath = folder_path.join(fileName);
-    debug!("下载文件路径: {:?}", filepath);
+    let filepath = folder_path.join(file_name);
     // 检查文件是否存在
     if filepath.exists() {
         let result = rfd::MessageDialog::new()
@@ -177,7 +175,7 @@ pub async fn sys_download(app_handle: AppHandle, downloadPath: String, fileName:
 
     let result = async {
         let client = Client::new();
-        let response = client.get(downloadPath).send().await.map_err(|e| format!("请求失败: {}", e))?;
+        let response = client.get(download_path).send().await.map_err(|e| format!("请求失败: {}", e))?;
 
         let total_size = response
             .content_length()
@@ -393,6 +391,8 @@ pub fn sys_open_in_browser(app_handle: tauri::AppHandle, data: String) {
 
 #[command]
 pub fn sys_create_menu(app: tauri::AppHandle, data: HashMap<String, String>) -> Result<(), String> {
+    #[cfg(not(target_os = "macos"))]
+    let _ = (&app, &data);
     #[cfg(target_os = "macos")] {
         let about = MenuItemBuilder::new(data.get("about").unwrap())
             .id("about").build(&app).map_err(|e| e.to_string())?;
@@ -502,6 +502,8 @@ pub fn sys_create_menu(app: tauri::AppHandle, data: HashMap<String, String>) -> 
 
 #[command]
 pub fn sys_update_menu(app: tauri::AppHandle, parent: String, id: String, action: String, value: String) -> Result<(), String> {
+    #[cfg(not(target_os = "macos"))]
+    let _ = (&app, &parent, &id, &action, &value);
     #[cfg(target_os = "macos")] {
         debug!("菜单更新: {}.{}::{} -> {}", parent, id, action, value);
         // let menu = app.get_webview_window("main").unwrap().menu().unwrap();

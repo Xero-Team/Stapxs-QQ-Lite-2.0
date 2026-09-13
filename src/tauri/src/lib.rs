@@ -4,7 +4,9 @@ use commands::db::DbState;
 use std::collections::HashMap;
 
 use commands::utils::http_proxy::ProxyServer;
-use log::{info, error, debug};
+use log::info;
+#[cfg(target_os = "macos")]
+use log::error;
 use log4rs::{append::console::ConsoleAppender, config::{Appender, Logger, Root}, Config};
 
 #[cfg(target_os = "macos")]
@@ -272,18 +274,22 @@ fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
         .title("Xero QQ Lite")
         .inner_size(850.0, 530.0)
         .transparent(true);
-    let store =
-            StoreBuilder::new(app, ".settings.dat").build()
-            .map_err(|e| tauri::Error::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("failed to open settings store: {}", e),
-            )))?;
+    #[cfg(target_os = "macos")]
+    let store = StoreBuilder::new(app, ".settings.dat").build()
+        .map_err(|e| tauri::Error::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("failed to open settings store: {}", e),
+        )))?;
+    #[cfg(target_os = "macos")]
     let chat_more_blur = store.get("chat_more_blur").and_then(|v| v.as_bool()).unwrap_or(false);
+    #[cfg(target_os = "macos")]
     let glass_effect = store.get("glass_effect").and_then(|v| v.as_bool()).unwrap_or(false);
-    let mut window_effect = tauri::window::Effect::Sidebar;
-    if chat_more_blur {
-        window_effect = tauri::window::Effect::Menu;
-    }
+    #[cfg(target_os = "macos")]
+    let window_effect = if chat_more_blur {
+        tauri::window::Effect::Menu
+    } else {
+        tauri::window::Effect::Sidebar
+    };
     #[cfg(target_os = "macos")]
     let win_builder = {
         if glass_effect {

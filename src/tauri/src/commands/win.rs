@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use log::info;
 use tauri::{command, LogicalPosition, Manager};
 
 #[command]
