@@ -12,6 +12,7 @@ jobs:
     build:
         runs-on: ${{ matrix.os }}
         strategy:
+            fail-fast: false
             matrix:
                 os: [windows-2022, ubuntu-22.04, macos-latest]
 
@@ -84,6 +85,7 @@ jobs:
               run: node scripts/measure-artifact-metrics.mjs upload
 
             - name: 生成 Tauri 产物校验和
+              shell: bash
               run: |
                   test -n "$(find upload -type f -print -quit)"
                   find upload -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > upload/SHA256SUMS

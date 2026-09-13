@@ -12,6 +12,7 @@ jobs:
     build:
         runs-on: ${{ matrix.os }}
         strategy:
+            fail-fast: false
             matrix:
                 os: [windows-2022, ubuntu-latest, macos-latest]
 
@@ -45,6 +46,7 @@ jobs:
 
             - name: 生成 Electron 产物校验和
               working-directory: dist_electron
+              shell: bash
               run: find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
 
             - name: 上传构建产物
