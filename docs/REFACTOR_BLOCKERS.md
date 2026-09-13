@@ -71,6 +71,13 @@
   SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums.
   Roll back with `yarn up zod@^4.3.6`; the local optional `sharp` postinstall
   failure remains unrelated.
+- Final-bundle browser regression after the dependency refresh passed
+  `playwright-smoke.sh` (first start, CSP, privacy, export, offline reload),
+  authentication-failure smoke, and all four OneBot synthetic scenarios. The
+  OneBot run covered Lagrange/NapCat with numeric/string IDs, messaging,
+  media/download, reply, recall, and reconnect; all reported `passed: true`
+  with zero external requests and zero page errors. Offline reload emitted the
+  documented three network console errors only.
 - `@electron-toolkit/utils` was upgraded independently from 3.0.0 to 4.0.0.
   The package is not called directly by renderer code, and Electron
   main/preload/renderer builds plus Web/core typecheck, browser harness
