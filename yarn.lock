@@ -1693,12 +1693,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-toolkit/utils@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@electron-toolkit/utils@npm:3.0.0"
+"@electron-toolkit/utils@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@electron-toolkit/utils@npm:4.0.0"
   peerDependencies:
     electron: ">=13.0.0"
-  checksum: 10c0/b9cb3da36fec97b1a8e2344283da8a78c77d7fb27d09bcf60ca0947db246460a8d05f12cd25bc1c764211443caa58684656e197f9fa3f587a9a5589ec9cf74de
+  checksum: 10c0/fdaffa28a4b2b4d043f9d9ec7f0fcbe2b4dfc670962a0fbbdd8cadb333e0857a325b6f21b93588b4833e9c3b339f901383da82fc5e7cf625ad087db75fbdc5c9
   languageName: node
   linkType: hard
 
@@ -14555,7 +14555,7 @@ __metadata:
     "@electron-toolkit/eslint-config-ts": "npm:^2.0.0"
     "@electron-toolkit/preload": "npm:^3.0.0"
     "@electron-toolkit/tsconfig": "npm:^1.0.1"
-    "@electron-toolkit/utils": "npm:^3.0.0"
+    "@electron-toolkit/utils": "npm:^4.0.0"
     "@fortawesome/fontawesome-svg-core": "npm:^6.7.0"
     "@fortawesome/free-regular-svg-icons": "npm:^6.7.0"
     "@fortawesome/free-solid-svg-icons": "npm:^6.7.0"

@@ -51,7 +51,7 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.48",
     "@electron-toolkit/preload": "^3.0.0",
-    "@electron-toolkit/utils": "^3.0.0",
+    "@electron-toolkit/utils": "^4.0.0",
     "@tauri-apps/api": "~2.11.1",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.0",
     "@tauri-apps/plugin-opener": "^2",

@@ -71,6 +71,13 @@
   SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums.
   Roll back with `yarn up zod@^4.3.6`; the local optional `sharp` postinstall
   failure remains unrelated.
+- `@electron-toolkit/utils` was upgraded independently from 3.0.0 to 4.0.0.
+  The package is not called directly by renderer code, and Electron
+  main/preload/renderer builds plus Web/core typecheck, browser harness
+  typecheck, contract tests, Tauri lint, SBOM/license/CSP metadata, release
+  metadata, and 92-file artifact checksums pass. Roll back with `yarn up
+  @electron-toolkit/utils@^3.0.0`; the local `sharp` postinstall failure is
+  unchanged.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
