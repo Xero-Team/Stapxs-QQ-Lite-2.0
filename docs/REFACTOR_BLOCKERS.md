@@ -6,10 +6,10 @@
   with numeric and string account IDs), including the message/media/reply/
   recall/reconnect flow implemented by the runner. No live credentials or
   native WebView behavior are implied by this result.
-- Android release build was started through `yarn build:android`; Gradle is
-  currently held by an existing `assembleRelease` process while acquiring the
-  Gradle 8.13 distribution lock. A separate `assembleDebug` attempt timed out
-  after 120 seconds waiting for that lock, so no Android artifact is claimed.
+- Android release build was started through `yarn build:android` and completed
+  Gradle dependency setup, but failed because no Android SDK is installed:
+  `SDK location not found` (no `ANDROID_HOME` and no
+  `src/mobile/android/local.properties`). No APK/AAB artifact is claimed.
 - A fresh recursive `yarn npm audit --all --recursive` (Yarn 4.12.0 via
   Corepack) completes with the known advisory set: lodash/lodash-es high and
   moderate prototype-pollution/code-injection entries plus deprecated build
