@@ -155,6 +155,71 @@ export interface MessageSegmentElem extends Record<string, unknown> {
     qq?: string | number
 }
 
+/**
+ * A message segment received from a OneBot event.
+ *
+ * This is deliberately separate from `MessageSegmentElem`: the latter is
+ * also used by the composer and therefore has a different set of optional
+ * fields. Extensions are kept in the index signature for forward
+ * compatibility with adapter-specific segments.
+ */
+export interface IncomingMessageSegment extends Record<string, unknown> {
+    type?: string
+    text?: string
+    id?: string | number
+    file?: string
+    file_id?: string
+    file_name?: string
+    name?: string
+    url?: string
+    qq?: string | number
+    summary?: string
+    size?: number
+    file_size?: number
+    data?: unknown
+    content?: IncomingMessageElem[]
+}
+
+export interface IncomingMessageSender extends Record<string, unknown> {
+    user_id?: string | number
+    nickname?: string
+    card?: string
+    group_id?: string | number
+    role?: string
+}
+
+/** Normalized OneBot message event consumed by the message pipeline. */
+export interface IncomingMessageElem extends Record<string, unknown> {
+    post_type?: string
+    message_type?: string
+    detail_type?: string
+    sub_type?: string
+    notice_type?: string
+    message_id?: string | number
+    message_seq?: string | number
+    seq?: string | number
+    time?: number | string
+    group_id?: string | number
+    user_id?: string | number
+    target_id?: string | number
+    group_name?: string
+    raw_message?: string
+    message: IncomingMessageSegment[]
+    sender: IncomingMessageSender
+    atme?: boolean
+    atall?: boolean
+}
+
+/** Narrow an unknown payload at the OneBot message boundary. */
+export function isIncomingMessage(value: unknown): value is IncomingMessageElem {
+    if (typeof value !== 'object' || value === null) return false
+    const payload = value as Record<string, unknown>
+    if (!Array.isArray(payload.message) || typeof payload.sender !== 'object' || payload.sender === null) {
+        return false
+    }
+    return payload.message.every((segment) => typeof segment === 'object' && segment !== null)
+}
+
 export interface MsgItemElem {
     type?: string
     // Legacy extension fields are validated by the OneBot schema before use.

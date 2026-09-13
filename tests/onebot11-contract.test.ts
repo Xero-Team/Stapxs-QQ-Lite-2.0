@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import napcatEvent from '../docs/onebot11-samples/napcat-event.json'
 import lagrangeResponse from '../docs/onebot11-samples/lagrange-api-response.json'
 import { parseOneBotApiResponse, parseOneBotEvent } from '../src/renderer/src/protocol/onebot11'
+import { isIncomingMessage } from '../src/renderer/src/function/elements/information'
 import { retryWithBackoff } from '../src/renderer/src/transport/transport'
 
 describe('OneBot 11 compatibility samples', () => {
@@ -15,6 +16,16 @@ describe('OneBot 11 compatibility samples', () => {
 
     it('rejects malformed payloads', () => {
         expect(() => parseOneBotEvent({ post_type: 'message' })).toThrow()
+    })
+
+    it('narrows message events before the renderer pipeline consumes them', () => {
+        const event = {
+            post_type: 'message',
+            message: [{ type: 'text', data: { text: 'hello' } }],
+            sender: { user_id: 10001, nickname: 'Alice' },
+        }
+        expect(isIncomingMessage(event)).toBe(true)
+        expect(isIncomingMessage({ ...event, message: ['invalid'] })).toBe(false)
     })
 
     it('retries transient transport failures with bounded attempts', async () => {

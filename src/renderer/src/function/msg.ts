@@ -48,6 +48,9 @@ import {
     UserFriendElem,
     UserGroupElem,
     MsgItemElem,
+    IncomingMessageElem,
+    IncomingMessageSegment,
+    isIncomingMessage,
     type Session,
 } from './elements/information'
 import { NotifyInfo } from './elements/system'
@@ -75,7 +78,6 @@ import {
 } from './utils/sessionUtil'
 
 const popInfo = new PopInfo()
-// eslint-disable-next-line
 const msgPaths = import.meta.glob("@renderer/assets/pathMap/*.yaml", { eager: true })
 // 取出包含 Lagrange.OneBot.yaml 的那条
 const msgPathAt = Object.keys(msgPaths).find((item) => {
@@ -96,25 +98,14 @@ type MessageSegmentPayload = MessagePayload & {
     id?: string | number
     content?: MessagePayload[]
 }
-type MessageSenderPayload = MessagePayload & {
-    user_id?: string | number
-    nickname?: string
-    card?: string
-    group_id?: string | number
-}
-type IncomingMessagePayload = MessagePayload & {
-    message: MsgItemElem[]
-    sender: MessageSenderPayload
-    notice_type?: string
-    message_type?: string
-    sub_type?: string
-    raw_message?: string
-    group_id?: string | number
-    user_id?: string | number
-}
+type IncomingMessagePayload = IncomingMessageElem
 
 function asMessagePayload(value: unknown): MessagePayload | undefined {
     return typeof value === 'object' && value !== null ? value as MessagePayload : undefined
+}
+
+function asIncomingMessage(value: unknown): IncomingMessagePayload | undefined {
+    return isIncomingMessage(value) ? value : undefined
 }
 
 function stringField(payload: MessagePayload, key: string): string | undefined {
@@ -2203,7 +2194,12 @@ function revokeMsg(_: string, msg: MessagePayload) {
 
 let _qed_try_times = 0
 function newMsg(_: string, rawData: MessagePayload) {
-    let data = rawData as IncomingMessagePayload
+    const incoming = asIncomingMessage(rawData)
+    if (!incoming) {
+        logger.add(LogType.WS, '收到结构无效的消息事件', undefined, true)
+        return
+    }
+    let data = incoming
     const { $t } = app.config.globalProperties
     const authStore = useAuthStore()
     const uiStore = useUIStore()
@@ -2315,7 +2311,7 @@ function newMsg(_: string, rawData: MessagePayload) {
         // 通知判定预处理 ============================================
         // 对于其他不在消息里标记 atme、atall 的处理
         if (data.atme == undefined || data.atall == undefined) {
-            data.message.forEach((item: MsgItemElem) => {
+            data.message.forEach((item: IncomingMessageSegment) => {
                 if (item.type == 'at' && item.qq == loginId) {
                     data.atme = true
                 }
@@ -2436,9 +2432,9 @@ function newMsg(_: string, rawData: MessagePayload) {
                     type: data.group_id ? 'group' : 'user',
                     is_important: isImportant,
                 } as NotifyInfo
-                data.message.forEach((item: MsgItemElem) => {
+                data.message.forEach((item: IncomingMessageSegment) => {
                     // 如果消息有图片，追加第一张图片
-                    if (item.type === 'image' && msgInfo.image === undefined) {
+                    if (item.type === 'image' && msgInfo.image === undefined && typeof item.url === 'string') {
                         msgInfo.image = item.url
                     }
                 })
