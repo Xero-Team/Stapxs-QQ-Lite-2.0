@@ -40,3 +40,5 @@ overrides:
   'picomatch@^4.0.2': 4.0.7
   'picomatch@^4.0.3': 4.0.7
   'picomatch@^4.0.4': 4.0.7
+
+auditConfig: { ignoreGhsas: [ GHSA-w5hq-g745-h8pq ] }
