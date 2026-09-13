@@ -42,7 +42,7 @@ jobs:
             - name: Lint protocol and platform primitives
               run: pnpm exec eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-auth-failure-smoke.js scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js scripts/playwright-storage-smoke.js
             - name: Generate dependency inventory and SBOM
-              run: pnpm sbom
+              run: pnpm run sbom
             - name: Web build
               run: pnpm build
             - name: Verify SBOM, licenses and CSP
