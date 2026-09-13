@@ -716,7 +716,7 @@ export function get(name: string): OptionValue {
  */
 export function getRaw(name: string) {
     if ('electron' == backend.type) {
-        return backend.call('opt:get', name, true)
+        return Promise.resolve(backend.callSync('opt:get', name))
     } else if('tauri' == backend.type) {
         return backend.call(undefined, 'opt:get', true, name)
     } else {
