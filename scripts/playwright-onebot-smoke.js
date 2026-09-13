@@ -59,9 +59,11 @@ async (page) => {
                     'get_friend_msg_history', 'get_group_msg_history',
                 ].includes(action))
                 let activeSocket
+                let socketCount = 0
                 // Intercept every socket, so the smoke can never contact a real bot.
                 await smokePage.routeWebSocket('**/*', (socket) => {
                     activeSocket = socket
+                    socketCount++
                     if (!socket.url().startsWith('ws://127.0.0.1:30991/')) {
                         unexpectedRequests++
                         socket.close()
@@ -290,6 +292,17 @@ async (page) => {
                         await smokePage.waitForTimeout(100)
                     }
                     messageFlow.recalled = requests.includes('delete_msg')
+
+                    // Drop the established socket and verify the shared
+                    // reconnecting transport opens a fresh connection and
+                    // repeats the OneBot initialization handshake.
+                    const socketsBeforeDrop = socketCount
+                    activeSocket?.close()
+                    for (let attempt = 0; attempt < 150; attempt++) {
+                        if (socketCount > socketsBeforeDrop && requests.filter((action) => action === 'get_version_info').length > 1) break
+                        await smokePage.waitForTimeout(100)
+                    }
+                    messageFlow.reconnected = socketCount > socketsBeforeDrop
                 }
 
                 // Validate the persisted account type through the public settings format.
@@ -320,7 +333,8 @@ async (page) => {
                         && (!messageFlow.sent || !messageFlow.received
                             || !messageFlow.imageSent || !messageFlow.fileSent
                             || !messageFlow.replySent || !messageFlow.recalled
-                            || !messageFlow.mediaReceived || !messageFlow.mediaDownloaded))) {
+                            || !messageFlow.mediaReceived || !messageFlow.mediaDownloaded
+                            || !messageFlow.reconnected))) {
                     throw new Error(`${scenario}: login smoke failed (${JSON.stringify(checks)})`)
                 }
                 results.push({ backend, accountType: typeof accountId, loggedIn: true })

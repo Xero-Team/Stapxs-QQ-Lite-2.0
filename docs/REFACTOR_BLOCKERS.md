@@ -4,7 +4,7 @@
 
 - Runtime-scoped Pinia state now has typed reset actions for authentication, contacts, connections, chat messages, Qzone, stickers, and session history. `resetRimtime(true)` delegates to those actions, and history/terminal/chat message-list clearing uses the Chat store mutation API. Web typecheck, browser harness typecheck, `check`, production build, Tauri lint, 79 contract tests, repository policy, SBOM/license/CSP metadata, and 90-file artifact checksum verification pass after this change.
 - Settings migration UI smoke is now reproducible through `scripts/playwright-settings-migration-smoke.sh`: a synthetic legacy serialized option is copied into the rollback-safe store, the legacy key is removed, and the Settings checkbox remains enabled after a fresh reload. The local Chromium run passed against the production preview; live reconnect, authentication failure, and native UI flows remain open.
-- OneBot Playwright smoke now also pushes a synthetic image and file event, verifies the rendered received file, and clicks its download control against a local fixture URL. The four Lagrange/NapCat numeric/string scenarios pass with no external requests or page errors; reconnect and authentication-failure flows remain open.
+- OneBot Playwright smoke now also pushes a synthetic image and file event, verifies the rendered received file, and clicks its download control against a local fixture URL. It drops the established socket and verifies a fresh connection repeats the initialization handshake. The four Lagrange/NapCat numeric/string scenarios pass with no external requests or page errors; authentication-failure UI remains open.
 
 ## 2026-09-12
 
