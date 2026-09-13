@@ -17,3 +17,4 @@ notice_local.json
 *.log*
 .playwright-cli/
 output/playwright/
+.codex/
