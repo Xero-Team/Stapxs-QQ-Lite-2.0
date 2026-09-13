@@ -116,6 +116,11 @@
   typechecks, contract tests, production and Electron builds, Tauri lint,
   SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums
   pass. Roll back with `yarn up rollup-plugin-visualizer@^5.12.0`.
+- `vue-echarts` was upgraded independently from 7.0.3 to 8.3.0 to match the
+  project's ECharts 6 line; the previous ECharts peer warning is resolved.
+  Web/Node/core/browser typechecks, contract tests, production and Electron
+  builds, Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file
+  artifact checksums pass. Roll back with `yarn up vue-echarts@^7.0.3`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item

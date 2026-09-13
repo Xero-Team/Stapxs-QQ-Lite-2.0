@@ -1422,7 +1422,7 @@
     {
       "type": "library",
       "name": "vue-echarts",
-      "version": "7.0.3",
+      "version": "8.3.0",
       "licenses": [
         {
           "license": {
@@ -1430,7 +1430,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vue-echarts@7.0.3",
+      "purl": "pkg:npm/vue-echarts@8.3.0",
       "properties": [
         {
           "name": "xero:dependency-scope",
