@@ -17,6 +17,7 @@ Keep the preview running and execute these in another terminal:
 
 ```bash
 bash scripts/playwright-smoke.sh
+bash scripts/playwright-auth-failure-smoke.sh
 bash scripts/playwright-onebot-smoke.sh
 ```
 
@@ -39,13 +40,18 @@ requests, page exceptions, and incomplete login fail the script. It uses no real
 account or access token and blocks service workers in these scenarios to avoid
 testing a cached build.
 
-These mocks do not validate a live bot, reconnect/authentication failures, media
-reception/download, settings migration, or native platforms. The OneBot smoke
+These mocks do not validate a live bot or native platforms. The OneBot smoke
 exercises synthetic UI text/image/file sending, server-pushed receive messages,
 reply composition (including the OneBot `reply` segment), and confirmed-message
 recall (`delete_msg`). The remaining checks stay open in `REFACTOR_CHECKLIST.md`. Repository-wide
 ESLint and dependency-audit failures are tracked in `REFACTOR_BLOCKERS.md`;
 passing these focused regressions does not imply a passing release gate.
+
+The authentication-failure smoke closes a synthetic WebSocket with protocol
+code 4003 and asserts the visible connection error, restored login form, and
+re-enabled connect button. It blocks third-party requests and records browser
+exceptions; it does not claim that a particular live Bot implementation uses
+the same close code.
 
 ## XML card security regression
 

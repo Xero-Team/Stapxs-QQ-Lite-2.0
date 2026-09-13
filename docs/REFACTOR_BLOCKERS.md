@@ -27,8 +27,8 @@
 - Earlier bootstrap and missing-submodule failures were resolved: Yarn 4.12.0 is available through the Corepack shim, dependencies install with `--immutable --mode=skip-build`, and the QFace/Border Card UI submodules are initialized.
 - The registry's latest Vue/Vite/TypeScript/ESLint/Pinia/Electron combination is currently incompatible with this dependency graph: Vite 8 conflicts with `@vitejs/plugin-vue` 5, ESLint 10 conflicts with the installed Vue/TypeScript configs, and the TypeScript 7 patch failed during fetch. The attempted upgrade was discarded; upgrades must proceed package by package with matching plugins.
 - Native `sharp@0.32.6` postinstall fails in this environment, so Yarn exits non-zero after linking even though JavaScript dependencies are available.
-- `yarn npm audit --all --recursive` currently exits 1 with 192 advisories (including 3 critical findings in Handlebars, tar, and Vitest); dependency upgrades and an application impact review are required before enabling the audit as a passing release gate.
-- A fresh `yarn npm audit --all` on 2026-09-13 still exits 1; it reports high/critical issues in `jsonpath`, `rollup`, and `vitest`, plus moderate findings in `echarts`, `markdown-it`, `uuid`, and `ws`. No upgrade is applied yet because each requires compatibility review.
+- `yarn npm audit --all --recursive` currently exits 1; the latest refresh is recorded below with the full advisory breakdown. Dependency upgrades and an application impact review are required before enabling the audit as a passing release gate.
+- An earlier `yarn npm audit --all` on 2026-09-13 reported high/critical issues in `jsonpath`, `rollup`, and `vitest`, plus moderate findings in `echarts`, `markdown-it`, `uuid`, and `ws`; the direct package findings were addressed in the refresh below, while transitive findings remain.
 - The Electron renderer/main/preload build was re-run locally with `yarn electron-vite build` and completed successfully; Windows/macOS signing and packaged installer validation remain outstanding.
 - `vue-tsc` is pinned to the stable 3.3.11 line for the resolved TypeScript 5.9.3 toolchain. The Web renderer now explicitly enables all requested strict flags and passes `vue-tsc --noEmit -p tsconfig.web.json`; the third-party `vue3-bcui` component remains isolated behind its type shim.
 
@@ -115,23 +115,19 @@ checks.
 
 ## Dependency audit refresh (2026-09-13, full recursive graph)
 
-`npx --yes corepack@0.31.0 yarn npm audit --all --recursive` exits 1 after
-reporting 142 advisory entries across 56 packages: 3 critical, 80 high, 53
-moderate, and 6 low. The upgraded direct packages (`jsonpath`, `echarts`,
-`markdown-it`, and `uuid`) no longer appear as direct vulnerable nodes, but
-transitive findings remain in the build and test toolchain. Notable blockers
-include `sharp@0.32.6` (libvips/libheif), `tar` from Capacitor tooling,
-`postcss`/`nanoid` from Vite, `rollup` from the connector workspace, and
-`vitest@2.1.9`. These require compatibility upgrades or replacement before the
-recursive audit can become a passing release gate; this result is retained as
-the current evidence rather than being suppressed.
+`npx --yes corepack@0.31.0 yarn npm audit --all --recursive` previously exited
+1 after reporting 142 advisory entries across 56 packages. That historical
+snapshot is retained for comparison; the newer direct dependency refresh and
+current result are recorded below.
 
 ## Dependency audit refresh (2026-09-13)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
 `markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 3.2.6. A fresh
 recursive audit still exits 1 with 137 advisory entries across 54 packages
-(2 critical, 79 high, 50 moderate, 6 low). Remaining exposure is primarily
+(2 critical, 79 high, 50 moderate, 6 low). A subsequent full recursive run
+using the repository Yarn 4.12.0 entrypoint reports 112 advisory entries:
+2 critical, 79 high, 25 moderate, and 6 low. Remaining exposure is primarily
 transitive build tooling (`sharp`, `tar`, `postcss`, `nanoid`, Rollup), plus
 Vitest's current transitive mocker advisory and deprecated Vue I18n 10. These
 upgrades require compatibility work and remain release blockers. Contract

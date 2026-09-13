@@ -40,7 +40,7 @@ jobs:
             - name: OneBot contract tests
               run: yarn test:contract
             - name: Lint protocol and platform primitives
-              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js scripts/playwright-storage-smoke.js scripts/playwright-storage-smoke.js
+              run: yarn eslint src/renderer/src/protocol src/renderer/src/transport src/renderer/src/storage src/renderer/src/network src/renderer/src/function/utils/avatar.ts src/electron/function/ipc.ts src/electron/function/urlPolicy.ts src/electron/function/util.ts tests scripts/playwright-auth-failure-smoke.js scripts/playwright-onebot-smoke.js scripts/playwright-xml-card-smoke.js scripts/playwright-storage-smoke.js
             - name: Generate dependency inventory and SBOM
               run: yarn sbom
             - name: Web build
@@ -66,6 +66,8 @@ jobs:
               run: bash scripts/playwright-smoke.sh
             - name: Settings migration UI smoke
               run: bash scripts/playwright-settings-migration-smoke.sh
+            - name: Authentication failure UI smoke
+              run: bash scripts/playwright-auth-failure-smoke.sh
             - name: Upload browser runtime metrics
               if: always()
               uses: actions/upload-artifact@v4
