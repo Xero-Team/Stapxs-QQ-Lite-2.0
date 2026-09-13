@@ -235,15 +235,7 @@
             :merge-list="chatStore.mergeMessageList"
             :list="chatStore.messageList" :chat="chatStore.chatInfo"
             @user-click="changeChat" />
-        <TransitionGroup class="app-msg" name="appmsg" tag="div">
-            <div v-for="msg in appMsgs" :key="'appmsg-' + msg.id">
-                <div><font-awesome-icon :icon="['fas', msg.svg]" /></div>
-                <a>{{ msg.text }}</a>
-                <div v-if="!msg.autoClose" @click="popInfo.remove(msg.id)">
-                    <font-awesome-icon :icon="['fas', 'xmark']" />
-                </div>
-            </div>
-        </TransitionGroup>
+        <AppNotifications :messages="appMsgs" @remove="popInfo.remove" />
         <Transition name="music-player-float">
             <div v-show="tags.showMusicPlayer" class="global-music-player ss-card">
                 <MusicPlayer
@@ -345,6 +337,7 @@ import FileManager, { panelVisible, closePanel, getDownloadTasks, getUploadTasks
 import GlobalSessionSearchBar from './components/GlobalSessionSearchBar.vue'
 import NtViewer from './components/ViewerCom.vue'
 import Tooltips from './components/tooltip/Tooltips.vue'
+import AppNotifications from './components/AppNotifications.vue'
 import { useQzoneStore } from './state/qzone'
 
 // 注册组件实例
