@@ -115,11 +115,11 @@ git clone https://github.com/XeroTeam/Stapxs-QQ-Lite-2.0.git --recursive
 git submodule update --init
 ```
 
-在开始构建之前，请先安装依赖。请确保已安装 `yarn`：
+在开始构建之前，请先安装依赖。请确保已安装 `pnpm`：
 
 ``` bash
 # 安装依赖
-yarn install
+pnpm install
 ```
 
 位置卡片默认只显示地址。需要地图时，请自行申请 [高德地图 API Key](https://lbs.amap.com/dev/key/app)，在部署环境中配置，并在设置中启用外部服务。项目不提供默认 Key。
@@ -132,13 +132,13 @@ Xero QQ Lite 是一个基于 Vue 的单页应用，如果你想自行部署到�
 
 ``` bash
 # 运行本地调试
-yarn dev
+pnpm dev
 
-# 代码检查（自动修复使用 yarn lint:fix）
-yarn lint
+# 代码检查（自动修复使用 pnpm lint:fix）
+pnpm lint
 
 # 构建应用
-yarn build
+pnpm build
 ```
 
 协议测试和 Playwright 冒烟测试的运行方式见 [验证说明](docs/TESTING.md)。
@@ -172,10 +172,10 @@ VITE_APP_SSE_HTTP_ADDRESS=api
 
 ``` bash
 # Electron 运行本地调试
-yarn dev:electron
+pnpm dev:electron
 
 # Electron 构建应用
-yarn build:electron
+pnpm build:electron
 ```
 
 ### > 构建 Tauri 应用
@@ -186,13 +186,13 @@ yarn build:electron
 
 ``` bash
 # Tauri 运行本地调试
-yarn dev:tauri
+pnpm dev:tauri
 
 # Tauri 构建应用
-yarn build:tauri
+pnpm build:tauri
 
 # Tauri 构建指定架构
-yarn build:tauri -t x86_64-apple-darwin -b dmg
+pnpm build:tauri -t x86_64-apple-darwin -b dmg
 
 # 查看支持的架构
 rustup target list
@@ -206,23 +206,23 @@ rustup target list
 #### Android
 > 如果 Capacitor CLI 无法找到 Android Studio 和 Android SDK，可以将 `CAPACITOR_ANDROID_STUDIO_PATH` 和 `ANDROID_HOME` 导出到环境变量中，它们分别指向 Android Studio 可执行文件路径和 Android SDK 路径。
 
-你可以使用 `yarn open:android` 打开 Android Studio，通过 Build -> Generate Signed Bundle or APK 来构建 APK 文件。
+你可以使用 `pnpm open:android` 打开 Android Studio，通过 Build -> Generate Signed Bundle or APK 来构建 APK 文件。
 
-你也可以直接使用 `yarn build:android` 构建 APK 文件。请检查并修改 `capacitor.config.ts` 文件中 `android.buildOptions` 的 keyStore 配置。
+你也可以直接使用 `pnpm build:android` 构建 APK 文件。请检查并修改 `capacitor.config.ts` 文件中 `android.buildOptions` 的 keyStore 配置。
 
 构建结果将输出在 `src/mobile/android/app/build/outputs/apk/release` 目录下。
 
 #### iOS
-你可以使用 `yarn open:ios` 打开 Xcode，通过 Product -> Archive 来构建 IPA 文件。
+你可以使用 `pnpm open:ios` 打开 Xcode，通过 Product -> Archive 来构建 IPA 文件。
 
-你也可以直接使用 `yarn build:ios` 构建 IPA 文件。此构建方式将执行 `scripts/build-export-ipa.sh` 脚本，构建将使用钥匙串中的默认开发者证书，请确保已配置开发者证书。
+你也可以直接使用 `pnpm build:ios` 构建 IPA 文件。此构建方式将执行 `scripts/build-export-ipa.sh` 脚本，构建将使用钥匙串中的默认开发者证书，请确保已配置开发者证书。
 
 Xcode 的构建结果将输出在 `src/mobile/ios/build` 目录下，脚本构建结果将输出在 `dist_capacitor` 目录下。
 
 ### > 命令列表
 以下是本项目的完整命令列表，你可以使用这些命令来快速构建和调试 Xero QQ Lite。
 
-**命令格式为 `yarn <命令>`，其中 `<命令>` 为列表中的一个：**
+**命令格式为 `pnpm <命令>`，其中 `<命令>` 为列表中的一个：**
 
 | 命令           | 描述                |
 | -------------- | ------------------ |

@@ -8,7 +8,7 @@
 
 ```bash
 # 生成 web 前端到 dist/
-yarn build
+pnpm build
 ```
 
 生成后的静态资源位于 `dist/`。
@@ -17,5 +17,5 @@ yarn build
 
 ```bash
 # 生成 NapCat 插件包到 napcat-plugin-ssqq.zip
-yarn build:zip
+pnpm build:zip
 ```

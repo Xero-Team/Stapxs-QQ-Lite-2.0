@@ -113,11 +113,11 @@ If you have already cloned the repository, you can use the following command to 
 git submodule update --init
 ```
 
-Before building, please install the dependencies. Make sure `yarn` is installed:
+Before building, please install the dependencies. Make sure `pnpm` is installed:
 
 ``` bash
 # Install dependencies
-yarn install
+pnpm install
 ```
 
 Location cards show their address by default. To load maps, configure your own [Amap API Key](https://lbs.amap.com/dev/key/app) in the deployment environment and enable external services in Settings. The project does not provide a default key.
@@ -130,13 +130,13 @@ The following are the commands to build the project. The build output will be pl
 
 ``` bash
 # Run local debug server
-yarn dev
+pnpm dev
 
-# Lint code (use yarn lint:fix for automatic fixes)
-yarn lint
+# Lint code (use pnpm lint:fix for automatic fixes)
+pnpm lint
 
 # Build the application
-yarn build
+pnpm build
 ```
 
 See [regression checks](docs/TESTING.md) for contract tests and Playwright smoke commands.
@@ -170,10 +170,10 @@ The following are the commands to build the Electron application. The build outp
 
 ``` bash
 # Run Electron local debug
-yarn dev:electron
+pnpm dev:electron
 
 # Build the Electron application
-yarn build:electron
+pnpm build:electron
 ```
 
 ### > Build the Tauri Application
@@ -184,13 +184,13 @@ The following are the commands to build the Tauri application. The build output 
 
 ``` bash
 # Run Tauri local debug
-yarn dev:tauri
+pnpm dev:tauri
 
 # Build the Tauri application
-yarn build:tauri
+pnpm build:tauri
 
 # Build Tauri for a specific architecture
-yarn build:tauri -t x86_64-apple-darwin -b dmg
+pnpm build:tauri -t x86_64-apple-darwin -b dmg
 
 # View supported architectures
 rustup target list
@@ -204,23 +204,23 @@ Starting from version `3.0.0`, Xero QQ Lite supports building as a mobile applic
 #### Android
 > If the Capacitor CLI cannot find Android Studio and the Android SDK, you can export `CAPACITOR_ANDROID_STUDIO_PATH` and `ANDROID_HOME` as environment variables, pointing to the Android Studio executable path and the Android SDK path respectively.
 
-You can use `yarn open:android` to open Android Studio and build the APK file via Build -> Generate Signed Bundle or APK.
+You can use `pnpm open:android` to open Android Studio and build the APK file via Build -> Generate Signed Bundle or APK.
 
-You can also use `yarn build:android` to build the APK file directly. Please check and modify the keyStore configuration under `android.buildOptions` in the `capacitor.config.ts` file.
+You can also use `pnpm build:android` to build the APK file directly. Please check and modify the keyStore configuration under `android.buildOptions` in the `capacitor.config.ts` file.
 
 The build output will be placed in the `src/mobile/android/app/build/outputs/apk/release` directory.
 
 #### iOS
-You can use `yarn open:ios` to open Xcode and build the IPA file via Product -> Archive.
+You can use `pnpm open:ios` to open Xcode and build the IPA file via Product -> Archive.
 
-You can also use `yarn build:ios` to build the IPA file directly. This build method executes the `scripts/build-export-ipa.sh` script, and the build will use the default developer certificate from the Keychain. Make sure a developer certificate is configured.
+You can also use `pnpm build:ios` to build the IPA file directly. This build method executes the `scripts/build-export-ipa.sh` script, and the build will use the default developer certificate from the Keychain. Make sure a developer certificate is configured.
 
 The Xcode build output will be placed in the `src/mobile/ios/build` directory, and the script build output will be placed in the `dist_capacitor` directory.
 
 ### > Command List
 The following is the complete list of commands for this project. You can use these commands to quickly build and debug Xero QQ Lite.
 
-**Commands are in the format `yarn <command>`, where `<command>` is one of the following:**
+**Commands are in the format `pnpm <command>`, where `<command>` is one of the following:**
 
 | Command        | Description                                   |
 | -------------- | --------------------------------------------- |
