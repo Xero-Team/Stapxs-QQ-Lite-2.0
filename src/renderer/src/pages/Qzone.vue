@@ -698,7 +698,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
         const likeUsers = [] as { nickname: string, id: number }[]
         div.querySelectorAll('.user-list .item').forEach(el => {
             likeUsers.push({
-                nickname: el.textContent,
+                nickname: el.textContent ?? '',
                 id: Number(((el as HTMLAnchorElement).href.match(/\/\/(\d+)/) ?? [0, 0])[1])
             })
         })

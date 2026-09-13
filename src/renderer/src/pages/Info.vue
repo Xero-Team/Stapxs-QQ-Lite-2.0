@@ -600,14 +600,19 @@ function startChat(info: GroupMemberInfoElem & { group_id?: number }) {
     }
 }
 
-function moreConfig(info: Record<string, unknown>) {
-    const role = typeof info.role === 'string' ? info.role : 'member'
-    if(canEditMember(role)) {
-        const member = toMemberConfig(info)
+function moreConfig(info: GroupMemberInfoElem) {
+    if(canEditMember(info.role)) {
+        const member: MemberConfig = {
+            user_id: info.user_id,
+            nickname: info.nickname,
+            card: info.card,
+            role: info.role,
+            title: info.title,
+            shut_up_timestamp: info.shutup_time,
+        }
         showUserConfig.value = member
         showUserConfigRaw.value = { ...member }
-        // 初始化一些内容
-        mumberInfo.value.banMin = getBanTimeMin(Number(info.shut_up_timestamp ?? 0))
+        mumberInfo.value.banMin = getBanTimeMin(info.shutup_time)
     } else {
         copyText(info.user_id)
     }
@@ -615,7 +620,7 @@ function moreConfig(info: Record<string, unknown>) {
 
 function openMoreConfig(userId: number) {
     const member = props.chat.info.group_members.find((item) => item.user_id === userId)
-    if (member) moreConfig({ ...member })
+    if (member) moreConfig(member)
 }
 
 defineExpose({ openMoreConfig })
