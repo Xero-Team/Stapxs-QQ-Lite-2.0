@@ -9,8 +9,6 @@ import { v4 as uuid } from 'uuid'
 import { Connector } from '@renderer/function/connect'
 import {
     BotMsgType,
-    UserFriendElem,
-    UserGroupElem,
 } from '../elements/information'
 import { backend } from '@renderer/runtime/backend'
 import { useContactStore } from '@renderer/state/contact'
@@ -19,7 +17,6 @@ import { useAuthStore } from '@renderer/state/auth'
 import { useChatStore } from '@renderer/state/chat'
 import {
     findSessionContact,
-    getSessionId,
 } from './sessionUtil'
 import {
     parseCqText,
@@ -27,12 +24,17 @@ import {
     serializeCqSegments,
 } from '@renderer/protocol/message'
 import { getShowName } from './displayFormat'
+import { updateBaseOnMsgList, updateLastestHistory } from './sessionList'
 export {
     getShowName,
     isShowTime,
     qqLevelIcons,
     qqLevelToEmoji,
 } from './displayFormat'
+export {
+    updateBaseOnMsgList,
+    updateLastestHistory,
+} from './sessionList'
 
 const logger = new Logger()
 type JsonRecord = Record<string, unknown>
@@ -541,108 +543,6 @@ export function sendMsgRaw(
             }
         }
     }
-}
-
-export function updateLastestHistory(item: UserFriendElem & UserGroupElem) {
-    const authStore = useAuthStore()
-    // 发起获取历史消息请求
-    const type = item.user_id ? 'user' : 'group'
-    const id = item.user_id ? item.user_id : item.group_id
-    let name
-    if (authStore.jsonMap.message_list && type != 'group') {
-        name = authStore.jsonMap.message_list.private_name
-    } else {
-        name = authStore.jsonMap.message_list.name
-    }
-    Connector.send(
-        name ?? 'get_chat_history',
-        {
-            message_type: authStore.jsonMap.message_list.message_type[type],
-            group_id: id,
-            user_id: id,
-            message_seq: 0,
-            message_id: 0,
-            count: 1,
-        },
-        'getChatHistoryOnMsg_' + id,
-    )
-}
-
-function getSessionTime(item: UserFriendElem & UserGroupElem) {
-    const time = Number(item.time ?? 0)
-    return Number.isFinite(time) ? time : 0
-}
-
-function getSessionSortName(item: UserFriendElem & UserGroupElem) {
-    return item.py_start ?? getShowName(item.group_name ?? item.nickname ?? '', item.remark ?? '')
-}
-
-function getSessionList() {
-    const contactStore = useContactStore()
-    const settingsStore = useSettingsStore()
-    const sessionMap = new Map<number, UserFriendElem & UserGroupElem>()
-
-    if (settingsStore.sysConfig.session_display_mode === 'all') {
-        contactStore.userList.forEach((item) => {
-            const id = getSessionId(item)
-            if (Number.isFinite(id) && id > 0) {
-                sessionMap.set(id, item)
-            }
-        })
-    }
-
-    contactStore.baseOnMsgList.forEach((item, id) => {
-        sessionMap.set(id, item)
-    })
-
-    return [...sessionMap.values()]
-}
-
-/**
- * 刷新消息列表排序
- */
-export function updateBaseOnMsgList() {
-    const contactStore = useContactStore()
-    const settingsStore = useSettingsStore()
-    const allList = getSessionList()
-    // 先更具 item.always_top 是不是 true 拆为两个数组
-    const topList = allList.filter((item) => item.always_top)
-    const normalList = allList.filter((item) => !item.always_top)
-    // 将两个数组按照 item.time 降序排序
-    // item.time 不存在或者相同时按照 item.py_start 降序排序
-
-    const sortFun = (
-        a: UserFriendElem & UserGroupElem,
-        b: UserFriendElem & UserGroupElem,
-    ) => {
-        const timeA = getSessionTime(a)
-        const timeB = getSessionTime(b)
-        if (timeA !== timeB) return timeB - timeA
-
-        return getSessionSortName(b).localeCompare(getSessionSortName(a))
-    }
-    topList.sort(sortFun)
-    normalList.sort(sortFun)
-
-    let onMsgList: Array<UserFriendElem & UserGroupElem> = []
-    let groupAssistList: Array<UserFriendElem & UserGroupElem> = []
-    if (settingsStore.sysConfig.bubble_sort_user) {
-        // 将 normalList 进行拆分
-        const shouldShowInMainList = (item: UserFriendElem & UserGroupElem) => {
-            return item.user_id || item.new_msg || item.highlight
-        }
-        onMsgList = topList.concat(normalList.filter((item) => {
-            return shouldShowInMainList(item)
-        }))
-        groupAssistList = normalList.filter((item) => {
-            return item.group_id && !shouldShowInMainList(item)
-        })
-    } else {
-        onMsgList = topList.concat(normalList)
-    }
-
-    contactStore.onMsgList = onMsgList
-    contactStore.groupAssistList = groupAssistList
 }
 
 /**
