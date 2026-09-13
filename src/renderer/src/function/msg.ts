@@ -48,6 +48,7 @@ import {
     UserFriendElem,
     UserGroupElem,
     MsgItemElem,
+    JinMessageElem,
     type Session,
 } from './elements/information'
 import { NotifyInfo } from './elements/system'
@@ -1120,7 +1121,7 @@ const msgFunctions = {
             notice.img = img
             lastImg = img
         }
-        chatStore.chatInfo.info.group_notices = list
+        chatStore.chatInfo.info.group_notices = list as import('./elements/information').BulletinDataElem[]
     },
 
     /**
@@ -2518,7 +2519,7 @@ export function resetRimtime(resetAll = false) {
                 group_members: [],
                 group_files: [],
                 group_sub_files: {},
-                jin_info: { list: [] as MessagePayload[], pages: 0 },
+                jin_info: { list: [] as JinMessageElem[], pages: 0 },
             },
         })
         chatStore.messageList = []

@@ -316,7 +316,7 @@ import { computed, watch, onMounted, onUnmounted, shallowReactive, shallowRef, p
 import { Connector, login as loginInfo, loadConnectionHistory, loadConnectionFromHistory, deleteConnectionHistory, decodeStoredToken } from '@renderer/function/connect'
 import { Logger, popList, PopInfo, LogType } from '@renderer/function/base'
 import { setLoginWaveTimer } from '@renderer/function/msg'
-import { BaseChatInfoElem } from '@renderer/function/elements/information'
+import { BaseChatInfoElem, JinMessageElem } from '@renderer/function/elements/information'
 import { useConnectionStore } from '@renderer/state/connection'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
@@ -717,7 +717,7 @@ function changeChat(data: BaseChatInfoElem) {
             group_files: [],
             group_sub_files: {},
             jin_info: {
-            list: [] as Record<string, unknown>[],
+                list: [] as JinMessageElem[],
                 pages: 0,
             },
         },

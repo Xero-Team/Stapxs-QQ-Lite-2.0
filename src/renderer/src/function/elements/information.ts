@@ -8,22 +8,58 @@ export enum BotMsgType {
 export interface ChatInfoElem {
     show: BaseChatInfoElem
     info: {
-        group_info: Record<string, unknown>
-        user_info: Record<string, unknown>
-        me_info: Record<string, unknown>
+        group_info: GroupInfoElem
+        user_info: UserInfoElem
+        me_info: MemberInfoElem
         group_members: GroupMemberInfoElem[]
         /** Legacy OneBot file payload; validated at protocol boundary. */
         group_files: (GroupFileElem & GroupFileFolderElem)[]
         group_sub_files: Record<string, unknown>
-        group_notices?: Record<string, unknown>[]
+        group_notices?: BulletinDataElem[]
         now_member_info?: Record<string, unknown>
         image_list?: { index: number; message_id: string; img_url: string }[]
         jin_info: {
-            list: Record<string, unknown>[]
+            list: JinMessageElem[]
             is_end?: boolean
             pages: number
         }
     }
+}
+
+export interface BulletinDataElem extends Record<string, unknown> {
+    time: number
+    content: string[]
+    sender: number
+    img?: { src: string }
+    is_read?: boolean
+    read_num?: number
+}
+
+export interface JinMessageContext {
+    type: string
+    data: { text?: string; id?: string | number; url?: string }
+}
+
+export interface JinMessageElem {
+    sender_uin: number
+    sender_nick: string
+    sender_time: number
+    add_digest_nick: string
+    msg_content: JinMessageContext[]
+}
+
+export interface GroupInfoElem extends Record<string, unknown> {
+    gc?: number
+}
+
+export interface UserInfoElem extends Record<string, unknown> {
+    uin?: number
+}
+
+export interface MemberInfoElem extends Record<string, unknown> {
+    role?: string
+    card?: string
+    shut_up_timestamp?: number
 }
 
 export interface BaseChatInfoElem {
@@ -33,6 +69,7 @@ export interface BaseChatInfoElem {
     avatar: string
     appendInfo?: string | undefined
     jump?: string
+    temp?: string | number | undefined
 }
 
 export interface UserElem {

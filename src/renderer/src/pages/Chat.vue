@@ -50,7 +50,7 @@
                                     hour: 'numeric',
                                     minute: 'numeric',
                                     second: 'numeric',
-                                }).format(new Date(list[list.length - 1].time * 1000)),
+                                }).format(new Date((list[list.length - 1]?.time ?? 0) * 1000)),
                             }) : $t('暂无消息')
                         }}
                     </template>
@@ -81,12 +81,12 @@
                 </div>
                 <!-- 时间戳，在下滑加载的时候会显示，方便在大段的相连消息上让用户知道消息时间 -->
                 <NoticeBody v-if="uiStore.nowGetHistory && list.length > 0"
-                    :data="{ sub_type: 'time', time: list[0].time }" />
+                    :data="{ sub_type: 'time', time: list[0]?.time }" />
                 <TransitionGroup :name="settingsStore.sysConfig.opt_fast_animation ? '' : 'msglist'" tag="div">
                     <template v-for="(msgIndex, index) in list">
                         <!-- 时间戳 -->
                         <NoticeBody
-                            v-if="isShowTime(list[Number(index) - 1] ? list[Number(index) - 1].time : undefined, msgIndex.time)"
+                            v-if="isShowTime(list[Number(index) - 1]?.time, msgIndex.time)"
                             :key="'notice-time-' + (msgIndex.time / ( 4 * 60 )).toFixed(0)"
                             :data="{ sub_type: 'time', time: msgIndex.time }" />
                         <!-- [已删除]消息 -->
@@ -112,7 +112,7 @@
                         <NoticeBody v-else-if="msgIndex.post_type === 'notice'"
                             :id="uuid()"
                             :key="'notice-' + index"
-                            :data="msgIndex" />
+                            :data="msgIndex as MsgItemElem" />
                     </template>
                 </TransitionGroup>
             </template>
@@ -124,7 +124,7 @@
                     <template v-for="(msgIndex, index) in tags.search.list">
                         <!-- 时间戳 -->
                         <NoticeBody
-                            v-if="isShowTime(list[Number(index) - 1] ? list[Number(index) - 1].time : undefined, msgIndex.time)"
+                            v-if="isShowTime(list[Number(index) - 1]?.time, msgIndex.time)"
                             :key="'notice-time-' + index"
                             :data="{ sub_type: 'time', time: msgIndex.time }" />
                         <!-- 消息体 -->
@@ -214,7 +214,7 @@
                                                 :emoji="Emoji.get(Number(context.data.id))" />
                                             <img v-if="context.type === 'image'"
                                                 :src="context.data.url"
-                                                @click="viewerEssImg(context.data.url)">
+                                                @click="viewerEssImg(context.data.url ?? '')">
                                         </template>
                                     </div>
                                 </div>
@@ -381,15 +381,15 @@
                                 v-model="msg"
                                 type="text"
                                 autocomplete="off"
-                                :disabled="uiStore.openSideBar || chat.info.me_info.shut_up_timestamp > 0"
+                                :disabled="uiStore.openSideBar || (chat.info.me_info.shut_up_timestamp ?? 0) > 0"
                                 :placeholder="
-                                    chat.info.me_info.shut_up_timestamp > 0
+                                    (chat.info.me_info.shut_up_timestamp ?? 0) > 0
                                         ? $t('已被禁言至：{time}', {
                                             time: Intl.DateTimeFormat(
                                                 trueLang, getTimeConfig(
-                                                    new Date(chat.info.me_info.shut_up_timestamp * 1000),
+                                                    new Date((chat.info.me_info.shut_up_timestamp ?? 0) * 1000),
                                                 ),
-                                            ).format(new Date(chat.info.me_info.shut_up_timestamp * 1000)),
+                                            ).format(new Date((chat.info.me_info.shut_up_timestamp ?? 0) * 1000)),
                                         }) : ''"
                                 @paste="addImg"
                                 @keydown="mainAtKey"
@@ -607,6 +607,7 @@ import { Logger, LogType, PopInfo, PopType } from '@renderer/function/base'
 import { Connector } from '@renderer/function/connect'
 import {
     BaseChatInfoElem,
+    ChatInfoElem,
     MsgItemElem,
     SQCodeElem,
     GroupMemberInfoElem,
@@ -641,9 +642,9 @@ interface ChatViewer {
 const { viewer: viewerRef } = inject<{ viewer: ChatViewer | null }>('viewer', { viewer: null })
 
 const { chat, list } = defineProps<{
-    chat: any
-    list: any[]
-    imgView?: any
+    chat: ChatInfoElem
+    list: MsgItemElem[]
+    imgView?: unknown
 }>()
 
 function normalizeHistoryMessages(value: unknown): MsgItemElem[] {
@@ -1055,7 +1056,7 @@ async function loadMoreHistory() {
         !uiStore.nowGetHistory &&
         uiStore.canLoadHistory !== false
     ) {
-        const firstMsgId = list[0].message_id
+        const firstMsgId = list[0]?.message_id
         const firstMsgTime = Number(list[0]?.time)
         const useMixedHistory =
             settingsStore.sysConfig.enable_local_history &&
@@ -1095,7 +1096,7 @@ async function loadMoreHistory() {
                     chatStore.messageList.splice(0, 0, ...addList)
                 }
                 const boundary = list[addList.length] ?? list[addList.length - 1]
-                const seqGapAnchors = detectSeqGaps([...addList, boundary])
+                const seqGapAnchors = boundary ? detectSeqGaps([...addList, boundary]) : []
                 if (seqGapAnchors.length > 0) {
                     fillSeqGaps(seqGapAnchors)
                 }
@@ -1693,7 +1694,7 @@ function forwardSelf() {
     if (selectedMsg.value) {
         const msgData = JSON.parse(JSON.stringify(selectedMsg.value))
         sendMsgRaw(
-            chat.show.id,
+            String(chat.show.id),
             chat.show.type,
             msgData.message,
             true,
@@ -2353,7 +2354,7 @@ function sendMsg(echo = 'sendMsgBack') {
         )
     } else {
         sendMsgRaw(
-            chat.show.id,
+            String(chat.show.id),
             chat.show.type,
             parsedMsg,
             true,
@@ -2383,7 +2384,7 @@ function updateList(newLength: number, oldLength: number) {
                 {
                     group_id: chat.show.id,
                     message_id:
-                        list[list.length - 1].message_id,
+                        list[list.length - 1]?.message_id,
                 },
                 'setMessageRead',
             )
@@ -2393,7 +2394,7 @@ function updateList(newLength: number, oldLength: number) {
                 {
                     user_id: chat.show.id,
                     message_id:
-                        list[list.length - 1].message_id,
+                        list[list.length - 1]?.message_id,
                 },
                 'setMessageRead',
             )

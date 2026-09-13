@@ -279,7 +279,7 @@ type InfoChat = Omit<ChatInfoElem, 'info'> & {
     info: Omit<ChatInfoElem['info'], 'group_info' | 'user_info' | 'me_info' | 'group_notices'> & {
         group_info: InfoGroupInfo
         user_info: InfoUserInfo
-        me_info: { role: string }
+        me_info: { role?: string }
         group_notices?: BulletinData[]
     }
 }

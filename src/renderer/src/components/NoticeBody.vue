@@ -70,6 +70,8 @@ import { backend } from '@renderer/runtime/backend'
 import type { MsgItemElem } from '@renderer/function/elements/information'
 
 interface NoticePayload {
+    [key: string]: unknown
+    post_type?: string
     notice_type?: string
     sub_type?: string
     user_id?: number

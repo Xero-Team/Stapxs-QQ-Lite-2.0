@@ -59,7 +59,7 @@ import {
 } from '@renderer/function/option'
 
 import Chat from '../Chat.vue'
-import type { MsgItemElem } from '@renderer/function/elements/information'
+import type { ChatInfoElem, MsgItemElem } from '@renderer/function/elements/information'
 
 defineOptions({ name: 'ChatGlagame' })
 
@@ -71,7 +71,7 @@ const authStore = useAuthStore()
 const chatStore = useChatStore()
 
 const props = defineProps<{
-    chat: unknown
+    chat: ChatInfoElem
     list: MsgItemElem[]
     imgView: unknown
 }>()
