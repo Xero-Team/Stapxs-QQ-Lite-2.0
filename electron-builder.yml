@@ -28,7 +28,6 @@ win:
     executableName: Xero QQ Lite
     icon: build/icon-client-others.png
     legalTrademarks: Copyright © 2026 Xero-Team
-    publisherName: xero
 
 # macOS 配置
 mac:
@@ -49,6 +48,8 @@ dmg:
 
 # Linux 配置
 linux:
+    desktopName: xero-qq-lite
+    syncDesktopName: true
     target:
         - { target: pacman, arch: x64 }
         - { target: AppImage, arch: x64 }
