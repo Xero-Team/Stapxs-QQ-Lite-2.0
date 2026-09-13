@@ -67,19 +67,19 @@
     } from '@renderer/function/utils/systemUtil'
     import { pokeAnime } from '@renderer/function/utils/msgUtil'
 import { backend } from '@renderer/runtime/backend'
-import type { MsgItemElem } from '@renderer/function/elements/information'
+    import type { RenderedMessage } from '@renderer/function/elements/information'
 
 interface NoticePayload {
     [key: string]: unknown
     post_type?: string
     notice_type?: string
     sub_type?: string
-    user_id?: number
-    operator_id?: number
+    user_id?: string | number
+    operator_id?: string | number
     duration?: number
     str?: string
     time?: number
-    originMsg?: MsgItemElem
+    originMsg?: RenderedMessage
     pokeMe?: boolean
     name?: string | number
 }
@@ -92,16 +92,16 @@ interface NoticePayload {
     defineOptions({ name: 'NoticeBody' })
 
     const props = defineProps<{ data: NoticePayload; id?: string | number }>()
-    defineEmits<{ reedit: [message: MsgItemElem] }>()
+    defineEmits<{ reedit: [message: RenderedMessage] }>()
 
     const trueLang = getTrueLang()
     const info = ref<NoticePayload>(props.data)
 
-    function isMe(id: number | undefined) {
+    function isMe(id: string | number | undefined) {
         return String(authStore.loginInfo.uin) === String(id)
     }
 
-    function getName(id: number | undefined) {
+    function getName(id: string | number | undefined) {
         const back = chatStore.chatInfo.info.group_members.filter(
             (item) => {
                 return item.user_id === id

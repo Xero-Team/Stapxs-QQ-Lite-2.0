@@ -168,7 +168,7 @@
 
 <script setup lang="ts">
 import {
-    MsgItemElem,
+    MessageSegmentElem,
     SQCodeElem,
 } from '@renderer/function/elements/information'
 import { computed, ComputedRef, Ref, ShallowRef, shallowRef } from 'vue'
@@ -242,7 +242,7 @@ if (backend.isDesktop() && settingsStore.sysConfig.local_emoji_folder) {
     reloadLocalEmojis()
 }
 
-function addSpecialMsg(json: MsgItemElem, addText: boolean) {
+function addSpecialMsg(json: MessageSegmentElem, addText: boolean) {
     emit('addSpecialMsg', {
         addText: addText,
         msgObj: json,

@@ -36,7 +36,7 @@
     import { normalizeMessagesForPreview } from '@renderer/function/msg'
     import { getMsgRawTxt } from '@renderer/function/utils/msgUtil'
     import { useAuthStore } from '@renderer/state/auth'
-    import type { MsgItemElem } from '@renderer/function/elements/information'
+    import type { RenderedMessage } from '@renderer/function/elements/information'
     import { i18n } from '@renderer/main'
 
     defineOptions({ name: 'RawMsgRenderPreviewPan' })
@@ -55,10 +55,10 @@
     const rawRenderPreviewText = ref(data?.text ?? '')
     const rawRenderPreviewLoading = ref(false)
     const rawRenderPreviewError = ref('')
-    const rawRenderPreviewList = ref<MsgItemElem[]>([])
+    const rawRenderPreviewList = ref<RenderedMessage[]>([])
 
-    function buildRawRenderFallbackMessage(msg: Record<string, unknown>, index: number): MsgItemElem {
-        const previewMsg = { ...msg } as MsgItemElem
+    function buildRawRenderFallbackMessage(msg: Record<string, unknown>, index: number): RenderedMessage {
+        const previewMsg = { ...msg } as Partial<RenderedMessage> & Record<string, unknown>
         const senderId = Number(
             previewMsg.sender?.user_id
             ?? previewMsg.user_id
@@ -69,7 +69,7 @@
         previewMsg.message_id ??= `raw-render-preview-${index}`
         previewMsg.time = Number(previewMsg.time ?? Math.floor(Date.now() / 1000))
         previewMsg.post_type ??= 'message'
-        previewMsg.message = Array.isArray(previewMsg.message) ? previewMsg.message : []
+        previewMsg.message = Array.isArray(previewMsg.message) ? previewMsg.message as RenderedMessage['message'] : []
         previewMsg.sender = {
             user_id: senderId,
             nickname: previewMsg.sender?.nickname
@@ -81,7 +81,7 @@
         }
         previewMsg.raw_message ??= getMsgRawTxt(previewMsg)
 
-        return previewMsg
+        return previewMsg as RenderedMessage
     }
 
     async function renderRawPreview() {

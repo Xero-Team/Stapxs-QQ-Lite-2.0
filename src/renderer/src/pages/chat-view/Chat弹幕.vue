@@ -337,7 +337,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
     import { getMsgRawTxt, sendMsgRaw } from '@renderer/function/utils/msgUtil'
     import { parseMsg } from '@renderer/function/sender'
     import {
-        MsgItemElem,
+        RenderedMessage,
         MessageSegmentElem,
         SQCodeElem,
     } from '@renderer/function/elements/information'
@@ -365,7 +365,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
 
     const props = defineProps<{
         chat: { show: { id: number, type: string, temp?: number } }
-        list: MsgItemElem[]
+        list: RenderedMessage[]
         mumberInfo: Record<string, unknown>
     }>()
 
@@ -538,7 +538,7 @@ import { avatarUrl } from '@renderer/function/utils/avatar'
                     'getChatHistory',
                 )
             }
-            const list = props.list.map((data: MsgItemElem) => {
+            const list = props.list.map((data: RenderedMessage) => {
                 return {
                     text: getMsgRawTxt(data),
                     id: data.sender.user_id,

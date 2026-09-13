@@ -44,7 +44,7 @@
                 </div>
                 <!-- 时间戳，在下滑加载的时候会显示，方便在大段的相连消息上让用户知道消息时间 -->
                 <NoticeBody v-if="uiStore.nowGetHistory && list.length > 0"
-                    :data="{ sub_type: 'time', time: list[0]?.time }" />
+                    :data="{ sub_type: 'time', ...(list[0] ? { time: list[0].time } : {}) }" />
                 <TransitionGroup :name="settingsStore.sysConfig.opt_fast_animation ? '' : 'msglist'" tag="div">
                     <template v-for="(msgIndex, index) in list">
                         <!-- 时间戳 -->
@@ -75,7 +75,7 @@
                         <NoticeBody v-else-if="msgIndex.post_type === 'notice'"
                             :id="uuid()"
                             :key="'notice-' + index"
-                            :data="msgIndex as MsgItemElem" />
+                            :data="msgIndex" />
                     </template>
                 </TransitionGroup>
             </template>
@@ -450,7 +450,7 @@
                         <div><font-awesome-icon :icon="['fas', 'at']" /></div>
                         <a>{{ $t('提及') }}</a>
                     </div>
-                    <div v-show="tags.menuDisplay.poke" @click="sendPoke(selectedMsg ? selectedMsg.sender.user_id : undefined)">
+                    <div v-show="tags.menuDisplay.poke" @click="sendPoke(selectedMsg ? Number(selectedMsg.sender.user_id) : 0)">
                         <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
                         <a>{{ $t('戳一戳') }}</a>
                     </div>
@@ -572,7 +572,7 @@ import {
     BaseChatInfoElem,
     ChatInfoElem,
     MessageSegmentElem,
-    MsgItemElem,
+    RenderedMessage,
     SQCodeElem,
     GroupMemberInfoElem,
     UserFriendElem,
@@ -608,15 +608,15 @@ const { viewer: viewerRef } = inject<{ viewer: ChatViewer | null }>('viewer', { 
 
 const { chat, list } = defineProps<{
     chat: ChatInfoElem
-    list: MsgItemElem[]
+    list: RenderedMessage[]
     imgView?: unknown
 }>()
 
-function normalizeHistoryMessages(value: unknown): MsgItemElem[] {
+function normalizeHistoryMessages(value: unknown): RenderedMessage[] {
     if (!Array.isArray(value)) return []
     return value.filter((item): item is Record<string, unknown> =>
         typeof item === 'object' && item !== null,
-    ) as MsgItemElem[]
+    ) as RenderedMessage[]
 }
 
 const connectionStore = useConnectionStore()
@@ -690,7 +690,7 @@ const msg = ref('')
 const oldMsg = ref('')
 const imgCache = ref(new Map<number, string>())
 const sendCache = ref<MessageSegmentElem[]>([])
-const selectedMsg = ref<MsgItemElem | null>(null)
+const selectedMsg = ref<RenderedMessage | null>(null)
 const selectCache = ref('')
 const atFindList = ref<GroupMemberInfoElem[] | null>(null)
 const atSelectedIndex = ref(0)
@@ -1035,7 +1035,7 @@ async function loadMoreHistory() {
         uiStore.loadHistoryFail = false
 
         if (useMixedHistory) {
-            let localMsgs: MsgItemElem[] = []
+            let localMsgs: RenderedMessage[] = []
             if (Number.isFinite(firstMsgTime)) {
                 localMsgs = normalizeHistoryMessages(await dbGetBeforeByTime(
                     authStore.loginInfo.uin,
@@ -1047,7 +1047,7 @@ async function loadMoreHistory() {
                 localMsgs = normalizeHistoryMessages(await dbGetBefore(
                     authStore.loginInfo.uin,
                     chatStore.chatInfo.show.id,
-                    firstMsgId,
+                    String(firstMsgId ?? ''),
                     20,
                 ))
             }
@@ -1091,7 +1091,7 @@ async function loadMoreHistory() {
     }
 }
 
-function detectSeqGaps(msgs: MsgItemElem[]): string[] {
+function detectSeqGaps(msgs: RenderedMessage[]): string[] {
     const gaps: string[] = []
     for (let i = 0; i < msgs.length - 1; i++) {
         const current = msgs[i]
@@ -1410,7 +1410,7 @@ function selectSQIn() {
     }
 }
 
-function showMsgMeun(event: MenuEventData, data: MsgItemElem) {
+function showMsgMeun(event: MenuEventData, data: RenderedMessage) {
     selectedMsg.value = data
     tags.value.menuDisplay.menuSelectedMsgId = data.message_id
 
@@ -1456,14 +1456,14 @@ function showMsgMeun(event: MenuEventData, data: MsgItemElem) {
             tags.value.menuDisplay.remove = true
             if (
                 chatStore.chatInfo.show.type != 'group' ||
-                data.sender.user_id === authStore.loginInfo.uin ||
+                String(data.sender.user_id) === String(authStore.loginInfo.uin) ||
                 chatStore.chatInfo.info.me_info.role === 'member' ||
                 selectUserType == 'owner' ||
                 (selectUserType == 'admin' && chatStore.chatInfo.info.me_info.role != 'owner')
             ) {
                 tags.value.menuDisplay.remove = false
             }
-            if (data.sender.user_id === authStore.loginInfo.uin) {
+            if (String(data.sender.user_id) === String(authStore.loginInfo.uin)) {
                 tags.value.menuDisplay.at = false
             }
             if(chatStore.chatInfo.show.type == 'group' &&
@@ -1472,14 +1472,14 @@ function showMsgMeun(event: MenuEventData, data: MsgItemElem) {
             }
         } else {
             if (
-                data.sender.user_id === authStore.loginInfo.uin ||
+                String(data.sender.user_id) === String(authStore.loginInfo.uin) ||
                 chatStore.chatInfo.info.me_info.role ===
                     'admin' ||
                 chatStore.chatInfo.info.me_info.role === 'owner'
             ) {
                 tags.value.menuDisplay.revoke = true
             }
-            tags.value.menuDisplay.reedit = tags.value.menuDisplay.revoke && data.sender.user_id === authStore.loginInfo.uin
+            tags.value.menuDisplay.reedit = tags.value.menuDisplay.revoke && String(data.sender.user_id) === String(authStore.loginInfo.uin)
             if (data.revoke === true) {
                 tags.value.menuDisplay.relpy = false
                 tags.value.menuDisplay.forward = false
@@ -1527,7 +1527,7 @@ function showMsgMeun(event: MenuEventData, data: MsgItemElem) {
                 }
             }
             const nList = ['xml', 'json']
-            data.message.forEach((item: MsgItemElem) => {
+            data.message.forEach((item) => {
                 if (nList.indexOf(item.type as string) > 0) {
                     tags.value.menuDisplay.forward = false
                     tags.value.menuDisplay.add = false
@@ -1599,7 +1599,7 @@ function menuReplyMsg(closeMenu = true) {
     }
 }
 
-function replyMsg(msgData: MsgItemElem) {
+function replyMsg(msgData: RenderedMessage) {
     const msgId = msgData.message_id
     selectedMsg.value = msgData
     addSpecialMsg({
@@ -2430,7 +2430,7 @@ function updateList(newLength: number, oldLength: number) {
                                 msgItem.type === 'image' &&
                                 msgItem.file != 'marketface'
                             ) {
-                                getImgList.push(msgItem.url)
+                                if (msgItem.url) getImgList.push(msgItem.url)
                             }
                         }
                     }
@@ -2455,7 +2455,7 @@ function updateList(newLength: number, oldLength: number) {
     }
 }
 
-function msgClick(_: Event, data: MsgItemElem) {
+function msgClick(_: Event, data: RenderedMessage) {
     const message_id = data.message_id
     if (multipleSelectList.value.length > 0) {
         if (multipleSelectList.value.indexOf(message_id) > -1) {
@@ -2589,7 +2589,7 @@ async function handleInput(event: Event) {
                     value,
                 )
                 if (requestId !== searchRequestId.value || !details.value[3].open) return
-                tags.value.search.list = results
+                tags.value.search.list = results as unknown as RenderedMessage[]
             }, 180)
         } else {
             searchRequestId.value++
@@ -2642,7 +2642,7 @@ function sendPoke(userId: number) {
     tags.value.menuDisplay.poke = false
 }
 
-function reedit(msgData: MsgItemElem) {
+function reedit(msgData: RenderedMessage) {
     msg.value = ''
     sendCache.value = []
     imgCache.value.clear()

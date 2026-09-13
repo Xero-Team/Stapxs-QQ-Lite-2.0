@@ -11,7 +11,7 @@ import WelPan from '@renderer/components/WelPan.vue'
 import { KeyboardInfo } from '@capacitor/keyboard'
 import { LogType, Logger, PopInfo, PopType } from '@renderer/function/base'
 import { Connector, login } from '@renderer/function/connect'
-import { BaseChatInfoElem, MenuEventData, Session, MsgItemElem } from '@renderer/function/elements/information'
+import { BaseChatInfoElem, MenuEventData, Session, RenderedMessage } from '@renderer/function/elements/information'
 import { useAuthStore } from '@renderer/state/auth'
 import { useContactStore } from '@renderer/state/contact'
 import { useChatStore } from '@renderer/state/chat'
@@ -174,7 +174,7 @@ export async function loadHistory(info: BaseChatInfoElem) {
             20,
         )
         if (localMsgs.length > 0) {
-            chatStore.setMessages(localMsgs as unknown as MsgItemElem[])
+            chatStore.setMessages(localMsgs as unknown as RenderedMessage[])
         }
     }
     if (!loadHistoryMessage(info.id, info.type)) {

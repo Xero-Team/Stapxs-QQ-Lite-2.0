@@ -35,11 +35,11 @@
                             :class="
                                 'sname s' +
                                     msgItem.sender.role +
-                                    (authStore.loginInfo.uin == msgItem.sender.user_id
+                                    (String(authStore.loginInfo.uin) == String(msgItem.sender.user_id)
                                         ? ' smine'
                                         : '')
                             "
-                            @click="copy(msgItem.sender.user_id)">
+                            @click="copy(String(msgItem.sender.user_id))">
                             {{
                                 msgItem.sender.card
                                     ? msgItem.sender.card
@@ -47,8 +47,8 @@
                             }}{{ hasReply(msgItem) ?? ''
                             }}{{
                                 msgItem.sub_type == 'friend'
-                                    ? authStore.loginInfo.uin ==
-                                        msgItem.sender.user_id
+                                    ? String(authStore.loginInfo.uin) ==
+                                        String(msgItem.sender.user_id)
                                         ? authStore.loginInfo.nickname
                                         : chatStore.chatInfo.show.name
                                     : ''
@@ -66,7 +66,7 @@
                             v-if="msgItem.sub_type == 'recall'"
                             style="color: yellow">::
                             <span style="color: yellow; opacity: 0.7">{{
-                                getRecallName(msgItem.operator_id)
+                                getRecallName(Number(msgItem.operator_id ?? 0))
                             }}</span>
                             recalled a message.</span>
                     </div>
@@ -94,7 +94,7 @@
                                         :icon="['fas', 'code-branch']" />
                                 </span>
                                 <span>
-                                    {{ msgItem.time.time
+                                    {{ getCommandTime(msgItem)
                                     }}<font-awesome-icon
                                         :icon="['fas', 'clock']" />
                                 </span>
@@ -171,7 +171,8 @@
     import { getTrueLang } from '@renderer/function/utils/systemUtil'
     import {
         BaseChatInfoElem,
-        MsgItemElem,
+        RenderedMessage,
+        RenderedMessageSegment,
         MessageSegmentElem,
         SQCodeElem,
         UserFriendElem,
@@ -227,7 +228,7 @@
 
     const { chat, list } = defineProps<{
         chat: TerminalChat
-        list: MsgItemElem[]
+        list: RenderedMessage[]
         mumberInfo: unknown
     }>()
 
@@ -256,15 +257,25 @@
     })
 
     // --- methods ---
-    function hasReply(msg: MsgItemElem) {
+    function getCommandTime(msg: RenderedMessage): string {
+        const value = (msg as Record<string, unknown>).time
+        if (typeof value === 'object' && value !== null) {
+            const nested = (value as Record<string, unknown>).time
+            return typeof nested === 'string' || typeof nested === 'number' ? String(nested) : ''
+        }
+        return typeof value === 'number' || typeof value === 'string' ? String(value) : ''
+    }
+
+    function hasReply(msg: RenderedMessage) {
         if (msg.message) {
-            const repItem = msg.message.filter((item: MsgItemElem) => {
+            const repItem = msg.message.filter((item: RenderedMessageSegment) => {
                 return item.type == 'reply'
             })
             if (repItem[0]) {
+                const replyId = String(repItem[0].id ?? '')
                 const repMsg = chatStore.messageList.filter(
                     (item) => {
-                        return item.message_id == repItem[0].id
+                        return item.message_id == replyId
                     },
                 )
                 if (repMsg[0]) {
@@ -350,7 +361,7 @@
             color: color,
             str: raw,
             html: html,
-        } as unknown as MsgItemElem)
+        } as unknown as RenderedMessage)
     }
 
     function addCommandOutF(
@@ -363,7 +374,7 @@
             color: color,
             str: raw,
             html: html,
-        } as unknown as MsgItemElem)
+        } as unknown as RenderedMessage)
     }
 
     function addCommandLine(
@@ -383,7 +394,7 @@
                 }).format(new Date()),
             }),
             data: appendData,
-        } as unknown as MsgItemElem)
+        } as unknown as RenderedMessage)
     }
 
     function addCommandLineF(str: string, dir = chatStore.chatInfo.show.name) {
@@ -399,7 +410,7 @@
                 }).format(new Date()),
             }),
             data: {},
-        } as unknown as MsgItemElem)
+        } as unknown as RenderedMessage)
     }
 
     function sendMsg(event: KeyboardEvent) {
@@ -686,7 +697,7 @@
                                 )
                                 tags.value.replyId = item[2]
                                 if (replyMsg[0]) {
-                                    tags.value.replyName = replyMsg[0].sender.card? replyMsg[0].sender.card: replyMsg[0].sender.nickname
+                                    tags.value.replyName = replyMsg[0].sender.card ?? replyMsg[0].sender.nickname ?? null
                                 }
                                 addSpecialMsg({
                                     msgObj: { type: 'reply', id: item[2] },

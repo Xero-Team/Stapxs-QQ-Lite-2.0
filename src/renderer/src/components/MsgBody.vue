@@ -76,14 +76,14 @@
                 <template v-else-if="isSuperFaceMsg()">
                     <div class="msg-img face lottie-face alone">
                         <LazyLottie
-                            :animation-link="Emoji.get(Number(data.message[0].id))!.superValue!"
-                            :title="Emoji.get(Number(data.message[0].id))!.description" />
+                            :animation-link="Emoji.get(Number(data.message[0]!.id))!.superValue!"
+                            :title="Emoji.get(Number(data.message[0]!.id))!.description" />
                     </div>
                 </template>
                 <template v-else-if="!hasCard()">
                     <div v-for="(item, index) in data.message"
                         :key="data.message_id + '-m-' + index"
-                        :class="View.isMsgInline(item.type) ? 'msg-inline' : ''">
+                            :class="View.isMsgInline(item.type ?? '') ? 'msg-inline' : ''">
                         <div v-if="item.type === undefined" />
                         <span v-else-if="isDebugMsg" class="msg-text">{{ item }}</span>
                         <template v-else-if="item.type == 'text'">
@@ -92,7 +92,7 @@
                                 class="msg-text" @click="textClick" v-html="textIndex[index]" />
                         </template>
                         <div v-else-if="item.type == 'markdown'" v-once
-                            :id="getMdHTML(item.content, 'msg-md-' + data.message_id)"
+                            :id="getMdHTML(typeof item.content === 'string' ? item.content : '', 'msg-md-' + data.message_id)"
                             class="msg-md" />
                         <img v-else-if="item.type == 'image' && item.file == 'marketface'"
                             :class=" imgStyle(data.message.length, Number(index), true) + ' msg-mface'"
@@ -112,10 +112,10 @@
                                 :class="imgStyle(data.message.length, Number(index), isFace(item)) + ' msg-img-placeholder'"
                                 @click="loadImage(item, Number(index))">
                                 <font-awesome-icon
-                                    :icon="['fas', imageLoading(getImageKey(Number(index), item.url)) ? 'spinner' : 'image']"
-                                    :spin="imageLoading(getImageKey(Number(index), item.url))" />
+                                    :icon="['fas', imageLoading(getImageKey(Number(index), item.url ?? '')) ? 'spinner' : 'image']"
+                                    :spin="imageLoading(getImageKey(Number(index), item.url ?? ''))" />
                                 <span>
-                                    {{ imageLoading(getImageKey(Number(index), item.url)) ? $t('加载中') : $t('点击加载图片') }}
+                                    {{ imageLoading(getImageKey(Number(index), item.url ?? '')) ? $t('加载中') : $t('点击加载图片') }}
                                 </span>
                             </div>
                             <img v-show="!shouldShowImagePlaceholder(item, Number(index))"
@@ -151,9 +151,9 @@
                                         <font-awesome-icon :icon="['fas', 'file']" />
                                         {{ chatStore.chatInfo.show.type == 'group' ? $t('群文件') : $t('离线文件') }}
                                     </a>
-                                    <p>{{ loadFileBase( item, item.name ?? item.file_name, data.message_id) }}</p>
+                                    <p>{{ loadFileBase( item, item.name ?? item.file_name ?? '', data.message_id) }}</p>
                                 </div>
-                                <i>{{ getSizeFromBytes(item.size ?? item.file_size) }}</i>
+                                <i>{{ getSizeFromBytes(item.size ?? item.file_size ?? 0) }}</i>
                             </div>
                             <div>
                                 <font-awesome-icon
@@ -171,7 +171,7 @@
                                         :type="'video/' + data.fileView.ext">
                                     现在还有不支持 video tag 的浏览器吗？
                                 </video>
-                                <span v-else-if="['txt', 'md'].includes(data.fileView.ext) && (item.size ?? item.file_size) < 2000000" class="txt">
+                                <span v-else-if="['txt', 'md'].includes(data.fileView.ext) && (item.size ?? item.file_size ?? 0) < 2000000" class="txt">
                                     <a>&gt; {{ item.name }} - {{ $t('文件预览') }}</a>
                                     {{ getTxtUrl(data.fileView) }}{{ data.fileView.txt }}
                                 </span>
@@ -197,7 +197,7 @@
                                 @click="openMerge()">
                                 <span>{{ $t('合并转发消息') }}</span>
                                 <div class="forward-msg">
-                                    <template v-if="item.content && item.content.length > 0">
+                                    <template v-if="Array.isArray(item.content) && item.content.length > 0">
                                         <div v-for="(i, indexItem) in item.content.slice(0, 3)"
                                             :key="'raw-forward-' + indexItem">
                                             {{ i.sender.nickname }}:
@@ -213,7 +213,7 @@
                                                     [{{ $t('表情') }}]
                                                 </span>
                                                 <span v-else-if="msg.type == 'file'">
-                                                    [{{ $t('文件') }}]{{ msg.data.file }}
+                                                    [{{ $t('文件') }}]{{ typeof msg.data === 'object' && msg.data !== null ? msg.data.file ?? '' : '' }}
                                                 </span>
                                                 <span v-else-if="msg.type == 'video'">
                                                     [{{ $t('视频') }}]
@@ -250,13 +250,13 @@
                         <div v-else-if="item.type == 'reply'"
                             v-show="type != 'body'"
                             :class="isMe ? type == 'merge' ? 'msg-replay' : 'msg-replay me' : 'msg-replay'"
-                            @click="scrollToMsg(item.id)">
+                            @click="scrollToMsg(String(item.id ?? ''))">
                             <div>
                                 <span>{{ getMsgInfo(item.id) }}</span>
                                 <font-awesome-icon v-if="getMsgInfo(item.id) != ''" :icon="['fas', 'turn-up']" />
                             </div>
                             <MsgBody v-if="getMsg(item.id)"
-                                :data="(getMsg(item.id, true) || {}) as MsgItemElem"
+                                :data="(getMsg(item.id, true) || {}) as RenderedMessage"
                                 :type="'body'"
                                 :global-me="isMe ? 'Y' : ''" />
                             <a v-else class="msg-unknown">
@@ -272,8 +272,8 @@
                 </template>
                 <template v-else>
                     <JsonSegComp v-if="data.message.at(0)!.type === 'json'"
-                        :data="data.message.at(0)!.data" />
-                    <XmlSegComp v-else :id="data.message_id" :item="data.message.at(0)!.data" />
+                        :data="getSegmentDataText(data.message.at(0)!.data)" />
+                    <XmlSegComp v-else :id="data.message_id" :item="getSegmentDataText(data.message.at(0)!.data)" />
                 </template>
                 <!-- 链接预览框 -->
                 <div v-if="!isDebugMsg && pageViewInfo && Object.keys(pageViewInfo).length > 0"
@@ -368,7 +368,7 @@
                 <TransitionGroup name="emoji-like">
                     <template v-for="info, id in data.emojis" :key="'respond-' + data.message_id + '-' + id">
                         <div :class="{
-                            'me-send': info.includes(authStore.loginInfo.uin),
+                            'me-send': info.includes(Number(authStore.loginInfo.uin)),
                         }">
                             <EmojiFace :emoji="Emoji.get(Number(id))!" />
                             <span>{{ info.length }}</span>
@@ -391,7 +391,6 @@ import { watch, onMounted, nextTick, provide, inject, useTemplateRef, ref, toRaw
 import { Connector } from '@renderer/function/connect'
 import { useSettingsStore } from '@renderer/state/settings'
 import { Logger, LogType, PopInfo, PopType } from '@renderer/function/base'
-import { StringifyOptions } from 'querystring'
 import { getMsgRawTxt, pokeAnime } from '@renderer/function/utils/msgUtil'
 import {
     isRobot,
@@ -408,7 +407,7 @@ import {
     getTrueLang,
     getViewTime } from '@renderer/function/utils/systemUtil'
 import { linkView } from '@renderer/function/utils/linkViewUtil'
-import { MenuEventData, MergeStackData, MsgItemElem } from '@renderer/function/elements/information'
+import { MenuEventData, MergeStackData, MessageSegmentData, RenderedMessage, RenderedMessageSegment } from '@renderer/function/elements/information'
 import { backend } from '@renderer/runtime/backend'
 import { i18n } from '@renderer/main'
 import { useUIStore } from '@renderer/state/ui'
@@ -432,7 +431,7 @@ import VoiceMsg from './VoiceMsg.vue'
 import { addMusic, MusicInfo } from './MusicPlayer.vue'
 import { z } from 'zod'
 
-type Msg = MsgItemElem
+type Msg = RenderedMessage
 const genericLinkPreviewSchema = z.object({
     type: z.undefined().optional(),
     site: z.string(),
@@ -511,7 +510,7 @@ const {
     globalMe,
     imageListHeader,
 } = defineProps<{
-    data: MsgItemElem
+    data: RenderedMessage
     selected?: boolean
     type?: 'merge' | 'body'
     globalMe?: string
@@ -575,7 +574,7 @@ const pageViewInfo = ref<LinkPreview>()
 const gotLink = ref(false)
 const senderInfo = ref<IUser | null>(null)
 const trueLang = getTrueLang()
-const textIndex = ref({} as { [key: string]: number })
+const textIndex = ref({} as { [key: string]: string })
 const resolvedImages = ref({} as Record<string, string>)
 const manualImageLoads = ref({} as Record<string, boolean>)
 const pendingImageLoads = ref({} as Record<string, boolean>)
@@ -584,8 +583,9 @@ const pendingImageLoads = ref({} as Record<string, boolean>)
 
 //#region == 工具函数 ================================================================
 
-function getAtMember(id: number): IUser | number {
-    const re = getUserById(id) ?? id
+function getAtMember(id: number | string | undefined): IUser | number {
+    const numericId = Number(id ?? 0)
+    const re = getUserById(numericId) ?? numericId
     return re
 }
 function getUserById(id: number): IUser | number {
@@ -631,8 +631,15 @@ async function loadCachedImage(url: string) {
     return undefined
 }
 
-function getImgSrc(url: string): string {
-    return resolvedImages.value[url] ?? backend.proxyUrl(url)
+function getImgSrc(url: string | undefined): string {
+    const source = url ?? ''
+    return resolvedImages.value[source] ?? backend.proxyUrl(source)
+}
+
+function getSegmentDataText(data: MessageSegmentData | string | undefined): string {
+    if (data === undefined) return ''
+    if (typeof data === 'string') return data
+    return typeof data.text === 'string' ? data.text : JSON.stringify(data)
 }
 
 function getImageKey(index: number, url: string) {
@@ -643,14 +650,14 @@ function imageLoading(key: string) {
     return pendingImageLoads.value[key] === true
 }
 
-function shouldShowImagePlaceholder(item: { type: string, url: string }, index: number) {
+function shouldShowImagePlaceholder(item: { type?: string, url?: string }, index: number) {
     if (item.type !== 'image') return false
     if (settingsStore.sysConfig.opt_no_auto_load_image !== true) return false
 
-    return manualImageLoads.value[getImageKey(index, item.url)] !== true
+    return manualImageLoads.value[getImageKey(index, item.url ?? '')] !== true
 }
 
-function getAtClass(who: number | string) {
+function getAtClass(who: number | string | undefined) {
     let back = 'msg-at'
     if (isMe.value && type != 'merge') {
         back += ' me'
@@ -661,7 +668,7 @@ function getAtClass(who: number | string) {
     return back
 }
 
-function getAtName(item: MsgItemElem) {
+function getAtName(item: RenderedMessageSegment) {
     if (item.qq == 'all') {
         return '@' + $t('全体成员')
     }
@@ -703,13 +710,15 @@ function imgStyle(length: number, at: number, isFace: boolean) {
     return style
 }
 
-function imgClick(url: string) {
+function imgClick(url: string | undefined) {
+    if (!url) return
     if (viewerRef?.value && imageListHeader) {
         viewerRef.value.openBySrc(imageListHeader, url)
     }
 }
 
-async function loadImage(item: { url: string }, index: number) {
+async function loadImage(item: { url?: string }, index: number) {
+    if (!item.url) return
     const key = getImageKey(index, item.url)
     if (manualImageLoads.value[key] || pendingImageLoads.value[key]) return
 
@@ -811,7 +820,9 @@ function imgLoadFail(event: Event) {
 
 async function parseText(index: number) {
 
-    let text = data.message[index].text
+    const segment = data.message[index]
+    if (!segment) return
+    let text = segment.text ?? ''
 
     const logger = new Logger()
     text = ViewFuns.parseText(text)
@@ -949,7 +960,7 @@ function hiddenUserInfo() {
     }
 }
 
-function getMsgInfo(message_id: string) {
+function getMsgInfo(message_id: string | number | undefined) {
     const list = chatStore.messageList.filter((item) => {
         return item.message_id == message_id
     })
@@ -964,7 +975,7 @@ function getMsgInfo(message_id: string) {
 
 }
 
-function getMsgStr(message_id: string) {
+function getMsgStr(message_id: string | number | undefined) {
     const list = chatStore.messageList.filter((item) => {
         return item.message_id == message_id
     })
@@ -974,7 +985,7 @@ function getMsgStr(message_id: string) {
     return ''
 }
 
-function getMsg(message_id: string, filter: boolean = false) {
+function getMsg(message_id: string | number | undefined, filter: boolean = false) {
     const list = chatStore.messageList.filter((item) => {
         return item.message_id == message_id
     })
@@ -989,7 +1000,7 @@ function getMsg(message_id: string, filter: boolean = false) {
             'xml',
             'forward'
         ])
-        const needTextFallback = (msg.message ?? []).some((seg: MsgItemElem) => textFallbackTypes.has(seg?.type ?? ''))
+        const needTextFallback = (msg.message ?? []).some((seg: RenderedMessageSegment) => textFallbackTypes.has(seg?.type ?? ''))
         if (needTextFallback) {
             return filter ? null : false
         }
@@ -1000,7 +1011,7 @@ function getMsg(message_id: string, filter: boolean = false) {
                 'forward',
             ])
             let hasMedia = false
-            const message = (msg.message ?? []).filter((seg: MsgItemElem) => {
+            const message = (msg.message ?? []).filter((seg: RenderedMessageSegment) => {
                 if (!mediaTypes.has(seg?.type ?? '')) {
                     return true
                 }
@@ -1021,7 +1032,7 @@ function getMsg(message_id: string, filter: boolean = false) {
     return null
 }
 
-function downloadFile(fileData: MsgItemElem, message_id: string) {
+function downloadFile(fileData: RenderedMessageSegment, message_id: string) {
     let name = authStore.jsonMap.file_download?.private_name
     if(chatStore.chatInfo.show.type == 'group') {
         name = authStore.jsonMap.file_download?.name
@@ -1030,7 +1041,7 @@ function downloadFile(fileData: MsgItemElem, message_id: string) {
         file_id: fileData.file_id,
         group_id: chatStore.chatInfo.show.type == 'group' ? chatStore.chatInfo.show.id : undefined,
     },
-        'downloadFile_' + message_id + '_' + btoa(encodeURIComponent(fileData.name ?? fileData.file_name)),
+        'downloadFile_' + message_id + '_' + btoa(encodeURIComponent(fileData.name ?? fileData.file_name ?? 'file')),
     )
 }
 
@@ -1050,9 +1061,9 @@ function textClick(event: Event) {
 }
 
 function loadFileBase(
-    fileData: MsgItemElem,
+    fileData: RenderedMessageSegment,
     name: string,
-    message_id: StringifyOptions,
+    message_id: string,
 ) {
     const ext = name.split('.').pop()
     const msg = chatStore.messageList.find(
@@ -1065,7 +1076,7 @@ function loadFileBase(
             'txt', 'md',
         ]
         if (list.includes(ext) && msg) {
-            msg.fileView = {}
+            msg.fileView = { ext, url: '' }
             let dlName = authStore.jsonMap.file_download?.private_name
             if(chatStore.chatInfo.show.type == 'group') {
                 dlName = authStore.jsonMap.file_download?.name
@@ -1099,7 +1110,7 @@ function getTxtUrl(view: { url: string; txt?: string }) {
 
 function hasCard() {
     let hasCard = false
-    data.message.forEach((item: MsgItemElem) => {
+    data.message.forEach((item: RenderedMessageSegment) => {
         if (item.type === 'json' || item.type === 'xml') {
             hasCard = true
         }
@@ -1109,7 +1120,7 @@ function hasCard() {
 
 function hasMarkdown() {
     let hasMarkdown = false
-    data.message.forEach((item: MsgItemElem) => {
+    data.message.forEach((item: RenderedMessageSegment) => {
         if (item.type === 'markdown') {
             hasMarkdown = true
         }
@@ -1202,7 +1213,7 @@ function sendPlay(info: MusicInfo) {
 
 function openMerge(){
     const seg = data.message[0]
-    if (!seg.content) {
+    if (!seg || !seg.content || typeof seg.content === 'string') {
         new PopInfo().add(PopType.ERR, $t('合并转发解析失败'))
         return
     }
@@ -1227,7 +1238,7 @@ function openMerge(){
                 imgList.push({
                     index: index,
                     message_id: item.message_id,
-                    img_url: msg.url,
+                    img_url: msg.url ?? '',
                 })
                 index++
             }
@@ -1238,7 +1249,7 @@ function openMerge(){
     chatStore.mergeMsgStack.push(mergeData)
 }
 
-function isFace(item: MsgItemElem) {
+function isFace(item: RenderedMessageSegment) {
     if (item.asface) return true
     else if (item.subType == 7) return true
     else if (item.subType == 1) return true
@@ -1263,19 +1274,20 @@ onMounted(() => {
         () => {
             senderInfo.value =
                 chatStore.chatInfo.info.group_members.filter(
-                    (item: MsgItemElem) => {
+            (item: RenderedMessageSegment) => {
                         return item.user_id == data.sender.user_id
                     },
                 )[0] ?? null
         },
     )
     senderInfo.value = chatStore.chatInfo.info.group_members.filter(
-        (item: MsgItemElem) => {
+        (item: RenderedMessageSegment) => {
             return item.user_id == data.sender.user_id
         },
     )[0] ?? null
     for (let i = 0; i < data.message.length; i++) {
         const item = data.message[i]
+        if (!item) continue
         if(item.type == 'text') {
             parseText(i)
         }

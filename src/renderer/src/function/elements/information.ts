@@ -176,6 +176,8 @@ export interface IncomingMessageSegment extends Record<string, unknown> {
     summary?: string
     size?: number
     file_size?: number
+    subType?: number
+    asface?: boolean
     data?: unknown
     content?: IncomingMessageElem[]
 }
@@ -222,16 +224,90 @@ export function isIncomingMessage(value: unknown): value is IncomingMessageElem 
 
 export interface MsgItemElem {
     type?: string
-    // Legacy extension fields are validated by the OneBot schema before use.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any
+    /** Legacy extension fields are narrowed at each protocol/rendering boundary. */
+    [key: string]: unknown
+}
+
+export interface RenderedMessageSegment extends Record<string, unknown> {
+    type?: string
+    text?: string
+    id?: string | number
+    file?: string
+    file_id?: string
+    file_name?: string
+    name?: string
+    url?: string
+    qq?: string | number
+    summary?: string
+    size?: number
+    file_size?: number
+    subType?: number
+    asface?: boolean
+    data?: MessageSegmentData | string
+    content?: RenderedMessage[] | string
+}
+
+export interface MessageSegmentData extends Record<string, unknown> {
+    text?: string
+    file?: string
+    file_id?: string
+    file_name?: string
+    name?: string
+    url?: string
+    id?: string | number
+    size?: number
+    summary?: string
+}
+
+export interface RenderedMessageSender extends IncomingMessageSender {
+    user_id: number
+    nickname?: string
+    card?: string
+    role?: string
+    title?: string
+}
+
+/** Message shape consumed by the renderer after protocol normalization. */
+export interface RenderedMessage extends Record<string, unknown> {
+    type?: string
+    message: RenderedMessageSegment[]
+    sender: RenderedMessageSender
+    message_id: string
+    fake_message_id?: string | number
+    post_type?: string
+    message_type?: string
+    detail_type?: string
+    sub_type?: string
+    notice_type?: string
+    time: number
+    user_id?: string | number
+    group_id?: string | number
+    target_id?: string | number
+    self_id?: string | number
+    message_seq?: number
+    seq?: number
+    nickname?: string
+    card?: string
+    remark?: string
+    group_name?: string
+    raw_message?: string
+    raw_msg?: string
+    revoke?: boolean
+    fake_msg?: boolean
+    atme?: boolean
+    atall?: boolean
+    color?: string
+    _from_local_db?: boolean
+    emojis?: Record<string, number[]>
+    emoji_like?: Array<{ emoji_id: number; count: number }>
+    fileView?: { ext: string; url: string; txt?: string }
 }
 
 export interface MergeStackData {
-    messageList: MsgItemElem[]      // 消息列表
+    messageList: RenderedMessage[]      // 消息列表
     imageList: Array<{ img_url: string }>        // 图片列表
     placeCache: number      // 位置缓存
-    forwardMsg: MsgItemElem         // 原合并转发消息
+    forwardMsg: RenderedMessage         // 原合并转发消息
 }
 
 export interface MenuEventData {

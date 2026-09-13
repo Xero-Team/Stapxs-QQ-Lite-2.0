@@ -1,4 +1,4 @@
-import { BaseChatInfoElem, ChatInfoElem, JinMessageElem, MergeStackData, MsgItemElem } from '@renderer/function/elements/information'
+import { BaseChatInfoElem, ChatInfoElem, JinMessageElem, MergeStackData, RenderedMessage } from '@renderer/function/elements/information'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -23,16 +23,16 @@ export function createEmptyChatInfo(show: BaseChatInfoElem = { type: '', id: 0, 
 export const useChatStore = defineStore('chat', () => {
     const chatInfo = ref<ChatInfoElem>(createEmptyChatInfo())
 
-    const messageList = ref<MsgItemElem[]>([])
+    const messageList = ref<RenderedMessage[]>([])
     const mergeMsgStack = ref<MergeStackData[]>([])
-    const mergeMessageList = ref<MsgItemElem[] | undefined>(undefined)
+    const mergeMessageList = ref<RenderedMessage[] | undefined>(undefined)
     const mergeMessageImgList = ref<Array<{ img_url: string }> | undefined>(undefined)
 
     function clearMessages(): void {
         messageList.value.splice(0, messageList.value.length)
     }
 
-    function setMessages(messages: MsgItemElem[]): void {
+    function setMessages(messages: RenderedMessage[]): void {
         messageList.value.splice(0, messageList.value.length, ...messages)
     }
 

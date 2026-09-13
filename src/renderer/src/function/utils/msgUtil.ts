@@ -458,7 +458,7 @@ export function sendMsgRaw(
         } else {
             showMsg.user_id = chatStore.chatInfo.show.id
         }
-        chatStore.messageList = chatStore.messageList.concat([showMsg as unknown as MsgItemElem])
+                chatStore.messageList = chatStore.messageList.concat([showMsg as unknown as import('@renderer/function/elements/information').RenderedMessage])
 
         // 发送方不一定会上报自身消息事件，先用预发送消息同步会话预览。
         const sessionId = Number(String(id).split('/')[0])

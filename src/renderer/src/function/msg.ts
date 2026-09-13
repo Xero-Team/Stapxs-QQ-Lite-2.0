@@ -47,9 +47,9 @@ import {
     GroupMemberInfoElem,
     UserFriendElem,
     UserGroupElem,
-    MsgItemElem,
     IncomingMessageElem,
     IncomingMessageSegment,
+    RenderedMessage,
     isIncomingMessage,
     type Session,
 } from './elements/information'
@@ -458,7 +458,12 @@ const noticeFunctions = {
     group_msg_emoji_like: (_: string, msg: MessagePayload) => {
         const chatStore = useChatStore()
         const msgId = msg.message_id
-        const emojiList = msg.likes
+        const emojiList = Array.isArray(msg.likes)
+            ? msg.likes.filter((item): item is { emoji_id: number; count: number } => {
+                const value = asMessagePayload(item)
+                return value !== undefined && Number.isFinite(Number(value.emoji_id)) && Number.isFinite(Number(value.count))
+            }).map((item) => ({ emoji_id: Number(item.emoji_id), count: Number(item.count) }))
+            : []
         // 寻找消息
         chatStore.messageList.forEach((item) => {
             if (item.message_id === msgId) {
@@ -491,7 +496,7 @@ const noticeFunctions = {
 
         // 只有在当前群才会显示
         if (groupId == chatStore.chatInfo.show.id)
-            chatStore.messageList.push(msg as MsgItemElem)
+            chatStore.messageList.push(msg as unknown as RenderedMessage)
     },
 
     /**
@@ -578,7 +583,7 @@ const noticeFunctions = {
             // 插入系统消息
             msg.str = str
             msg.pokeMe = userInfo[1]?.isMe ?? false
-            chatStore.messageList.push(msg as MsgItemElem)
+            chatStore.messageList.push(msg as unknown as RenderedMessage)
         }
     },
 
@@ -609,7 +614,7 @@ const noticeFunctions = {
                     name: user.nickname,
                 })
                 msg.str = str
-                chatStore.messageList.push(msg as MsgItemElem)
+                chatStore.messageList.push(msg as unknown as RenderedMessage)
             }
         }
     },
@@ -1010,7 +1015,7 @@ const msgFunctions = {
             // 去 messagelist 里找到这条消息
             chatStore.messageList.forEach((item) => {
                 if (item.message_id == messageId) {
-                    item.message_id = msg.message_id
+                    item.message_id = String(msg.message_id ?? '')
                     item.fake_msg = false
                     return
                 }
@@ -1240,8 +1245,9 @@ const msgFunctions = {
                         url = 'https' + url.substring(url.indexOf('://'))
                     }
                 }
+                msg.fileView ??= { ext: '', url: '' }
                 msg.fileView.url = url
-                msg.fileView.ext = ext
+                msg.fileView.ext = ext ?? ''
             }
         }
     },
@@ -1298,7 +1304,7 @@ const msgFunctions = {
                 }, 5000)
             } else {
                 // 列表内最近的一条 fake_msg（倒序查找）
-                let fakeMsg: MsgItemElem | null = null
+                let fakeMsg: RenderedMessage | null = null
                 for (let i = chatStore.messageList.length - 1; i > 0; i--) {
                     const msg = chatStore.messageList[i]
                     if (!msg) continue
@@ -1321,9 +1327,10 @@ const msgFunctions = {
                             const replacement = trueMsg[0]
                             if (!replacement) return
                             fakeMsg.message = replacement.message
-                            fakeMsg.raw_message = replacement.raw_message
+                            if (replacement.raw_message !== undefined) fakeMsg.raw_message = replacement.raw_message
+                            else delete fakeMsg.raw_message
                             fakeMsg.time = replacement.time
-                            fakeMsg.fake_msg = undefined
+                            delete fakeMsg.fake_msg
                             fakeMsg.revoke = false
                         }
                     })
@@ -1920,6 +1927,25 @@ function normalizeNewIncomingMessage(data: MessagePayload): MessagePayload[] {
     return list
 }
 
+function toRenderedMessage(msg: MessagePayload): RenderedMessage {
+    const sender = asMessagePayload(msg.sender)
+    const normalizedSender = {
+        ...(sender ?? {}),
+        user_id: Number(sender?.user_id ?? msg.user_id ?? 0),
+    }
+    const segments = Array.isArray(msg.message)
+        ? msg.message.filter((item): item is MessagePayload => asMessagePayload(item) !== undefined)
+            .map((item) => item as unknown as import('./elements/information').RenderedMessageSegment)
+        : []
+    return {
+        ...msg,
+        message_id: String(msg.message_id ?? ''),
+        time: Number(msg.time ?? 0),
+        sender: normalizedSender,
+        message: segments,
+    } as unknown as RenderedMessage
+}
+
 function insertHistorySegmentAtAnchor(
     current: MessagePayload[],
     anchorMsgId: string,
@@ -2065,7 +2091,7 @@ function mergeMessagesByIdAndTime(current: MessagePayload[], incoming: MessagePa
 
 function replaceMessageListInPlace(next: MessagePayload[]) {
     const chatStore = useChatStore()
-    chatStore.messageList.splice(0, chatStore.messageList.length, ...(next as unknown as MsgItemElem[]))
+    chatStore.messageList.splice(0, chatStore.messageList.length, ...(next as unknown as RenderedMessage[]))
 }
 
 export async function getMessageList(list: MessagePayload[] | undefined) {
@@ -2093,7 +2119,7 @@ export async function getMessageList(list: MessagePayload[] | undefined) {
  * 消息预处理
  * @param msg 要处理的消息
  */
-async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
+async function msgPreprocess(msg: MessagePayload): Promise<RenderedMessage> {
     let segments: MessageSegmentPayload[] = Array.isArray(msg.message)
         ? msg.message.map(asMessagePayload).filter((item): item is MessageSegmentPayload => item !== undefined)
         : []
@@ -2151,7 +2177,7 @@ async function msgPreprocess(msg: MessagePayload): Promise<MessagePayload> {
     }
     msg.message = filter
     //#endregion
-    return msg
+    return toRenderedMessage(msg)
 }
 
 function revokeMsg(_: string, msg: MessagePayload) {
@@ -2190,7 +2216,7 @@ function revokeMsg(_: string, msg: MessagePayload) {
 
     // 显示撤回提示
     const list = chatStore.messageList
-    list.splice(msgIndex + 1, 0, msg as unknown as MsgItemElem)
+    list.splice(msgIndex + 1, 0, msg as unknown as RenderedMessage)
 }
 
 let _qed_try_times = 0
@@ -2228,7 +2254,7 @@ function newMsg(_: string, rawData: MessagePayload) {
 
         // 预发送消息填充 ============================================
         // 列表内最近的一条 fake_msg（倒序查找）
-        let fakeMsg: MsgItemElem | null = null
+        let fakeMsg: RenderedMessage | null = null
         for (let i = chatStore.messageList.length - 1; i > 0; i--) {
             const msg = chatStore.messageList[i]
             if (!msg) continue
@@ -2251,9 +2277,10 @@ function newMsg(_: string, rawData: MessagePayload) {
                     const replacement = trueMsg[0]
                     if (!replacement) return
                     fakeMsg.message = replacement.message
-                    fakeMsg.raw_message = replacement.raw_message
+                    if (replacement.raw_message !== undefined) fakeMsg.raw_message = replacement.raw_message
+                    else delete fakeMsg.raw_message
                     fakeMsg.time = replacement.time
-                    fakeMsg.fake_msg = undefined
+                    delete fakeMsg.fake_msg
                     fakeMsg.revoke = false
                 }
             })

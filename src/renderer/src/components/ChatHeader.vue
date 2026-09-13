@@ -34,11 +34,11 @@
 import { computed } from 'vue'
 import { i18n } from '@renderer/main'
 import { getTrueLang } from '@renderer/function/utils/systemUtil'
-import type { ChatInfoElem, MsgItemElem } from '@renderer/function/elements/information'
+import type { ChatInfoElem, RenderedMessage } from '@renderer/function/elements/information'
 
 const props = defineProps<{
     chat: ChatInfoElem
-    list: MsgItemElem[]
+    list: RenderedMessage[]
 }>()
 
 defineEmits<{

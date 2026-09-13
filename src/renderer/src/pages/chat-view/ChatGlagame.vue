@@ -59,7 +59,7 @@ import {
 } from '@renderer/function/option'
 
 import Chat from '../Chat.vue'
-import type { ChatInfoElem, MsgItemElem } from '@renderer/function/elements/information'
+import type { ChatInfoElem, RenderedMessage, RenderedMessageSegment } from '@renderer/function/elements/information'
 
 defineOptions({ name: 'ChatGlagame' })
 
@@ -72,7 +72,7 @@ const chatStore = useChatStore()
 
 const props = defineProps<{
     chat: ChatInfoElem
-    list: MsgItemElem[]
+    list: RenderedMessage[]
     imgView: unknown
 }>()
 
@@ -133,7 +133,7 @@ async function initChat() {
             // 获取 20 条历史消息
             const historyMessages = props.list.slice(-20)
             let msgStrs = ''
-            historyMessages.forEach((msg: MsgItemElem) => {
+        historyMessages.forEach((msg: RenderedMessage) => {
                 msgStrs += getMessageDetail(msg) + '\n'
             })
             getCurrentMessages().push({
@@ -280,7 +280,7 @@ async function onRobotClick() {
     }
 }
 
-function getMessageDetail(chatMessage: MsgItemElem) {
+function getMessageDetail(chatMessage: RenderedMessage) {
     return JSON.stringify({
         id: chatMessage.messageId,
         time: getViewTime(chatMessage.time),
@@ -289,16 +289,18 @@ function getMessageDetail(chatMessage: MsgItemElem) {
             nickname: chatMessage.sender.nickname,
         },
         content: getMsgRawTxt(chatMessage),
-        replyMessages: chatMessage.message?.map((msg: MsgItemElem) => {
+        replyMessages: chatMessage.message?.map((msg: RenderedMessageSegment) => {
             if(msg.type === 'reply') {
                 return msg.id
             }
-        }) || [],
-        mentionUsers: chatMessage.message?.map((msg: MsgItemElem) => {
+            return undefined
+        }).filter((id): id is string | number => id !== undefined) || [],
+        mentionUsers: chatMessage.message?.map((msg: RenderedMessageSegment) => {
             if(msg.type === 'at') {
                 return msg.qq
             }
-        }) || [],
+            return undefined
+        }).filter((id): id is string | number => id !== undefined) || [],
     })
 }
 
