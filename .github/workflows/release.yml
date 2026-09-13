@@ -120,6 +120,8 @@ jobs:
     release:
         name: 发布构建结果
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         needs:
             - init
             - build-root-web
@@ -127,6 +129,10 @@ jobs:
             - build-tauri
             - build-android
         steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
             # 下载构建结果
             - name: Download Artifacts
               id: download-artifact
@@ -162,6 +168,6 @@ jobs:
                       - 构建时间：${{ github.event.head_commit.timestamp }}
                       - 构建提交：${{ github.event.head_commit.id }}
                       - 构建分支：${{ github.event.head_commit.tree_id }}
-                  draft: false
-                  prerelease: false
-                  token: ${{ secrets.ACCESS_TOKEN }}
+                   draft: false
+                   prerelease: false
+                   token: ${{ secrets.GITHUB_TOKEN }}
