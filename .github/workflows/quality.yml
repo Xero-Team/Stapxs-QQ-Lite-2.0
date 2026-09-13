@@ -64,6 +64,8 @@ jobs:
                   exit 1
             - name: Playwright smoke
               run: bash scripts/playwright-smoke.sh
+            - name: Settings migration UI smoke
+              run: bash scripts/playwright-settings-migration-smoke.sh
             - name: Upload browser runtime metrics
               if: always()
               uses: actions/upload-artifact@v4

@@ -3,6 +3,7 @@
 ## 2026-09-13 incremental evidence
 
 - Runtime-scoped Pinia state now has typed reset actions for authentication, contacts, connections, chat messages, Qzone, stickers, and session history. `resetRimtime(true)` delegates to those actions, and history/terminal/chat message-list clearing uses the Chat store mutation API. Web typecheck, browser harness typecheck, `check`, production build, Tauri lint, 79 contract tests, repository policy, SBOM/license/CSP metadata, and 90-file artifact checksum verification pass after this change.
+- Settings migration UI smoke is now reproducible through `scripts/playwright-settings-migration-smoke.sh`: a synthetic legacy serialized option is copied into the rollback-safe store, the legacy key is removed, and the Settings checkbox remains enabled after a fresh reload. The local Chromium run passed against the production preview; the broader live reconnect, authentication failure, media receive/download, and native UI flows remain open.
 
 ## 2026-09-12
 
