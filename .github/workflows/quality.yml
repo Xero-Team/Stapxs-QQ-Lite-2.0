@@ -29,6 +29,8 @@ jobs:
               run: yarn install --immutable --mode=skip-build
             - name: Check patch whitespace
               run: git diff --check
+            - name: Verify repository policy
+              run: yarn verify:repository-policy
             - name: TypeScript strict check
               run: yarn typecheck
             - name: Browser harness strict check

@@ -26,6 +26,7 @@
     "data:migrate": "node ./scripts/migrate-local-data.mjs",
     "verify:artifacts": "bash scripts/verify-artifacts.sh",
     "generate:artifact-checksums": "bash scripts/generate-artifacts-checksum.sh",
+    "verify:repository-policy": "node ./scripts/verify-repository-policy.mjs",
     "verify:release-metadata": "node ./scripts/verify-release-metadata.mjs",
     "update:icon": "npx @capacitor/assets generate --assetPath 'src/mobile/_assets' --iosProject 'src/mobile/ios/App' --androidProject 'src/mobile/android' --android --ios",
     "update:version": "node ./scripts/update-version.cjs android ios",
