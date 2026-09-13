@@ -23,6 +23,9 @@ export default [
             'src/renderer/public/**',
             'src/renderer/src/assets/**',
             'src/mobile/**',
+            // Rust build output contains binary-packed generated JavaScript
+            // assets; it is never source and must not be parsed by ESLint.
+            'src/tauri/target/**',
             'ssqq.capacitor-onebot-connector/**',
             'ssqq.napcat-plugin/**',
         ],
