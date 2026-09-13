@@ -35,7 +35,7 @@
     {
       "type": "library",
       "name": "@capacitor/android",
-      "version": "8.3.1",
+      "version": "8.5.2",
       "licenses": [
         {
           "license": {
@@ -43,7 +43,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/android@8.3.1",
+      "purl": "pkg:npm/@capacitor/android@8.5.2",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -54,7 +54,7 @@
     {
       "type": "library",
       "name": "@capacitor/app",
-      "version": "8.1.0",
+      "version": "8.1.1",
       "licenses": [
         {
           "license": {
@@ -62,7 +62,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/app@8.1.0",
+      "purl": "pkg:npm/@capacitor/app@8.1.1",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -92,7 +92,7 @@
     {
       "type": "library",
       "name": "@capacitor/cli",
-      "version": "8.3.1",
+      "version": "8.5.2",
       "licenses": [
         {
           "license": {
@@ -100,7 +100,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/cli@8.3.1",
+      "purl": "pkg:npm/@capacitor/cli@8.5.2",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -111,7 +111,7 @@
     {
       "type": "library",
       "name": "@capacitor/core",
-      "version": "8.3.1",
+      "version": "8.5.2",
       "licenses": [
         {
           "license": {
@@ -119,7 +119,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/core@8.3.1",
+      "purl": "pkg:npm/@capacitor/core@8.5.2",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -130,7 +130,7 @@
     {
       "type": "library",
       "name": "@capacitor/ios",
-      "version": "8.3.1",
+      "version": "8.5.2",
       "licenses": [
         {
           "license": {
@@ -138,7 +138,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/ios@8.3.1",
+      "purl": "pkg:npm/@capacitor/ios@8.5.2",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -149,7 +149,7 @@
     {
       "type": "library",
       "name": "@capacitor/keyboard",
-      "version": "8.0.3",
+      "version": "8.0.5",
       "licenses": [
         {
           "license": {
@@ -157,7 +157,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/keyboard@8.0.3",
+      "purl": "pkg:npm/@capacitor/keyboard@8.0.5",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -168,7 +168,7 @@
     {
       "type": "library",
       "name": "@capacitor/local-notifications",
-      "version": "8.0.2",
+      "version": "8.3.1",
       "licenses": [
         {
           "license": {
@@ -176,7 +176,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/local-notifications@8.0.2",
+      "purl": "pkg:npm/@capacitor/local-notifications@8.3.1",
       "properties": [
         {
           "name": "xero:dependency-scope",
@@ -187,7 +187,7 @@
     {
       "type": "library",
       "name": "@capacitor/status-bar",
-      "version": "8.0.2",
+      "version": "8.0.3",
       "licenses": [
         {
           "license": {
@@ -195,7 +195,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@capacitor/status-bar@8.0.2",
+      "purl": "pkg:npm/@capacitor/status-bar@8.0.3",
       "properties": [
         {
           "name": "xero:dependency-scope",
