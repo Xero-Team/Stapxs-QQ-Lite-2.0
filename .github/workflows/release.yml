@@ -40,6 +40,9 @@ jobs:
         needs:
             - init
             - build-root-web
+        permissions:
+            contents: read
+            packages: write
 
         uses: ./.github/workflows/build-docker.yml
         with:
