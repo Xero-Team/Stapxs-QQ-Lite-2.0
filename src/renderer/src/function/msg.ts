@@ -60,7 +60,13 @@ import { dbRevokeMessage, saveMessagesWithSideEffects } from './utils/localHisto
 import { addDownloadTask, completeUploadTask } from '@renderer/components/FileManager.vue'
 import { refreshFavicon } from './favicon'
 import { Img } from './model/img'
-import { ensurePinyinLoaded, getPinyin, isPinyinReady } from './utils/pinyin'
+import {
+    buildPinyinForContacts,
+    hydrateContactPinyinLater,
+    resolvePinyinFirstChar,
+    sortContactListByPinyin,
+} from './utils/contactPinyin'
+import { ensurePinyinLoaded, isPinyinReady } from './utils/pinyin'
 import { createLoginInfo, useAuthStore, type LoginInfo } from '@renderer/state/auth'
 import { useContactStore, type SystemNotice } from '@renderer/state/contact'
 import { useChatStore } from '@renderer/state/chat'
@@ -197,81 +203,6 @@ const groupPreviewHydrator = (() => {
         },
     }
 })()
-
-function resolveContactPinyinName(item: UserFriendElem | UserGroupElem) {
-    if ((item as UserFriendElem).group_id) {
-        return (item as UserFriendElem).group_name ?? ''
-    }
-    return `${(item as UserGroupElem).nickname ?? ''},${(item as UserGroupElem).remark ?? ''}`
-}
-
-function resolvePinyinFirstChar(value: string) {
-    return getPinyin(value)
-        .main
-        .at(0)
-        ?.substring(0, 1)
-        .toUpperCase() ?? ' '
-}
-
-function sortContactListByPinyin<T extends UserFriendElem | UserGroupElem>(list: T[]) {
-    list.sort((a, b) => {
-        if (a.py_start && b.py_start) {
-            return a.py_start.charCodeAt(0) - b.py_start.charCodeAt(0)
-        }
-        return 0
-    })
-}
-
-function buildPinyinForContacts(
-    list: (UserFriendElem | UserGroupElem)[],
-    startIndex = 0,
-    onDone?: () => void,
-) {
-    if (!isPinyinReady()) {
-        onDone?.()
-        return
-    }
-
-    const batchSize = 100
-    const endIndex = Math.min(startIndex + batchSize, list.length)
-
-    for (let index = startIndex; index < endIndex; index++) {
-        const item = list[index]
-        if (!item) continue
-        item.py_name = getPinyin(resolveContactPinyinName(item))
-        item.py_start = item.py_name.main.at(0)?.substring(0, 1).toUpperCase() ?? ' '
-    }
-
-    if (endIndex >= list.length) {
-        onDone?.()
-        return
-    }
-
-    setTimeout(() => {
-        buildPinyinForContacts(list, endIndex, onDone)
-    }, 0)
-}
-
-function hydrateContactPinyinLater(list: (UserFriendElem | UserGroupElem)[]) {
-    const contactStore = useContactStore()
-
-    const applyHydration = () => {
-        buildPinyinForContacts(list, 0, () => {
-            sortContactListByPinyin(list)
-            contactStore.userList = [...contactStore.userList]
-        })
-    }
-
-    if (isPinyinReady()) {
-        applyHydration()
-        return
-    }
-
-    void ensurePinyinLoaded().then((loaded) => {
-        if (!loaded) return
-        applyHydration()
-    })
-}
 
 function clearMetaEventWatchdog() {
     const connectionStore = useConnectionStore()

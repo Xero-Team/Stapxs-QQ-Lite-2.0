@@ -2,6 +2,11 @@
 
 ## 2026-09-13 incremental evidence
 
+- Contact pinyin derivation and deferred batch hydration now live in
+  `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
+  protocol/event callers. The extraction preserves the existing 100-item
+  batching, readiness check, sorting, and store refresh behavior. Renderer
+  typecheck, focused ESLint, contract tests, and the production build pass.
 - Runtime-scoped Pinia state now has typed reset actions for authentication, contacts, connections, chat messages, Qzone, stickers, and session history. `resetRimtime(true)` delegates to those actions, and history/terminal/chat message-list clearing uses the Chat store mutation API. Web typecheck, browser harness typecheck, `check`, production build, Tauri lint, 80 contract tests, repository policy, SBOM/license/CSP metadata, and 90-file artifact checksum verification pass after this change.
 - Browser authentication-failure UI coverage is now reproducible through `scripts/playwright-auth-failure-smoke.sh`: a synthetic protocol-level WebSocket rejection displays the connection-failure notification, restores the login form and enabled connect button, and records zero external requests and page errors. The quality workflow runs this smoke with the existing pinned Playwright CLI; live credentials and native authentication flows remain open.
 - Rendered message boundaries now use the shared `RenderedMessage`, `RenderedMessageSegment`, `RenderedMessageSender`, and `MessageSegmentData` types across the message list, chat composer, body/header rendering, history, terminal, danmaku, and Glagame views. `MsgItemElem` remains a compatibility type with an `unknown` index signature and no explicit application `any`; vendored QFace utility code is unchanged.
@@ -124,19 +129,21 @@ checks.
 snapshot is retained for comparison; the newer direct dependency refresh and
 current result are recorded below.
 
-## Dependency audit refresh (2026-09-13)
+## Dependency audit refresh (2026-09-13, latest local run)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
 `markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, and Vitest 3.2.6. A fresh
-recursive audit still exits 1 with 137 advisory entries across 54 packages
-(2 critical, 79 high, 50 moderate, 6 low). A subsequent full recursive run
-using the repository Yarn 4.12.0 entrypoint reports 112 advisory entries:
-2 critical, 79 high, 25 moderate, and 6 low. Remaining exposure is primarily
-transitive build tooling (`sharp`, `tar`, `postcss`, `nanoid`, Rollup), plus
-Vitest's current transitive mocker advisory and deprecated Vue I18n 10. These
-upgrades require compatibility work and remain release blockers. Contract
-tests pass after the dependency refresh; Yarn's optional `sharp` native build
-is still environment-dependent.
+recursive audit using the repository Yarn 4.12.0 entrypoint exits 1 with 132
+advisory entries across the current dependency graph: 2 critical, 79 high,
+46 moderate, and 6 low. The report includes repeated package/version paths, so
+the count is an advisory-path count rather than a unique CVE count. Remaining
+exposure is primarily transitive build tooling (`sharp`, `tar`, `postcss`,
+`nanoid`, Rollup), `@xmldom/xmldom`, the Vitest mocker range, `underscore`
+through `jsonpath`, and the deprecated Vue I18n 10 maintenance status.
+Dependency upgrades and application impact review are still required before
+enabling the audit as a passing release gate. Contract tests pass after the
+dependency refresh; Yarn's optional `sharp` native build remains
+environment-dependent.
 
 ## Lint verification (2026-09-13)
 
