@@ -430,8 +430,55 @@ import JsonSegComp from './msg-component/JsonSegComp.vue'
 import XmlSegComp from './msg-component/XmlSegComp.vue'
 import VoiceMsg from './VoiceMsg.vue'
 import { addMusic, MusicInfo } from './MusicPlayer.vue'
+import { z } from 'zod'
 
 type Msg = MsgItemElem
+const genericLinkPreviewSchema = z.object({
+    type: z.undefined().optional(),
+    site: z.string(),
+    title: z.string(),
+    desc: z.string(),
+    img: z.string().url().optional(),
+    url: z.string().url().optional(),
+})
+const bilibiliLinkPreviewSchema = z.object({
+    type: z.literal('bilibili'),
+    url: z.string().url(),
+    data: z.object({
+        title: z.string(),
+        desc: z.string(),
+        pic: z.string().url(),
+        public: z.number(),
+        owner: z.object({ face: z.string().url(), name: z.string() }),
+        stat: z.object({
+            view: z.string(),
+            coin: z.string(),
+            favorite: z.string(),
+            like: z.string(),
+        }),
+    }),
+})
+const musicLinkPreviewSchema = z.object({
+    type: z.literal('music163'),
+    data: z.object({
+        id: z.string(),
+        play_link: z.string().url(),
+        cover: z.string().url(),
+        cover_light: z.boolean(),
+        info: z.object({
+            name: z.string(),
+            author: z.array(z.string()),
+            time: z.number(),
+            free: z.boolean().optional(),
+        }),
+    }),
+})
+const linkPreviewSchema = z.union([
+    genericLinkPreviewSchema,
+    bilibiliLinkPreviewSchema,
+    musicLinkPreviewSchema,
+])
+type LinkPreview = z.infer<typeof linkPreviewSchema>
 type IUser = {
     user_id: number
     nickname?: string
@@ -524,7 +571,7 @@ const isDev = import.meta.env.DEV
 const msgBodyClass = ref('message-body')
 const isDebugMsg = Option.get('debug_msg')
 const linkViewStyle = ref('')
-const pageViewInfo = ref(undefined as { [key: string]: any } | undefined)
+const pageViewInfo = ref<LinkPreview>()
 const gotLink = ref(false)
 const senderInfo = ref<IUser | null>(null)
 const trueLang = getTrueLang()
@@ -866,12 +913,15 @@ function loadLinkPreview(domain: string, res: Record<string, unknown>) {
                     title: typeof res['og:title'] === 'string' ? res['og:title'] : '',
                     desc: typeof res['og:description'] === 'string' ? res['og:description'] : '',
                     img: imgUrl,
-                    link: typeof res['og:url'] === 'string' ? res['og:url'] : undefined,
+                    url: typeof res['og:url'] === 'string' ? res['og:url'] : undefined,
                 }
-                pageViewInfo.value = pageData
+                const parsed = genericLinkPreviewSchema.safeParse(pageData)
+                if (parsed.success) pageViewInfo.value = parsed.data
             }
         } else {
-            pageViewInfo.value = res
+            const parsed = linkPreviewSchema.safeParse(res)
+            if (parsed.success) pageViewInfo.value = parsed.data
+            else logger.debug('丢弃无效链接预览响应')
         }
     }
 }
@@ -889,8 +939,8 @@ function linkViewPicFin() {
     }
 }
 function linkViewPicErr() {
-    if(pageViewInfo.value)
-        pageViewInfo.value.img = undefined
+    const preview = pageViewInfo.value
+    if (preview && preview.type === undefined) preview.img = undefined
 }
 
 function hiddenUserInfo() {

@@ -83,10 +83,7 @@ export const linkView = {
                             name: jp.query(getData['detail'], '$..name')[0],
                             author: jp.query(getData['detail'], '$..ar[*].name'),
                             time: jp.query(getData['detail'], '$..dt')[0] / 1000,
-                            free: jp.query(getData['url'], '$..freeTrialInfo')[0] != null ? {
-                                start: jp.query(getData['url'], '$..freeTrialInfo')[0].start,
-                                end: jp.query(getData['url'], '$..freeTrialInfo')[0].end,
-                            } : null
+                            free: jp.query(getData['url'], '$..freeTrialInfo')[0] != null || undefined,
                         }
                     }
                 }
