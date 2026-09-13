@@ -18,3 +18,8 @@ The Android workflow requires a runner with the Android SDK and Java 21. If that
 produce an APK/AAB, the job fails instead of publishing a partial mobile release. Platform builds
 have not been executed locally on this Linux workstation; the GitHub Actions matrix is the
 authoritative cross-platform verification path.
+
+Each Web build also publishes `build-metrics.json`, containing artifact count, raw and gzip sizes,
+the ten largest files, and the build runner's Node/platform identity. Its runtime fields remain
+`null` until a browser or native platform job measures startup time and resident memory; a release
+must not treat missing runtime measurements as passing performance evidence.

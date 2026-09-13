@@ -28,12 +28,19 @@ jobs:
               run: yarn install --immutable --mode=skip-build
             - name: 构建
               run: yarn build
+            - name: 记录构建指标
+              run: node scripts/measure-build-metrics.mjs dist build-metrics.json
             - name: 压缩构建产物
               env:
                   VERSION: ${{ inputs.version }}
               run: zip -r "Xero.QQ.Lite-${VERSION}-web.zip" dist
+            - name: 生成 Web 产物校验和
+              run: sha256sum "Xero.QQ.Lite-${{ inputs.version }}-web.zip" build-metrics.json > SHA256SUMS
             - name: 上传构建产物
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ inputs.version }}-web
-                  path: Xero.QQ.Lite-${{ inputs.version }}-web.zip
+                  path: |
+                      Xero.QQ.Lite-${{ inputs.version }}-web.zip
+                      build-metrics.json
+                      SHA256SUMS
