@@ -111,6 +111,7 @@ jobs:
         uses: ./.github/workflows/build-mobile.yml
         with:
             version: ${{ needs.init.outputs.version }}
+        secrets: inherit
 
     # ========================= 发布构建结果 =========================
     release:

@@ -7,6 +7,11 @@ on:
                 description: "应用版本"
                 required: true
                 type: string
+        secrets:
+            KEYSTORE_PASSWORD:
+                required: false
+            KEYSTORE_ALIAS_PASSWORD:
+                required: false
 
 permissions:
     contents: read
@@ -36,12 +41,22 @@ jobs:
             - name: 安装依赖
               run: yarn install --immutable --mode=skip-build
             - name: 构建 Android
-              run: yarn build:android
+              env:
+                  KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+                  KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+              run: |
+                  if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEYSTORE_ALIAS_PASSWORD" ]; then
+                    yarn build:android
+                  else
+                    echo "No Android signing secrets; producing an unsigned release APK."
+                    yarn build:android:unsigned
+                  fi
             - name: 收集 Android 产物
               run: |
                   mkdir -p upload
                   find src/mobile/android -type f \( -name '*.apk' -o -name '*.aab' \) -exec cp {} upload/ \;
                   test -n "$(find upload -type f -print -quit)"
+                  node scripts/measure-artifact-metrics.mjs upload
                   find upload -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > upload/SHA256SUMS
             - name: 上传 Android 产物
               uses: actions/upload-artifact@v4
