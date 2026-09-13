@@ -6,10 +6,12 @@
   with numeric and string account IDs), including the message/media/reply/
   recall/reconnect flow implemented by the runner. No live credentials or
   native WebView behavior are implied by this result.
-- Android release build was started through `yarn build:android` and completed
-  Gradle dependency setup, but failed because no Android SDK is installed:
-  `SDK location not found` (no `ANDROID_HOME` and no
-  `src/mobile/android/local.properties`). No APK/AAB artifact is claimed.
+- Android release build now finds `/home/begonia/Android/Sdk` via
+  `src/mobile/android/local.properties` and installs missing platform/build
+  tools. It fails at `:capacitor-android:compileReleaseJavaWithJavac` because
+  the active JDK is Temurin 17 while the Capacitor 8 toolchain requires Java
+  21 (`error: invalid source release: 21`). No APK/AAB artifact is claimed;
+  CI already provisions Java 21.
 - Linux Tauri release compilation reaches the optimized Rust binary and emits
   deb/rpm staging artifacts, but AppImage bundling fails in the hosted
   `linuxdeploy` step (`failed to run linuxdeploy`). The native binary and deb/
