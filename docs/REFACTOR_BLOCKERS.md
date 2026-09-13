@@ -28,6 +28,12 @@
   tests, production build, Tauri lint, SBOM/license/CSP metadata, release
   metadata, and 90-file artifact checksums. Roll back with `yarn up
   pinia@^3.0.3` and remove the direct devtools peer if restoring the old graph.
+- `vite-plugin-vue-devtools` was upgraded independently from 7.6.4 to 8.2.1;
+  its Vite peer range now includes the project's Vite 7.3.6. Full Web/core
+  typecheck, browser harness typecheck, contract tests, production build,
+  Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file artifact
+  checksums pass. Roll back with `yarn up vite-plugin-vue-devtools@^7.6.4`;
+  the optional `sharp` postinstall remains environment-dependent.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
@@ -163,11 +169,11 @@ current result are recorded below.
 ## Dependency audit refresh (2026-09-13, latest local run)
 
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
-`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, Vitest 5.0.0, and the AI
-SDK pair listed above. A fresh recursive audit using the repository Yarn
-4.12.0 entrypoint exits 1 with 128
-advisory paths across the current dependency graph: 2 critical, 79 high,
-42 moderate, and 5 low. The report includes repeated package/version paths, so
+`markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, Vitest 5.0.0, the AI SDK
+pair, and `vite-plugin-vue-devtools` 8.2.1. A fresh recursive audit using the
+repository Yarn 4.12.0 entrypoint exits 1 with 126 advisory paths across the
+current dependency graph: 2 critical, 77 high, 42 moderate, and 5 low. The
+report includes repeated package/version paths, so
 the count is an advisory-path count rather than a unique CVE count. Remaining
 exposure is primarily transitive build tooling (`sharp`, `tar`, `postcss`,
 `nanoid`, Rollup), `@xmldom/xmldom`, the Vitest mocker range, `underscore`

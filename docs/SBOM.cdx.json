@@ -1346,7 +1346,7 @@
     {
       "type": "library",
       "name": "vite-plugin-vue-devtools",
-      "version": "7.7.9",
+      "version": "8.2.1",
       "licenses": [
         {
           "license": {
@@ -1354,7 +1354,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vite-plugin-vue-devtools@7.7.9",
+      "purl": "pkg:npm/vite-plugin-vue-devtools@8.2.1",
       "properties": [
         {
           "name": "xero:dependency-scope",
