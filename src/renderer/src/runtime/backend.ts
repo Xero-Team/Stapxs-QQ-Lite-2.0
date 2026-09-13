@@ -6,6 +6,7 @@ import { InvokeArgs, InvokeOptions } from '@tauri-apps/api/core'
 import { CapacitorGlobal } from '@capacitor/core'
 import { Logger, LogType, PopInfo, PopType } from '../function/base'
 import { useSettingsStore } from '@renderer/state/settings'
+import type { PlatformBackend } from './platform'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -318,3 +319,6 @@ export const backend = {
         // Capacitor 和 Web 不支持移除监听
     },
 }
+
+/** Typed view used by new platform-facing services during migration. */
+export const platformBackend: PlatformBackend = backend
