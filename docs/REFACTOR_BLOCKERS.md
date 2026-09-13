@@ -1,5 +1,13 @@
 # Refactor blockers
 
+## 2026-09-13 smoke refresh
+
+- `bash scripts/playwright-smoke.sh` passed against the production preview
+  (CSP, no third-party requests, privacy defaults, export entry point, and
+  offline reload). The offline reload still reports the documented three
+  network console errors; this is expected browser behavior and is not treated
+  as a page failure.
+
 ## 2026-09-13 verification refresh
 
 - OneBot Playwright smoke passes all four synthetic scenarios (Lagrange/NapCat
