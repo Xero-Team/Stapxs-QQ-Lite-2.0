@@ -13,6 +13,10 @@
   94-file artifact checksum verification pass locally. The workstation has no
   global Yarn/Corepack binary, but `npx --yes corepack@0.31.0 yarn check`
   executes Yarn 4.12.0 successfully (warning-only legacy formatting output).
+- Electron Linux packaging now completes with electron-builder 26.15.3 after
+  removing the obsolete `win.publisherName` option and declaring a Linux
+  desktop name. AppImage, tar.gz, pacman, and deb targets (x64/arm64) are
+  produced locally; Windows and macOS packaging remain CI-only validations.
 
 ## 2026-09-13 incremental evidence
 
