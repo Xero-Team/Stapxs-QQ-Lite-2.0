@@ -35,8 +35,8 @@ async (page) => {
                     if (/^https:\/\/(q\d+\.qlogo\.cn|p\.qlogo\.cn)\//.test(url)) {
                         return route.fulfill({
                             status: 200,
-                            contentType: 'image/png',
-                            body: Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='), (char) => char.charCodeAt(0)),
+                            contentType: 'image/svg+xml',
+                            body: '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
                         })
                     }
                     externalRequests++
