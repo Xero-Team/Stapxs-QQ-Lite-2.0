@@ -1,7 +1,7 @@
 <template>
     <div class="info">
         <font-awesome-icon class="back" :icon="['fas', 'angle-left']" @click="$emit('back')" />
-        <img :src="chat.show.avatar" :alt="chat.show.name">
+        <img :src="headerAvatar" :alt="chat.show.name">
         <div class="info">
             <p>
                 {{ chat.show.name }}
@@ -34,6 +34,7 @@
 import { computed } from 'vue'
 import { i18n } from '@renderer/main'
 import { getTrueLang } from '@renderer/function/utils/systemUtil'
+import { avatarUrl } from '@renderer/function/utils/avatar'
 import type { ChatInfoElem, RenderedMessage } from '@renderer/function/elements/information'
 
 const props = defineProps<{
@@ -49,6 +50,10 @@ defineEmits<{
 const $t = i18n.global.t
 const trueLang = getTrueLang()
 const lastMessage = computed(() => props.list.at(-1))
+const headerAvatar = computed(() => avatarUrl(
+    props.chat.show.id,
+    props.chat.show.type === 'group' ? 'group' : 'user',
+))
 
 function formatTime(value: unknown): string {
     const timestamp = typeof value === 'number' && Number.isFinite(value) ? value : 0

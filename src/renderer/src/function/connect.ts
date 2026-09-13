@@ -24,7 +24,7 @@ import { useAuthStore } from '@renderer/state/auth'
 import { useConnectionStore } from '@renderer/state/connection'
 import { HttpTransport, ReconnectingTransport, SseTransport, TransportError, WebSocketTransport } from '@renderer/transport/transport'
 import { getJsonPathEntry } from '@renderer/protocol/json-map'
-import { parseOneBotApiResponse, parseOneBotEvent } from '@renderer/protocol/onebot11'
+import { inspectOneBotPayload } from '@renderer/protocol/onebot11'
 import { ONEBOT_NATIVE_COMMANDS } from '@renderer/runtime/onebotNative'
 
 const logger = new Logger()
@@ -261,15 +261,9 @@ export class Connector {
             logger.error(null, '收到非对象 OneBot 数据')
             return
         }
-        try {
-            if ('status' in data || 'retcode' in data) {
-                parseOneBotApiResponse(data)
-            } else if ('post_type' in data) {
-                parseOneBotEvent(data)
-            }
-        } catch (error: unknown) {
-            logger.error(error instanceof Error ? error : new Error('Invalid OneBot payload'), '收到无效 OneBot 数据')
-            return
+        const inspected = inspectOneBotPayload(data)
+        if (inspected.kind !== 'unknown' && !inspected.ok) {
+            logger.add(LogType.DEBUG, 'OneBot payload failed schema inspection', { kind: inspected.kind })
         }
         logger.add(LogType.WS, 'GET：', data)
         if (data.echo === undefined){

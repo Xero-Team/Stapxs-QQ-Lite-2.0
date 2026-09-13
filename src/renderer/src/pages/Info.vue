@@ -16,7 +16,7 @@
             </header>
             <div :class="'chat-info-base ' + chat.show.type">
                 <div>
-                    <img :src="chat.show.avatar">
+                    <img :src="avatarUrl(chat.show.id, chat.show.type === 'group' ? 'group' : 'user')">
                     <div>
                         <a>{{ chat.show.name }}</a>
                         <span>{{ chat.show.id }}</span>

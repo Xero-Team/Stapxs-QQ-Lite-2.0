@@ -1106,3 +1106,21 @@ msgstr "逐條轉發"
 
 msgid "将按顺序逐条转发 {count} 条消息，是否继续？"
 msgstr "將按次序逐條轉發 {count} 條訊息，係咪繼續？"
+
+msgid "隐私与网络"
+msgstr "私隱同網絡"
+
+msgid "启用外部服务"
+msgstr "啟用外部服務"
+
+msgid "允许地图、链接预览和更新检查；默认关闭。QQ 头像和 OneBot 连接不受影响"
+msgstr "允許地圖、連結預覽同更新檢查；預設關閉。QQ 頭像同 OneBot 連線唔受影響"
+
+msgid "本地数据"
+msgstr "本機資料"
+
+msgid "导出或清除本地缓存；聊天记录不会上传到第三方"
+msgstr "匯出或者清除本機快取；傾偈紀錄唔會上傳去第三方"
+
+msgid "导出"
+msgstr "匯出"

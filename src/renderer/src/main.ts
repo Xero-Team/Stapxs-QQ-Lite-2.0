@@ -25,7 +25,7 @@ import { preloadPinyin } from './function/utils/pinyin'
 const zh = getPortableFileLang('zh-CN')
 
 // 载入 l10n
-const messages = { 'zh-CN': zh }
+const messages = { 'zh-CN': zh, zh }
 // 初始化 i18n
 export const i18n = createI18n({
     legacy: false,

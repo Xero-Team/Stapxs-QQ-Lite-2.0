@@ -25,11 +25,19 @@ async (page) => {
                     pageErrorMessages.push(String(error))
                 })
                 await context.route('**/*', (route) => {
-                    if (route.request().url() === `${baseOrigin}/received.txt`) {
+                    const url = route.request().url()
+                    if (url === `${baseOrigin}/received.txt`) {
                         return route.fulfill({ status: 200, contentType: 'text/plain', body: 'received file' })
                     }
-                    if (route.request().url().startsWith(`${baseOrigin}/`)) {
+                    if (url.startsWith(`${baseOrigin}/`)) {
                         return route.continue()
+                    }
+                    if (/^https:\/\/(q\d+\.qlogo\.cn|p\.qlogo\.cn)\//.test(url)) {
+                        return route.fulfill({
+                            status: 200,
+                            contentType: 'image/png',
+                            body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'),
+                        })
                     }
                     externalRequests++
                     return route.abort()

@@ -23,6 +23,16 @@ export function configFactory(outPath: string): UserConfigFnObject {
             ViteYaml(),
             !isDesktop && VitePWA({ registerType: 'autoUpdate' }),
             visualizer() as unknown as PluginOption,
+            {
+                name: 'dev-csp',
+                transformIndexHtml(html) {
+                    if (mode !== 'development') return html
+                    return html.replace(
+                        "script-src 'self'",
+                        "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+                    )
+                },
+            },
         ]
 
         if (useLocalFace) {

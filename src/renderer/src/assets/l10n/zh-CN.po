@@ -1915,3 +1915,21 @@ msgstr ""
 
 msgid "将按顺序逐条转发 {count} 条消息，是否继续？"
 msgstr ""
+
+msgid "隐私与网络"
+msgstr ""
+
+msgid "启用外部服务"
+msgstr ""
+
+msgid "允许地图、链接预览和更新检查；默认关闭。QQ 头像和 OneBot 连接不受影响"
+msgstr ""
+
+msgid "本地数据"
+msgstr ""
+
+msgid "导出或清除本地缓存；聊天记录不会上传到第三方"
+msgstr ""
+
+msgid "导出"
+msgstr ""
