@@ -1612,7 +1612,7 @@
     {
       "type": "library",
       "name": "zod",
-      "version": "4.3.6",
+      "version": "4.6.4",
       "licenses": [
         {
           "license": {
@@ -1620,7 +1620,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/zod@4.3.6",
+      "purl": "pkg:npm/zod@4.6.4",
       "properties": [
         {
           "name": "xero:dependency-scope",

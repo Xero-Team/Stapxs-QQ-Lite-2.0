@@ -14625,7 +14625,7 @@ __metadata:
     vue3-lottie: "npm:^3.3.1"
     ws: "npm:^8.21.0"
     xss: "npm:^1.0.15"
-    zod: "npm:^4.3.6"
+    zod: "npm:^4.6.4"
   dependenciesMeta:
     electron-liquid-glass:
       optional: true
@@ -14849,10 +14849,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^4.3.6":
-  version: 4.3.6
-  resolution: "zod@npm:4.3.6"
-  checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
+"zod@npm:^4.6.4":
+  version: 4.6.4
+  resolution: "zod@npm:4.6.4"
+  checksum: 10c0/c0b9f14353e7cbd7b984703b28ede906c0b6784ca4d0fdb0e0a371add14d6fc29ec4428ef5234a9189ef9db6cfb936cdc98201fb0d446e7521b81cabf627ea3d
   languageName: node
   linkType: hard
 

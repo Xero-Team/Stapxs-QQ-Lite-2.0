@@ -138,7 +138,7 @@
     "vue3-danmaku": "^1.6.1",
     "vue3-lottie": "^3.3.1",
     "xss": "^1.0.15",
-    "zod": "^4.3.6"
+    "zod": "^4.6.4"
   },
   "packageManager": "yarn@4.12.0"
 }

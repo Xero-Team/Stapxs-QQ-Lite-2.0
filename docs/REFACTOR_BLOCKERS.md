@@ -65,6 +65,12 @@
   The workspace `capacitor-onebot-connctor` peer/dev dependency declarations
   were synchronized to the same 8.5.2 core/android/ios line, and its Web
   connector build passes.
+- Zod was upgraded independently from 4.3.6 to 4.6.4. Existing protocol,
+  storage, and browser validation schemas pass full Web/core typecheck, browser
+  harness typecheck, contract tests, production build, Tauri lint,
+  SBOM/license/CSP metadata, release metadata, and 92-file artifact checksums.
+  Roll back with `yarn up zod@^4.3.6`; the local optional `sharp` postinstall
+  failure remains unrelated.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
