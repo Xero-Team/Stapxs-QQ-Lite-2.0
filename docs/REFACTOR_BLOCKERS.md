@@ -34,6 +34,12 @@
   Tauri lint, SBOM/license/CSP metadata, release metadata, and 92-file artifact
   checksums pass. Roll back with `yarn up vite-plugin-vue-devtools@^7.6.4`;
   the optional `sharp` postinstall remains environment-dependent.
+- `vite-plugin-static-copy` was upgraded independently from 3.1.2 to 4.1.1;
+  its Vite 7 integration passes full Web/core typecheck, browser harness
+  typecheck, contract tests, production build, Tauri lint, SBOM/license/CSP
+  metadata, release metadata, and 92-file artifact checksums. Roll back with
+  `yarn up vite-plugin-static-copy@^3.1.2`; Yarn linking still reports the
+  unrelated optional `sharp` native postinstall failure locally.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
