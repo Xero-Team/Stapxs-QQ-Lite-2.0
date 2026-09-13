@@ -575,6 +575,7 @@ import {
     markRaw,
     nextTick,
     reactive,
+    shallowRef,
     inject,
     toRaw,
     useTemplateRef,
@@ -711,13 +712,12 @@ const details = ref([
     { open: false },
     { open: false },
 ])
-const msgMenus = ref<any[]>([])
 const NewMsgNum = ref(0)
 const msg = ref('')
 const oldMsg = ref('')
 const imgCache = ref(new Map<number, string>())
 const sendCache = ref<MsgItemElem[]>([])
-const selectedMsg = ref<{ [key: string]: any } | null>(null)
+const selectedMsg = ref<MsgItemElem | null>(null)
 const selectCache = ref('')
 const atFindList = ref<GroupMemberInfoElem[] | null>(null)
 const atSelectedIndex = ref(0)
@@ -726,7 +726,7 @@ const atScrollInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const searchDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const searchRequestId = ref(0)
 const forwardList = ref(contactStore.userList)
-const chatImg = ref<any>(undefined)
+const chatImg = shallowRef<Img | undefined>(undefined)
 const trueLang = getTrueLang()
 
 //#region == 窗口移动相关 ==================================================
@@ -820,7 +820,6 @@ function resetState() {
         },
         checkNewLineFlag: false,
     }
-    msgMenus.value = []
 }
 
 watch(() => chat, () => {
