@@ -278,14 +278,18 @@ current result are recorded below.
 Upgraded direct vulnerable dependencies: `jsonpath` 1.3.0, `echarts` 6.1.0,
 `markdown-it` 14.3.2, `uuid` 11.1.1, `ws` 8.21.3, Vitest 5.0.0, the AI SDK
 pair, `vite-plugin-vue-devtools` 8.2.1, the Vue ESLint toolchain, and the
-Capacitor 8 updates above. Resolutions now pin `@xmldom/xmldom` to 0.8.15 and
-`tar` to 7.5.22. A fresh recursive audit using the repository Yarn 4.12.0
-entrypoint exits 1 with 71 advisory entries across 28 packages: 0 critical,
-47 high, 23 moderate, and 1 low. The report includes repeated
-package/version paths, so the count is an advisory-entry count rather than a
-unique CVE count. Remaining exposure is primarily transitive build tooling
-(`postcss`, `nanoid`, Rollup, Babel, minimatch), the Vitest mocker range,
-`underscore` through `jsonpath`, and deprecated packages.
+Capacitor 8 updates above. Resolutions now pin `@xmldom/xmldom` to 0.8.15,
+`tar` to 7.5.22, and compatible patch releases for Babel, Browserslist,
+`fast-uri`, `flatted`, `ip-address`, `js-yaml`, `nanoid`, PostCSS, Rollup,
+`tmp`, `underscore`, `minimatch`, `brace-expansion`, `picomatch`, and AJV. The
+connector's `prettier-plugin-java` was upgraded to 2.10.3, removing its old
+`java-parser`/Chevrotain chain. A fresh recursive audit using the repository
+Yarn 4.12.0 entrypoint exits 1 with 14 advisory entries: 0 critical, 2 high,
+and 12 moderate. The report includes repeated package/version paths, so the
+count is an advisory-entry count rather than a unique CVE count. Remaining
+exposure is limited to unmaintained toolchain packages (`lodash`/`lodash-es`,
+legacy `glob`/`inflight`, deprecated Rollup polyfills and source-map packages,
+ESLint 9 status, and the Capacitor CLI's old `uuid` path).
 Dependency upgrades and application impact review are still required before
 enabling the audit as a passing release gate. Contract tests pass after the
 dependency refresh; Yarn's optional `sharp` native build remains
