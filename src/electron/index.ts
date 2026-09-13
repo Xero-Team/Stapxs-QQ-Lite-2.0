@@ -7,9 +7,10 @@ import windowStateKeeper from 'electron-window-state'
 import packageInfo from '../../package.json' with { type: 'json' }
 
 import { regIpcListener } from './function/ipc.ts'
-import { Menu, session, app, protocol, BrowserWindow, Tray, type BrowserWindowConstructorOptions } from 'electron'
+import { Menu, session, app, protocol, BrowserWindow, Tray, nativeImage, type BrowserWindowConstructorOptions } from 'electron'
 import { touchBar } from './function/touchbar.ts'
 import { join } from 'path'
+import trayIconPath from './assets/tray@2x.png?asset&asarUnpack'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const isPrimary = app.requestSingleInstanceLock()
@@ -26,10 +27,8 @@ const isDev = import.meta.env.DEV
 
 async function createWindow() {
     const store = new Store()
-    let glassEffect = false
-    if (store.get('glass_effect')) {
-        glassEffect = store.get('glass_effect') as boolean
-    }
+    const storedGlass = store.get('glass_effect')
+    const glassEffect = storedGlass === true || storedGlass === 'true'
     if (store.get('opt_log_level')) {
         logLevel = (store.get('opt_log_level') ?? 'info') as string
     }
@@ -119,23 +118,25 @@ async function createWindow() {
         win.loadURL('app://./index.html')
     }
 
-    if (glassEffect) {
+    if (glassEffect && process.platform === 'darwin') {
         win.webContents.once('did-finish-load', () => {
-            if(win) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const liquidGlass = require('electron-liquid-glass')
-                try {
-                    const viewId = liquidGlass.addView(win.getNativeWindowHandle(), {
-                        cornerRadius: 24,
-                        tinitCOlor: '#00000000'
-                    })
-                    win.setWindowButtonVisibility(true)
-                    liquidGlass.unstable_setVariant(viewId!, 9)
-                    win.webContents.send('sys:liquidGlassReady', {})
-                    logger.info('liquidGlass 装载成功:', viewId)
-                } catch (err) {
-                    logger.error('liquidGlass 装载失败:', err);
+            if (!win) return
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const liquidGlass = require('electron-liquid-glass') as {
+                    addView: (handle: Buffer, options: { cornerRadius: number; tinitCOlor: string }) => number
+                    unstable_setVariant: (viewId: number, variant: number) => void
                 }
+                const viewId = liquidGlass.addView(win.getNativeWindowHandle(), {
+                    cornerRadius: 24,
+                    tinitCOlor: '#00000000'
+                })
+                win.setWindowButtonVisibility(true)
+                liquidGlass.unstable_setVariant(viewId, 9)
+                win.webContents.send('sys:liquidGlassReady', {})
+                logger.info('liquidGlass 装载成功:', viewId)
+            } catch (err) {
+                logger.error('liquidGlass 装载失败:', err)
             }
         })
     }
@@ -238,15 +239,23 @@ app.on('ready', async () => {
     })
     // 创建托盘
     if (process.platform !== 'darwin') {
-        const icon = path.join(__dirname, 'assets/tray@2x.png')
-        const tray = new Tray(icon)
-        tray.setContextMenu(Menu.buildFromTemplate([
-            { label: '显示窗口', click: () => win?.show() },
-            { label: '退出', type: 'normal', click: () => { app.quit() } }
-        ]))
-        tray.on('click', () => {
-            win?.show()
-        })
+        try {
+            const icon = nativeImage.createFromPath(trayIconPath)
+            if (icon.isEmpty()) {
+                logger.warn('托盘图标为空，跳过创建托盘')
+            } else {
+                const tray = new Tray(icon)
+                tray.setContextMenu(Menu.buildFromTemplate([
+                    { label: '显示窗口', click: () => win?.show() },
+                    { label: '退出', type: 'normal', click: () => { app.quit() } }
+                ]))
+                tray.on('click', () => {
+                    win?.show()
+                })
+            }
+        } catch (err) {
+            logger.error('创建托盘失败', err)
+        }
     }
     // 创建窗口
     createWindow()

@@ -21,6 +21,7 @@ files:
 
 asarUnpack:
     - resources/**
+    - out/main/**/*.png
 
 # Windows 配置
 win:
@@ -49,7 +50,6 @@ dmg:
 
 # Linux 配置
 linux:
-    desktopName: xero-qq-lite
     syncDesktopName: true
     target:
         - { target: pacman, arch: x64 }
@@ -62,6 +62,8 @@ linux:
     synopsis: 一个兼容 OneBot 协议的非官方 QQ 全平台客户端实现。
     category: Network
     mimeTypes: [ application/x-xero-qq-lite ]
+pacman:
+    compression: zstd
 
 # 其他配置
 npmRebuild: false
