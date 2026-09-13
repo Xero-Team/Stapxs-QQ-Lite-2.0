@@ -2,6 +2,8 @@
 
 ## 2026-09-12
 
+- Capacitor navigation-bar peer incompatibility resolved on 2026-09-13 by replacing the Capacitor 4–6-only `@hugotomazi/capacitor-navigation-bar` with `@capgo/capacitor-navigation-bar` 8.2.7 (peer `@capacitor/core >=8`). Android Gradle and iOS Pod references were migrated; Web build, core typecheck, and 77 contract tests pass. Native device builds remain covered by the cross-platform CI matrix.
+
 - Earlier bootstrap and missing-submodule failures were resolved: Yarn 4.12.0 is available through the Corepack shim, dependencies install with `--immutable --mode=skip-build`, and the QFace/Border Card UI submodules are initialized.
 - The registry's latest Vue/Vite/TypeScript/ESLint/Pinia/Electron combination is currently incompatible with this dependency graph: Vite 8 conflicts with `@vitejs/plugin-vue` 5, ESLint 10 conflicts with the installed Vue/TypeScript configs, and the TypeScript 7 patch failed during fetch. The attempted upgrade was discarded; upgrades must proceed package by package with matching plugins.
 - Native `sharp@0.32.6` postinstall fails in this environment, so Yarn exits non-zero after linking even though JavaScript dependencies are available.
