@@ -83,6 +83,12 @@ import {
     mergeEarlySessionContacts,
     resolveIncomingSession,
 } from './utils/sessionUtil'
+import {
+    hasImageMessage,
+    hasResolvableImageSource,
+    mergeMessagesByIdAndTime,
+    normalizeMessageId,
+} from './utils/messageMerge'
 
 const popInfo = new PopInfo()
 const msgPaths = import.meta.glob("@renderer/assets/pathMap/*.yaml", { eager: true })
@@ -1736,14 +1742,14 @@ async function saveMsg(msg: MessagePayload, append = undefined as undefined | st
                 uiStore.historyBeforeTime = undefined
                 return
             }
-            const merged = mergeMessagesByIdAndTime(chatStore.messageList, list)
+            const merged = mergeMessagesByIdAndTime(chatStore.messageList, list, shouldReplaceDuplicateMessage)
             replaceMessageListInPlace(merged)
         } else {
             if (
                 settingsStore.sysConfig.enable_local_history &&
                 settingsStore.sysConfig.mixed_load_messages !== false
             ) {
-                const merged = mergeMessagesByIdAndTime(chatStore.messageList, list)
+                const merged = mergeMessagesByIdAndTime(chatStore.messageList, list, shouldReplaceDuplicateMessage)
                 replaceMessageListInPlace(merged)
             } else {
                 replaceMessageListInPlace(list)
@@ -1894,65 +1900,7 @@ function insertHistorySegmentAtAnchor(
         ...newMsgs,
         ...current.slice(insertIdx),
     ]
-    return mergeMessagesByIdAndTime([], merged)
-}
-
-function normalizeMessageId(id: unknown): string {
-    if (id === null || id === undefined) return ''
-    return String(id)
-}
-
-function getMessageTimestamp(msg: MessagePayload): number {
-    const t = Number(msg?.time)
-    return Number.isFinite(t) ? t : 0
-}
-
-function buildFallbackMessageKey(msg: MessagePayload): string {
-    const seq = msg?.message_seq ?? msg?.seq_id ?? msg?.seq ?? ''
-    const senderInfo = asMessagePayload(msg?.sender)
-    const sender = senderInfo?.user_id ?? msg?.user_id ?? msg?.sender_id ?? ''
-    const ts = getMessageTimestamp(msg)
-    return `${ts}|${sender}|${seq}`
-}
-
-function compareMessageOrder(a: MessagePayload, b: MessagePayload): number {
-    const ta = getMessageTimestamp(a)
-    const tb = getMessageTimestamp(b)
-    if (ta !== tb) return ta - tb
-
-    const sa = Number(a?.message_seq ?? a?.seq_id ?? a?.seq)
-    const sb = Number(b?.message_seq ?? b?.seq_id ?? b?.seq)
-    if (Number.isFinite(sa) && Number.isFinite(sb) && sa !== sb) {
-        return sa - sb
-    }
-
-    const ia = normalizeMessageId(a?.message_id)
-    const ib = normalizeMessageId(b?.message_id)
-    if (ia === ib) return 0
-    return ia.localeCompare(ib)
-}
-
-function getImageSegments(msg: MessagePayload): MessagePayload[] {
-    if (!Array.isArray(msg?.message)) return []
-    return msg.message
-        .map(asMessagePayload)
-        .filter((seg): seg is MessagePayload => seg?.type === 'image')
-}
-
-function hasImageMessage(msg: MessagePayload): boolean {
-    return getImageSegments(msg).length > 0
-}
-
-function hasResolvableImageSource(msg: MessagePayload): boolean {
-    const imgs = getImageSegments(msg)
-    if (imgs.length === 0) return false
-    return imgs.every((seg) => {
-        const url = typeof seg.url === 'string' ? seg.url : ''
-        const file = typeof seg.file === 'string' ? seg.file : ''
-        if (url.length > 0) return true
-        if (file.length > 0) return true
-        return false
-    })
+    return mergeMessagesByIdAndTime([], merged, shouldReplaceDuplicateMessage)
 }
 
 function shouldReplaceDuplicateMessage(existing: MessagePayload, incoming: MessagePayload): boolean {
@@ -1967,57 +1915,6 @@ function shouldReplaceDuplicateMessage(existing: MessagePayload, incoming: Messa
 
     // 图片缓存开启但本地消息图片字段不完整时，也允许在线覆盖修复。
     return !hasResolvableImageSource(existing) && hasResolvableImageSource(incoming)
-}
-
-function mergeMessagesByIdAndTime(current: MessagePayload[], incoming: MessagePayload[]): MessagePayload[] {
-    if (incoming.length === 0) return [...current]
-    if (current.length === 0) {
-        const firstPass = [...incoming]
-        firstPass.sort(compareMessageOrder)
-        return firstPass
-    }
-
-    const idSet = new Set<string>()
-    const idIndexMap = new Map<string, number>()
-    const fallbackSet = new Set<string>()
-    const merged: MessagePayload[] = []
-
-    for (const msg of current) {
-        merged.push(msg)
-        const id = normalizeMessageId(msg?.message_id)
-        if (id) {
-            idSet.add(id)
-            idIndexMap.set(id, merged.length - 1)
-        } else {
-            fallbackSet.add(buildFallbackMessageKey(msg))
-        }
-    }
-
-    for (const msg of incoming) {
-        const id = normalizeMessageId(msg?.message_id)
-        if (id) {
-            if (idSet.has(id)) {
-                const idx = idIndexMap.get(id)
-                const existing = idx === undefined ? undefined : merged[idx]
-                if (idx !== undefined && existing && shouldReplaceDuplicateMessage(existing, msg)) {
-                    merged[idx] = msg
-                }
-                continue
-            }
-            idSet.add(id)
-            merged.push(msg)
-            idIndexMap.set(id, merged.length - 1)
-            continue
-        }
-
-        const fallbackKey = buildFallbackMessageKey(msg)
-        if (fallbackSet.has(fallbackKey)) continue
-        fallbackSet.add(fallbackKey)
-        merged.push(msg)
-    }
-
-    merged.sort(compareMessageOrder)
-    return merged
 }
 
 function replaceMessageListInPlace(next: MessagePayload[]) {

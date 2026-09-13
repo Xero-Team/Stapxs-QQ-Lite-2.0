@@ -7,6 +7,11 @@
   protocol/event callers. The extraction preserves the existing 100-item
   batching, readiness check, sorting, and store refresh behavior. Renderer
   typecheck, focused ESLint, contract tests, and the production build pass.
+- Message ordering, duplicate detection, and image-source checks now live in
+  the pure `function/utils/messageMerge.ts` utility. The local-history image
+  replacement rule remains injected from `msg.ts`, keeping settings and
+  Pinia dependencies outside the merge module. Renderer typecheck, focused
+  ESLint, and all 80 contract tests pass after the extraction.
 - Runtime-scoped Pinia state now has typed reset actions for authentication, contacts, connections, chat messages, Qzone, stickers, and session history. `resetRimtime(true)` delegates to those actions, and history/terminal/chat message-list clearing uses the Chat store mutation API. Web typecheck, browser harness typecheck, `check`, production build, Tauri lint, 80 contract tests, repository policy, SBOM/license/CSP metadata, and 90-file artifact checksum verification pass after this change.
 - Browser authentication-failure UI coverage is now reproducible through `scripts/playwright-auth-failure-smoke.sh`: a synthetic protocol-level WebSocket rejection displays the connection-failure notification, restores the login form and enabled connect button, and records zero external requests and page errors. The quality workflow runs this smoke with the existing pinned Playwright CLI; live credentials and native authentication flows remain open.
 - Rendered message boundaries now use the shared `RenderedMessage`, `RenderedMessageSegment`, `RenderedMessageSender`, and `MessageSegmentData` types across the message list, chat composer, body/header rendering, history, terminal, danmaku, and Glagame views. `MsgItemElem` remains a compatibility type with an `unknown` index signature and no explicit application `any`; vendored QFace utility code is unchanged.
