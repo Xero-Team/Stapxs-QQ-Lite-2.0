@@ -1113,7 +1113,7 @@ async function loadMoreHistory() {
     }
 }
 
-function detectSeqGaps(msgs: any[]): string[] {
+function detectSeqGaps(msgs: MsgItemElem[]): string[] {
     const gaps: string[] = []
     for (let i = 0; i < msgs.length - 1; i++) {
         const seqA: number | null = msgs[i].message_seq ?? msgs[i].seq ?? null
@@ -1429,7 +1429,7 @@ function selectSQIn() {
     }
 }
 
-function showMsgMeun(event: MenuEventData, data: any) {
+function showMsgMeun(event: MenuEventData, data: MsgItemElem) {
     selectedMsg.value = data
     tags.value.menuDisplay.menuSelectedMsgId = data.message_id
 
@@ -1448,7 +1448,7 @@ function showMsgMeun(event: MenuEventData, data: any) {
         chatStore.chatInfo.info.group_members
     ) {
         chatStore.chatInfo.info.group_members.forEach(
-            (item: any) => {
+            (item: GroupMemberInfoElem) => {
                 if (item.user_id == data.sender.user_id) {
                     selectUserType = item.role
                 }
@@ -1466,7 +1466,7 @@ function showMsgMeun(event: MenuEventData, data: any) {
         ) {
             Object.keys(tags.value.menuDisplay).forEach(
                 (name: string) => {
-                    (tags.value.menuDisplay as any)[name] = false
+                    (tags.value.menuDisplay as Record<string, boolean | string | null>)[name] = false
                 },
             )
             tags.value.menuDisplay.showRespond = false
@@ -1508,7 +1508,7 @@ function showMsgMeun(event: MenuEventData, data: any) {
             if (details.value[3].open) {
                 Object.keys(tags.value.menuDisplay).forEach(
                     (name: string) => {
-                        (tags.value.menuDisplay as any)[name] = false
+                        (tags.value.menuDisplay as Record<string, boolean | string | null>)[name] = false
                     },
                 )
                 tags.value.menuDisplay.jumpToMsg = true
@@ -1546,7 +1546,7 @@ function showMsgMeun(event: MenuEventData, data: any) {
                 }
             }
             const nList = ['xml', 'json']
-            data.message.forEach((item: any) => {
+            data.message.forEach((item: MsgItemElem) => {
                 if (nList.indexOf(item.type as string) > 0) {
                     tags.value.menuDisplay.forward = false
                     tags.value.menuDisplay.add = false
@@ -1618,7 +1618,7 @@ function menuReplyMsg(closeMenu = true) {
     }
 }
 
-function replyMsg(msgData: any) {
+function replyMsg(msgData: MsgItemElem) {
     const msgId = msgData.message_id
     selectedMsg.value = msgData
     addSpecialMsg({
@@ -1664,7 +1664,7 @@ function showForWard(action: ForwardAction = 'single-message') {
     selectedForwardAction.value = action
     tags.value.showForwardPan = true
     const showList = [...contactStore.onMsgList].reverse()
-    showList.forEach((item: any) => {
+    showList.forEach((item) => {
         const index = forwardList.value.indexOf(item)
         if (index > -1) {
             forwardList.value.splice(index, 1)
@@ -2471,7 +2471,7 @@ function updateList(newLength: number, oldLength: number) {
     }
 }
 
-function msgClick(_: Event, data: any) {
+function msgClick(_: Event, data: MsgItemElem) {
     const message_id = data.message_id
     if (multipleSelectList.value.length > 0) {
         if (multipleSelectList.value.indexOf(message_id) > -1) {
@@ -2493,12 +2493,12 @@ function delMsgs() {
 }
 
 function copyMsgs() {
-    const msgList = list.filter((item: any) => {
+    const msgList = list.filter((item) => {
         return multipleSelectList.value.indexOf(item.message_id) > -1
     })
     let msgText = ''
     let lastDate = ''
-    msgList.forEach((item: any) => {
+    msgList.forEach((item) => {
         const time = new Date(getViewTime(item.time))
         const date =
             time.getFullYear() +
@@ -2535,7 +2535,7 @@ function copyMsgs() {
 }
 
 async function recallMsgs() {
-    const msgList = list.filter((item: any) => multipleSelectList.value.includes(item.message_id))
+    const msgList = list.filter((item) => multipleSelectList.value.includes(item.message_id))
     const tasks: Promise<unknown>[] = []
     for (const msgItem of msgList) {
         const msgId = msgItem.message_id
@@ -2609,7 +2609,7 @@ async function handleInput(event: Event) {
         } else {
             searchRequestId.value++
             tags.value.search.list = list.filter(
-                (item: any) => {
+                (item) => {
                     const rawMessage = getMsgRawTxt(item)
                     return rawMessage.indexOf(value) !== -1
                 },
@@ -2657,7 +2657,7 @@ function sendPoke(userId: number) {
     tags.value.menuDisplay.poke = false
 }
 
-function reedit(msgData: any) {
+function reedit(msgData: MsgItemElem) {
     msg.value = ''
     sendCache.value = []
     imgCache.value.clear()
@@ -2666,7 +2666,7 @@ function reedit(msgData: any) {
         if (seg.type === 'text') {
             msg.value += seg.text
         } else if (seg.type === 'reply') {
-            const foundMsg = list.find((item: any) => item.message_id == seg.id)
+            const foundMsg = list.find((item) => item.message_id == seg.id)
             if (!foundMsg) continue
             replyMsg(foundMsg)
         } else {
