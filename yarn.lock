@@ -1684,12 +1684,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-toolkit/tsconfig@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@electron-toolkit/tsconfig@npm:1.0.1"
+"@electron-toolkit/tsconfig@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@electron-toolkit/tsconfig@npm:2.0.0"
   peerDependencies:
     "@types/node": "*"
-  checksum: 10c0/6e8670998abe3a725d0d99f2466d10b9d36026035efa8872f6b91000f04b748caad9922722e2189560ef0b0489aed6d6beb4099a2ae417606cff37f6ffc3eb46
+  checksum: 10c0/ea35344d6f9f3fb4c9d4b963eeac96e83159686098b0f8a6648f0e4e0bf13ba554b0d7d292d5b8220db1a158aab982555a453cb1b96a1bc1e8201e57b5836c75
   languageName: node
   linkType: hard
 
@@ -14554,7 +14554,7 @@ __metadata:
     "@electron-toolkit/eslint-config": "npm:^1.0.2"
     "@electron-toolkit/eslint-config-ts": "npm:^2.0.0"
     "@electron-toolkit/preload": "npm:^3.0.0"
-    "@electron-toolkit/tsconfig": "npm:^1.0.1"
+    "@electron-toolkit/tsconfig": "npm:^2.0.0"
     "@electron-toolkit/utils": "npm:^4.0.0"
     "@fortawesome/fontawesome-svg-core": "npm:^6.7.0"
     "@fortawesome/free-regular-svg-icons": "npm:^6.7.0"

@@ -282,7 +282,7 @@
     {
       "type": "library",
       "name": "@electron-toolkit/tsconfig",
-      "version": "1.0.1",
+      "version": "2.0.0",
       "licenses": [
         {
           "license": {
@@ -290,7 +290,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/@electron-toolkit/tsconfig@1.0.1",
+      "purl": "pkg:npm/@electron-toolkit/tsconfig@2.0.0",
       "properties": [
         {
           "name": "xero:dependency-scope",

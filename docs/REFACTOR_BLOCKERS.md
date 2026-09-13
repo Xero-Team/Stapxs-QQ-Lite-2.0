@@ -78,6 +78,13 @@
   metadata, and 92-file artifact checksums pass. Roll back with `yarn up
   @electron-toolkit/utils@^3.0.0`; the local `sharp` postinstall failure is
   unchanged.
+- `@electron-toolkit/tsconfig` was upgraded independently from 1.0.1 to
+  2.0.0. `vue-tsc --showConfig` still reports `strict`,
+  `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and
+  `useUnknownInCatchVariables` as enabled; Web/Node/core/browser typechecks,
+  contract tests, production build, Tauri lint, SBOM/license/CSP metadata,
+  release metadata, and 92-file artifact checksums pass. Roll back with
+  `yarn up @electron-toolkit/tsconfig@^1.0.1`.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
