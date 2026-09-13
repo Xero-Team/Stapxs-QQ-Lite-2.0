@@ -42,6 +42,14 @@ export const useUIStore = defineStore('ui', () => {
 
     const inch = getInch()
 
+    function reset(): void {
+        nowGetHistory.value = false
+        canLoadHistory.value = true
+        loadHistoryFail.value = false
+        historyBeforeTime.value = undefined
+        popBoxList.value = []
+    }
+
     return {
         openSideBar,
         nowGetHistory,
@@ -52,5 +60,6 @@ export const useUIStore = defineStore('ui', () => {
         popBoxList,
         pageView,
         inch,
+        reset,
     }
 })

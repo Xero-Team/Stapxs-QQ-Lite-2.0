@@ -38,6 +38,7 @@ import {
     updateMenu,
     loadJsonMap,
 } from '@renderer/function/utils/appUtil'
+import { resetContactSync, saveClassInfo, saveUser as saveContactUser } from '@renderer/function/utils/contactSync'
 import { markRaw, nextTick } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
 import { Connector, login, saveConnectionToHistory } from './connect'
@@ -61,10 +62,7 @@ import { addDownloadTask, completeUploadTask } from '@renderer/components/FileMa
 import { refreshFavicon } from './favicon'
 import { Img } from './model/img'
 import {
-    buildPinyinForContacts,
-    hydrateContactPinyinLater,
     resolvePinyinFirstChar,
-    sortContactListByPinyin,
 } from './utils/contactPinyin'
 import { ensurePinyinLoaded, isPinyinReady } from './utils/pinyin'
 import { createLoginInfo, useAuthStore, type LoginInfo } from '@renderer/state/auth'
@@ -80,7 +78,6 @@ import { normalizeLoginInfo, normalizeVersionInfo } from '@renderer/protocol/log
 import {
     getSessionId,
     getMissingGroupPreviewSessions,
-    mergeEarlySessionContacts,
     resolveIncomingSession,
 } from './utils/sessionUtil'
 import {
@@ -102,7 +99,6 @@ if (msgPathAt != undefined) {
     msgPath = (msgPaths[msgPathAt] as ReturnType<typeof JSON.parse>).default
 }
 // 其他 tag
-let listLoadTimes = 0
 const logger = new Logger()
 type MessagePayload = Record<string, unknown>
 type MessageSegmentPayload = MessagePayload & {
@@ -1509,174 +1505,7 @@ const handlers: Record<string, MessageHandler> = {
 // ==========================================
 
 function saveUser(msg: MessagePayload, type: string) {
-    const authStore = useAuthStore()
-    const contactStore = useContactStore()
-    const settingsStore = useSettingsStore()
-    listLoadTimes++
-    let list: Session[] | undefined
-    if (msgPath.user_list)
-        list = getMsgData('user_list', msg, msgPath.user_list) as Session[]
-    else {
-        switch (type) {
-            case 'friend':
-                list = getMsgData('friend_list', msg, msgPath.friend_list) as Session[]
-                if (list)
-                    // 根据 user_id 去重
-                    list = list.filter((item, index, arr) => {
-                        return (
-                            arr.findIndex((item2) => {
-                                return item2.user_id == item.user_id
-                            }) == index
-                        )
-                    })
-                break
-            case 'group':
-                list = getMsgData('group_list', msg, msgPath.group_list) as Session[]
-                if (list)
-                    // 根据 group_id 去重
-                    list = list.filter((item, index, arr) => {
-                        return (
-                            arr.findIndex((item2) => {
-                                return item2.group_id == item.group_id
-                            }) == index
-                        )
-                    })
-                break
-        }
-    }
-    if (list != undefined) {
-        const groupNames = {} as { [key: number]: string }
-        list.forEach((item, index) => {
-            if (item.group_name == null || item.group_name == undefined) {
-                item.group_name = ''
-            }
-            if (list?.[index]) {
-                list[index].py_name = { main: [], short: [] }
-                list[index].py_start = ' '
-            }
-            // 构建分类
-            if (type == 'friend') {
-                if (item.class_id != undefined && item.class_name) {
-                    if (typeof item.class_name == 'string') {
-                        groupNames[item.class_id] = item.class_name
-                    } else {
-                        groupNames[item.class_id] = item.class_name[0]
-                    }
-                }
-                item.group_name = ''
-            } else {
-                delete item.class_id
-                delete item.class_name
-            }
-        })
-        if (Object.keys(groupNames).length > 0) {
-            // 把 groupNames 处理为 { class_id: number, class_name: string }[]
-            const groupNamesList = [] as {
-                class_id: number
-                class_name: string
-            }[]
-            for (const key in groupNames) {
-                groupNamesList.push({
-                    class_id: Number(key),
-                    class_name: groupNames[key] ?? '',
-                })
-            }
-            saveClassInfo(groupNamesList)
-        }
-        if (isPinyinReady()) {
-            buildPinyinForContacts(list)
-        } else {
-            hydrateContactPinyinLater(list)
-        }
-        sortContactListByPinyin(list)
-        // 实时消息可能比联系人列表更早到达；用真实联系人资料接管临时会话，保留预览状态。
-        const didMergeEarlySessions = mergeEarlySessionContacts(
-            list,
-            contactStore.baseOnMsgList,
-        )
-        contactStore.userList = contactStore.userList.concat(list)
-        if (
-            settingsStore.sysConfig.session_display_mode === 'all' ||
-            didMergeEarlySessions
-        ) {
-            updateBaseOnMsgList()
-        }
-        // 刷新置顶列表
-        const info = settingsStore.sysConfig.top_info as {
-            [key: string]: number[]
-        } | null
-        if (info != null) {
-            const topList = info[authStore.loginInfo.uin]
-            if (topList !== undefined) {
-                list.forEach((item) => {
-                    const id = Number(
-                        item.user_id ? item.user_id : item.group_id,
-                    )
-                    if (topList.indexOf(id) >= 0) {
-                        item.always_top = true
-                        // 判断它在不在消息列表里
-                        if (contactStore.baseOnMsgList.get(id) == undefined) {
-                            contactStore.baseOnMsgList.set(id, item)
-                            // 给它获取一下最新的一条消息
-                            // 给置顶的用户刷新最新一条的消息用于显示
-                            contactStore.userList.forEach((item) => {
-                                if (item.always_top) {
-                                    updateLastestHistory(item)
-                                }
-                            })
-                        }
-                    }
-                })
-            }
-        }
-        // 更新菜单
-        updateMenu({
-            parent: 'account',
-            id: 'userList',
-            action: 'label',
-            value: app.config.globalProperties.$t('用户列表（{count}）', {
-                count: contactStore.userList.length,
-            }),
-        })
-    }
-    // 如果获取次数大于 0 并且是双数，刷新一下历史会话
-    if (listLoadTimes > 0 && listLoadTimes % 2 == 0) {
-        // 获取最近的会话
-        if (authStore.jsonMap.recent_contact)
-            Connector.send(
-                authStore.jsonMap.recent_contact.name,
-                {},
-                'getRecentContact',
-            )
-    }
-    // 如果是分离式的好友列表，继续获取分类信息
-    if (type == 'friend' && authStore.jsonMap.friend_category) {
-        Connector.send(
-            authStore.jsonMap.friend_category.name,
-            {},
-            'getFriendCategory',
-        )
-    }
-}
-
-function saveClassInfo(
-    list: { class_id: number; class_name: string; sort_id?: number }[],
-) {
-    const settingsStore = useSettingsStore()
-    if (list[0]?.sort_id != undefined) {
-        // 如果有 sort_id，按 sort_id 排序，从小到大
-        list.sort((a, b) => {
-            if (a.sort_id && b.sort_id) return a.sort_id - b.sort_id
-            else return 0
-        })
-    } else {
-        // 按 class_id 排序
-        list.sort((a, b) => {
-            return a.class_id - b.class_id
-        })
-    }
-
-    settingsStore.classes = list
+    saveContactUser(msg, type, msgPath)
 }
 
 async function saveMsg(msg: MessagePayload, append = undefined as undefined | string) {
@@ -2346,6 +2175,7 @@ export function resetRimtime(resetAll = false) {
     heartbeatTime = -1
     clearMetaEventWatchdog()
     groupPreviewHydrator.reset()
+    resetContactSync()
     if (resetAll) {
         // Reset auth store
         const authStore = useAuthStore()
@@ -2363,5 +2193,7 @@ export function resetRimtime(resetAll = false) {
         useQzoneStore().reset()
         useStickerStore().reset()
         useSessionHistoryStore().reset()
+        useSettingsStore().reset()
+        useUIStore().reset()
     }
 }

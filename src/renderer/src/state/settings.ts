@@ -73,11 +73,19 @@ export const useSettingsStore = defineStore('settings', () => {
     const firstLoad = ref(false)
     const classes = shallowRef<UserClass[]>([])
 
+    function reset(): void {
+        darkMode.value = false
+        connectSsl.value = false
+        firstLoad.value = false
+        classes.value = []
+    }
+
     return {
         sysConfig,
         darkMode,
         connectSsl,
         firstLoad,
         classes,
+        reset,
     }
 })

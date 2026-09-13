@@ -71,68 +71,14 @@
                         <FacePan v-show="details[1].open"
                             @add-special-msg="addSpecialMsg" @send-msg="sendMsg" />
                     </Transition>
-                    <!-- 精华消息 -->
-                    <Transition name="pan">
-                        <div v-show="details[2].open && chat.info.jin_info.list.length > 0"
-                            class="ss-card jin-pan">
-                            <div>
-                                <font-awesome-icon :icon="['fas', 'message']" />
-                                <span>{{ $t('精华消息') }}</span>
-                                <font-awesome-icon :icon="['fas', 'xmark']" @click="details[2].open = !details[2].open" />
-                            </div>
-                            <div
-                                class="jin-pan-body"
-                                @scroll="jinScroll">
-                                <div v-for="(item, index) in chat.info.jin_info.list"
-                                    :key="'jin-' + index">
-                                    <div>
-                                        <img :src="avatarUrl(item.sender_uin)">
-                                        <div>
-                                            <a>{{ item.sender_nick }}</a>
-                                            <span>{{ item.sender_time ? Intl.DateTimeFormat(
-                                                      trueLang,
-                                                      {
-                                                          hour: 'numeric',
-                                                          minute: 'numeric',
-                                                      },
-                                                  ).format(new Date(item.sender_time * 1000))
-                                                      : '' }}
-                                                {{ $t('发送') }}</span>
-                                        </div>
-                                        <span>{{
-                                            $t('{time}，由 {name} 设置', {
-                                                time: item.sender_time ? Intl.DateTimeFormat(
-                                                    trueLang,
-                                                    {
-                                                        hour: 'numeric',
-                                                        minute: 'numeric',
-                                                    },
-                                                ).format(new Date(item.sender_time * 1000)) : '',
-                                                name: item.add_digest_nick,
-                                            })
-                                        }}</span>
-                                    </div>
-                                    <div class="context">
-                                        <template
-                                            v-for="(context, indexc) in item.msg_content"
-                                            :key="'jinc-' + index + '-' + indexc">
-                                            <span v-if="context.type === 'text'">
-                                                {{ context.data.text }}
-                                            </span>
-                                            <EmojiFace v-if="context.type === 'face'"
-                                                :emoji="Emoji.get(Number(context.data.id))" />
-                                            <img v-if="context.type === 'image'"
-                                                :src="context.data.url"
-                                                @click="viewerEssImg(context.data.url ?? '')">
-                                        </template>
-                                    </div>
-                                </div>
-                                <div v-show="tags.isJinLoading" class="jin-pan-load">
-                                    <font-awesome-icon :icon="['fas', 'spinner']" />
-                                </div>
-                            </div>
-                        </div>
-                    </Transition>
+                    <ChatEssencePanel
+                        :open="details[2].open"
+                        :list="chat.info.jin_info.list"
+                        :loading="tags.isJinLoading"
+                        :locale="trueLang"
+                        @close="details[2].open = !details[2].open"
+                        @scroll="jinScroll"
+                        @view-image="viewerEssImg" />
                 </div>
                 <!-- 多选指示器 -->
                 <div :class=" multipleSelectList.length > 0 ? 'select-tag show' : 'select-tag'">
@@ -333,128 +279,40 @@
         </div>
         <!-- 合并转发消息预览器 -->
         <MergePan ref="mergePan" />
-        <!-- 消息右击菜单 -->
-        <Teleport to="body">
-            <div :class="'msg-menu' + (['linux', 'win32'].includes(backend.platform ?? '') ? ' withBar' : '')">
-                <div v-show="tags.showMsgMenu" class="msg-menu-bg" @click="closeMsgMenu" />
-                <div id="msgMenu" :class="tags.showMsgMenu ?
-                    'ss-card msg-menu-body show' : 'ss-card msg-menu-body'">
-                    <div v-if="chatStore.chatInfo.show.type == 'group'"
-                        v-show="tags.menuDisplay.showRespond"
-                        :class="'ss-card respond' + (tags.menuDisplay.respond ? ' open' : '')">
-                        <template v-for="(num, index) in Emoji.responseId" :key="'respond-' + num">
-                            <EmojiFace :emoji="Emoji.get(num)!"
-                                @click="sendRespond(num)" />
-                            <font-awesome-icon v-if="index == 4" :icon="['fas', 'angle-up']"
-                                @click="tags.menuDisplay.respond = true" />
-                        </template>
-                    </div>
-                    <div v-show="tags.menuDisplay.add" @click="forwardSelf()">
-                        <div><font-awesome-icon :icon="['fas', 'plus']" /></div>
-                        <a>{{ $t('+ 1') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.relpy" @click="menuReplyMsg(true)">
-                        <div><font-awesome-icon :icon="['fas', 'message']" /></div>
-                        <a>{{ $t('回复') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.forward" @click="showForWard()">
-                        <div><font-awesome-icon :icon="['fas', 'share']" /></div>
-                        <a>{{ $t('转发') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.select" @click="intoMultipleSelect()">
-                        <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
-                        <a>{{ $t('多选') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.copy" @click="copyMsg">
-                        <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
-                        <a>{{ $t('复制') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.copySelect" @click="copySelectMsg">
-                        <div><font-awesome-icon :icon="['fas', 'code']" /></div>
-                        <a>{{ $t('复制选中文本') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.copyImg" @click="copyImg">
-                        <div><font-awesome-icon :icon="['fas', 'object-ungroup']" /></div>
-                        <a>{{ $t('复制图片') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.downloadImg != false" @click="downloadImg">
-                        <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
-                        <a>{{ $t('下载图片') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.revoke" @click="revokeMsg">
-                        <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
-                        <a>{{ $t('撤回') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.reedit" @click="reeditMsg">
-                        <div><font-awesome-icon :icon="['fas', 'pencil']" /></div>
-                        <a>{{ $t('重新编辑') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.at"
-                        @click="selectedMsg ? addSpecialMsg({ msgObj: { type: 'at', qq: Number(selectedMsg.sender.user_id) }, addText: true, }): '';
-                                toMainInput();
-                                closeMsgMenu()">
-                        <div><font-awesome-icon :icon="['fas', 'at']" /></div>
-                        <a>{{ $t('提及') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.poke" @click="sendPoke(selectedMsg ? Number(selectedMsg.sender.user_id) : 0)">
-                        <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
-                        <a>{{ $t('戳一戳') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.remove" @click="removeUser">
-                        <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
-                        <a>{{ $t('移出群聊') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.config"
-                        @click="openChatInfoPan(); openSelectedMemberConfig(); closeMsgMenu();">
-                        <div><font-awesome-icon :icon="['fas', 'cog']" /></div>
-                        <a>{{ $t('成员设置') }}</a>
-                    </div>
-                    <div v-show="tags.menuDisplay.jumpToMsg" @click="jumpSearchMsg">
-                        <div><font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" /></div>
-                        <a>{{ $t('跳转到消息') }}</a>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
+        <ChatMsgMenu
+            :show="tags.showMsgMenu"
+            :with-bar="['linux', 'win32'].includes(backend.platform ?? '')"
+            :is-group="chatStore.chatInfo.show.type == 'group'"
+            :menu="tags.menuDisplay"
+            @close="closeMsgMenu"
+            @respond="sendRespond"
+            @expand-respond="tags.menuDisplay.respond = true"
+            @forward-self="forwardSelf"
+            @reply="menuReplyMsg(true)"
+            @forward="showForWard()"
+            @select="intoMultipleSelect"
+            @copy="copyMsg"
+            @copy-select="copySelectMsg"
+            @copy-img="copyImg"
+            @download-img="downloadImg"
+            @revoke="revokeMsg"
+            @reedit="reeditMsg"
+            @at="mentionSelectedSender"
+            @poke="sendPoke(selectedMsg ? Number(selectedMsg.sender.user_id) : 0)"
+            @remove="removeUser"
+            @config="openChatInfoPan(); openSelectedMemberConfig(); closeMsgMenu();"
+            @jump="jumpSearchMsg" />
         <!-- 群 / 好友信息弹窗 -->
         <Transition name="chat-info-float" :duration="{ enter: 300, leave: 200 }">
             <Info ref="infoRef" :chat="chat" :tags="tags"
                 @close="openChatInfoPan" />
         </Transition>
-        <!-- 转发面板 -->
-        <Transition>
-            <div v-if="tags.showForwardPan" class="forward-pan">
-                <div class="ss-card card">
-                    <header>
-                        <span>{{ $t('转发消息') }}</span>
-                        <font-awesome-icon :icon="['fas', 'xmark']" @click="cancelForward" />
-                    </header>
-                    <label for="chat-forward-search" class="sr-only">{{ $t('搜索转发对象') }}</label>
-                    <input id="chat-forward-search" :placeholder="$t('搜索 ……')" @input="searchForward">
-                    <div>
-                        <div v-for="data in forwardList"
-                            :key=" 'forwardList-' + data.user_id ? data.user_id : data.group_id"
-                            @click="forwardMsg(data)">
-                            <img loading="lazy"
-                                :title="getShowName(data.group_name || data.nickname, data.remark)"
-                                :src="data.user_id ?
-                                    avatarUrl(data.user_id) :
-                                    avatarUrl(data.group_id, 'group')">
-                            <div>
-                                <p>
-                                    {{ data.group_name ?
-                                        data.group_name : data.remark === data.nickname ?
-                                            data.nickname : data.remark + '（' + data.nickname + '）'
-                                    }}
-                                </p>
-                                <span>{{ data.group_id ? $t('群组') : $t('好友') }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg" @click="cancelForward" />
-            </div>
-        </Transition>
+        <ChatForwardPan
+            :show="tags.showForwardPan"
+            :list="forwardList"
+            @close="cancelForward"
+            @search="searchForward"
+            @select="forwardMsg" />
         <div class="bg" :style="{
             'backdrop-filter': `blur(${!settingsStore.sysConfig.chat_more_blur ? settingsStore.sysConfig .chat_background_blur : 0}px)`
         }" />
@@ -505,7 +363,6 @@ import {
 import {
     getMsgRawTxt,
     sendMsgRaw,
-    getShowName,
     getImageUrlData,
     getDifferencesWithRanges
 } from '@renderer/function/utils/msgUtil'
@@ -525,9 +382,10 @@ import {
 import { backend } from '@renderer/runtime/backend'
 import { toBackgroundImageStyle } from '@renderer/function/utils/backgroundUtil'
 import { dbGetBefore, dbGetBeforeByTime, dbSearchMessages } from '@renderer/function/utils/localHistoryUtil'
-import Emoji from '@renderer/function/model/emoji'
-import EmojiFace from '@renderer/components/EmojiFace.vue'
 import ChatHeader from '@renderer/components/ChatHeader.vue'
+import ChatEssencePanel from '@renderer/components/ChatEssencePanel.vue'
+import ChatMsgMenu from '@renderer/components/ChatMsgMenu.vue'
+import ChatForwardPan from '@renderer/components/ChatForwardPan.vue'
 import { Img } from '@renderer/function/model/img'
 import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
 import { useConnectionStore } from '@renderer/state/connection'
@@ -2028,6 +1886,17 @@ async function editImg(key: number) {
     if (!viewerRef?.value) return
     const dataurl = await viewerRef.value.edit(img)
     imgCache.value.set(key, dataurl)
+}
+
+function mentionSelectedSender() {
+    if (selectedMsg.value) {
+        addSpecialMsg({
+            msgObj: { type: 'at', qq: Number(selectedMsg.value.sender.user_id) },
+            addText: true,
+        })
+    }
+    toMainInput()
+    closeMsgMenu()
 }
 
 function addSpecialMsg(data: SQCodeElem) {
