@@ -62,6 +62,8 @@ jobs:
             - name: 构建 Tauri 应用
               if: matrix.os == 'macos-latest'
               run: pnpm build:tauri -t aarch64-apple-darwin -b dmg
+              env:
+                  APPLE_SIGNING_IDENTITY: '-'
 
             - name: 准备产物目录
               if: matrix.os != 'windows-2022'
