@@ -10,6 +10,10 @@
   Gradle dependency setup, but failed because no Android SDK is installed:
   `SDK location not found` (no `ANDROID_HOME` and no
   `src/mobile/android/local.properties`). No APK/AAB artifact is claimed.
+- Linux Tauri release compilation reaches the optimized Rust binary and emits
+  deb/rpm staging artifacts, but AppImage bundling fails in the hosted
+  `linuxdeploy` step (`failed to run linuxdeploy`). The native binary and deb/
+  rpm files are therefore not treated as a complete release artifact.
 - A fresh recursive `yarn npm audit --all --recursive` (Yarn 4.12.0 via
   Corepack) completes with the known advisory set: lodash/lodash-es high and
   moderate prototype-pollution/code-injection entries plus deprecated build
