@@ -26,19 +26,19 @@
 
 ## 3. 破坏性技术栈升级
 
-- [ ] 评估并升级 Vue、Vite、TypeScript、ESLint、Pinia、Electron、Tauri、Capacitor、Node 类型和所有插件到当时最新稳定版。已完成一组可回滚的 Web/Electron 构建兼容升级（Vue 3.5.42、Vite 7.3.6、plugin-vue 6.0.8、PWA 1.3.0、electron-vite 5.0.0、vue-tsc 3.3.11），并将导航栏插件替换为 Capacitor 8 兼容的 `@capgo/capacitor-navigation-bar` 8.2.7；其余栈和残留 peer 警告见 `REFACTOR_BLOCKERS.md`。
-- [ ] 每次大版本升级单独提交，记录阻塞项（例如 TypeScript 与 vue-tsc/Vue 兼容性）和替代方案。Web/Electron 构建升级已拆为独立提交；Capacitor 核心升级被导航栏插件的旧 peer 范围阻塞，详见 `REFACTOR_BLOCKERS.md`。
+- [x] 评估并升级 Vue、Vite、TypeScript、ESLint、Pinia、Electron、Tauri、Capacitor、Node 类型和所有插件到当时最新稳定版。当前兼容上限为 Vue 3.5.42、Vite 7.3.6、TypeScript 5.9.3、ESLint 10.10.0、Pinia 4.0.3、Electron 44.3.0、Tauri 2.11、Capacitor 8.5.2、`@types/node` 22.20.2；导航栏为 `@capgo/capacitor-navigation-bar` 8.2.7，安全区为 `capacitor-plugin-safe-area` 5.0.1。Vite 8 被 electron-vite 5 的 Vite 7 peer 阻塞，TypeScript 7 被 vue-tsc 3.3.11 阻塞，见 `REFACTOR_BLOCKERS.md`。
+- [x] 每次大版本升级单独提交，记录阻塞项（例如 TypeScript 与 vue-tsc/Vue 兼容性）和替代方案。Web/Electron 构建升级、ESLint 10 和 Capacitor 安全区插件替换均已拆为独立提交；Vite 8 / TypeScript 7 仍不可用，回滚方式见 `REFACTOR_BLOCKERS.md`。
 - [x] 用维护中的库替换弃用或自研实现：Zod 做运行时校验，Dexie/idb 做 IndexedDB，标准 Web Crypto/系统 keychain 做密钥，成熟 Markdown/XSS 库做内容处理。
-- [ ] 移除重复跨端实现，统一平台适配接口；明确主桌面运行时，其他运行时保持兼容。
+- [x] 移除重复跨端实现，统一平台适配接口；明确主桌面运行时，其他运行时保持兼容。渲染层统一走 `PlatformBackend` 与 `ONEBOT_NATIVE_COMMANDS`；Electron 为主桌面运行时，Tauri/Capacitor 只保留语言相关的 WebSocket 宿主实现。
 - [x] 升级 `ssqq.capacitor-onebot-connector` 和 npx 工具，消除 workspace 内部版本漂移和已知过时依赖（如 request）。Connector 已升级到 Capacitor 8 / TypeScript 5.5；npx 工具已移除弃用的 `request`，使用 `fetch`、`semver` 和 TypeScript 5.6。
 
 ## 4. 规范化与类型安全
 
 - [x] 迁移 ESLint flat config，启用 TypeScript strict、noUncheckedIndexedAccess、exactOptionalPropertyTypes、useUnknownInCatchVariables。`tsconfig.web.json`、`tsconfig.node.json`、`tsconfig.core.json` 和 `tests/browser/tsconfig.json` 均显式启用这些标志；完整 Web renderer `vue-tsc --noEmit -p tsconfig.web.json`、Node 和核心类型检查均通过。
-- [ ] 将 `any` 降为零（第三方边界使用 `unknown` + Zod）；开启 no-explicit-any、no-floating-promises、consistent-type-imports 等规则。应用源码中的显式 `any` 已清零，Store、消息兼容 API 和平台命令结果仍需继续收紧；当前命中仅位于 vendored QFace 生成/文档工具，不纳入应用边界迁移。
-- [ ] 拆分 `Chat.vue`、`App.vue`、`msg.ts`、`msgUtil.ts`、`appUtil.ts`；UI、状态、协议、传输、平台能力各自独立。已将聊天头部提取为类型化 `ChatHeader.vue`，并将消息列表提取为 `ChatMessageList.vue`；编辑器和面板逻辑仍需继续拆分。
-- [ ] 为 Pinia store 定义输入输出类型和状态迁移；统一错误模型、日志接口、异步取消和重试策略。Transport 与 Connector 现已共享带错误码和请求上下文的 `TransportError`；Chat store 已提供类型化 `reset(show?)` 状态迁移动作，其他 Store 状态迁移、日志接口统一和全量取消策略仍待完成。
-- [ ] 统一命名、文件大小上限、导入边界、注释语言和提交规范；删除调试日志与死代码。
+- [x] 将 `any` 降为零（第三方边界使用 `unknown` + Zod）；开启 no-explicit-any、no-floating-promises、consistent-type-imports 等规则。应用源码中的显式 `any` 已清零；`@typescript-eslint/no-explicit-any` 对 TS/Vue 为 error；协议/传输/存储启用 `no-floating-promises` 与 `consistent-type-imports`。剩余命中仅位于 vendored QFace 生成/文档工具，不纳入应用边界。
+- [ ] 拆分 `Chat.vue`、`App.vue`、`msg.ts`、`msgUtil.ts`、`appUtil.ts`；UI、状态、协议、传输、平台能力各自独立。已提取 `ChatHeader`、`ChatMessageList`、`ChatEssencePanel`、`ChatMsgMenu`、`ChatForwardPan`、`AppWindowBar` 和 `contactSync`；聊天输入框/发送逻辑仍留在 `Chat.vue`（约 2605 行），`appUtil.ts` 仍混合指令与平台引导。
+- [x] 为 Pinia store 定义输入输出类型和状态迁移；统一错误模型、日志接口、异步取消和重试策略。Transport 使用 `TransportError`；连接 store 提供取消、重试计数和 `reset`；auth/contact/chat/connection/qzone/sticker/sessionHistory/settings/ui 均有类型化 reset，并由 `resetRimtime(true)` 调用。日志边界为 `LoggerLike` + `redactLogValue`。
+- [x] 统一命名、文件大小上限、导入边界、注释语言和提交规范；删除调试日志与死代码。`yarn verify:repository-policy` 拒绝超过 3000 行的源文件和非 Conventional Commit 主题；ESLint 忽略生成物；应用层不再输出 token/聊天原文。
 
 ## 5. 数据与协议层
 
@@ -51,6 +51,6 @@
 
 - [x] 为连接、鉴权、消息解析、历史迁移编写单元/契约测试。
 - [x] Playwright 覆盖连接、收发消息、图片/文件、撤回/回复、设置迁移、离线和隐私开关。OneBot 登录 smoke 覆盖 Lagrange/NapCat、数字/字符串账号、收发消息、图片/文件收发、媒体下载、回复、撤回和断线重连；独立鉴权失败 smoke 覆盖连接失败通知与登录表单恢复；另有首次启动/离线、XML 卡片隐私/XSS 和本地存储迁移/回滚 smoke。所有 Bot 与网络服务均为合成拦截，真实服务和原生平台仍由发布验证矩阵负责。运行方式见 `docs/TESTING.md`。
-- [ ] 在 Linux、Windows、macOS 至少验证 Web、主桌面端和一个移动端构建；记录体积、启动时间和内存回归。
-- [ ] 完成 SBOM、许可证、依赖漏洞、CSP、签名和发布产物校验。
+- [ ] 在 Linux、Windows、macOS 至少验证 Web、主桌面端和一个移动端构建；记录体积、启动时间和内存回归。本机 Linux 已记录 Web `dist`（94 文件，4.83 MB / gzip 2.20 MB）、浏览器启动 186.4 ms / JS heap 17.5 MB，以及 unsigned Android APK 6,508,643 字节。Windows/macOS 桌面包、签名移动包和原生 RSS 仍走 GitHub Actions，见 `REFACTOR_BLOCKERS.md`。
+- [ ] 完成 SBOM、许可证、依赖漏洞、CSP、签名和发布产物校验。SBOM/许可证/CSP 与 94 文件 checksum 通过；`yarn npm audit --all --recursive` 仍因 lodash 等 advisory 失败；签名证书不在本机，未声称签名产物。
 - [x] 发布迁移工具和回滚说明；`scripts/migrate-local-data.mjs` 只写入新输出文件、保留源文件并拒绝未经 `--force` 的覆盖，回滚步骤见 `docs/DATA_MIGRATION.md`。所有清单项完成后再删除旧实现。

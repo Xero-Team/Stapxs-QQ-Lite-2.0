@@ -14,10 +14,15 @@ verification set; a release is not published until every required job completes.
 unsigned artifacts in CI (`CSC_IDENTITY_AUTO_DISCOVERY=false`); signing must be performed in a
 separate trusted release environment with an explicit certificate and keychain configuration.
 
-The Android workflow requires a runner with the Android SDK and Java 21. If that runner cannot
-produce an APK/AAB, the job fails instead of publishing a partial mobile release. Platform builds
-have not been executed locally on this Linux workstation; the GitHub Actions matrix is the
-authoritative cross-platform verification path.
+The Android workflow requires a runner with the Android SDK and Java 21. If `KEYSTORE_PASSWORD`
+and `KEYSTORE_ALIAS_PASSWORD` are set, it runs `yarn build:android` and publishes a signed
+package. Otherwise it runs `yarn build:android:unsigned` (`gradlew assembleRelease`) and
+uploads the unsigned APK with checksums and `build-metrics.json`. A signed artifact is still
+required for a production mobile release.
+
+Windows and macOS desktop packages are produced by the GitHub Actions matrix. This Linux
+workstation verified Web production output and an unsigned Android APK; it does not claim
+Windows, macOS, or signed iOS evidence.
 
 Each Web build also publishes `build-metrics.json`, containing artifact count, raw and gzip sizes,
 the ten largest files, and the build runner's Node/platform identity. The Playwright quality job

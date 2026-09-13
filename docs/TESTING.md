@@ -9,6 +9,7 @@ before building. The smoke scripts also require `npx` and Bash.
 yarn typecheck
 yarn test:contract
 yarn build
+yarn build:android:unsigned   # optional; needs Android SDK + Java 21, produces an unsigned APK
 npx --yes --package @playwright/cli@0.1.19 playwright-cli install-browser --with-deps chromium
 yarn preview --host 127.0.0.1
 ```

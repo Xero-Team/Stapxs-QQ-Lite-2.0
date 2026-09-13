@@ -1,5 +1,20 @@
 # Refactor blockers
 
+## 2026-09-13 remaining release blockers
+
+- Vite 8.3.0 is available, but electron-vite 5.0.0 only accepts Vite `^5 || ^6 || ^7`. The project stays on Vite 7.3.6. Roll back is not required; do not upgrade until electron-vite declares Vite 8.
+- TypeScript 7.0.2 is available, but vue-tsc 3.3.11 targets TypeScript 5.9. The compiler remains 5.9.3. TypeScript 7 is not claimed.
+- ESLint 10.10.0 is in use (`build: upgrade eslint to 10`). The workspace connector still declares ESLint 9 because `@ionic/eslint-config` only accepts ESLint 7/8; that peer warning is unchanged.
+- `yarn npm audit --all --recursive` still exits 1 on lodash/lodash-es prototype-pollution advisories and deprecated toolchain packages. Audit is not a passing release gate.
+- Windows/macOS Electron and Tauri packages, signed Android/iOS artifacts, and native startup/RSS measurements were not produced on this Linux workstation. CI remains the cross-platform path; Android CI now falls back to `yarn build:android:unsigned` when keystore secrets are absent.
+- Chat composer logic still lives in `Chat.vue` (~2605 lines). Essence/menu/forward panels and contact sync are extracted; further composer extraction remains open.
+
+## 2026-09-13 local evidence
+
+- Capacitor navigation-bar and safe-area plugins both declare `@capacitor/core >=8`. `yarn capacitor sync android` lists `capacitor-plugin-safe-area@5.0.1`. `assembleRelease` produced `app-release-unsigned.apk` (6,508,643 bytes) with Java 21.
+- Web production `dist` is 94 files, 4,831,166 bytes raw / 2,202,526 bytes gzip. Playwright first-start metrics: 186.4 ms DOMContentLoaded, 17.5 MB JS heap. Contract tests 80/80, `vue-tsc` web/core/browser, Node `tsc`, ESLint quiet, SBOM/CSP/94-file checksums pass.
+- Playwright first-start/offline, auth-failure, settings-migration, and all four OneBot synthetic scenarios passed against the production preview after the extraction.
+
 ## 2026-09-13 smoke refresh
 
 - `bash scripts/playwright-smoke.sh` passed against the production preview
