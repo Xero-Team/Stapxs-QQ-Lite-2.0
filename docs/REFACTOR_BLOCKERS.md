@@ -62,6 +62,9 @@
   artifact checksums pass. Roll back with the prior 8.0/8.3 ranges in the
   preceding commit. The remaining `@untiny/capacitor-safe-area` peer range
   (`@capacitor/core ^5`) is a separate unresolved native-plugin blocker.
+  The workspace `capacitor-onebot-connctor` peer/dev dependency declarations
+  were synchronized to the same 8.5.2 core/android/ios line, and its Web
+  connector build passes.
 - Contact pinyin derivation and deferred batch hydration now live in
   `function/utils/contactPinyin.ts`; `function/msg.ts` retains only the
   protocol/event callers. The extraction preserves the existing 100-item
